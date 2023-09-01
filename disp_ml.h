@@ -1870,7 +1870,7 @@ public :
     int momid;
     int pdgid;
     int cutBased;
-    float reliso03, reliso;
+    float dxy, dz, reliso03, reliso;
     bool tightID; bool mediumID; bool looseID;
     //int genmatch;
     //int jetmatch;
@@ -1903,14 +1903,16 @@ private:
   
   vector<Lepton> recoMuon;
   vector<Lepton> genMuon;
-  vector<Lepton> ZgenMuon;
   vector<Lepton> recoElectron;
   vector<Lepton> genElectron;
-  vector<Lepton> ZgenElectron;
   vector<Lepton> genmatchedEle;
   vector<Lepton> genmatchedMu;
   vector<Lepton> lowptElectron;
   vector<Lepton> genmatched_lowptEle;
+  vector<Lepton> recoLepton;
+  vector<Lepton> genmatchedLep;
+  vector<Lepton> promptLepton;
+  vector<Lepton> DisplacedLepton;
 
   ClassDef(disp_ml,0);
   

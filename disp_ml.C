@@ -116,7 +116,8 @@ Bool_t disp_ml::Process(Long64_t entry)
     //Muons
     
     int nmu = 0;                       
-    recoMuon.clear();                   
+    recoMuon.clear();
+    recoLepton.clear();
     for(unsigned int i=0; i<(*nMuon); i++){
       Lepton temp;                      
       temp.v.SetPtEtaPhiM(Muon_pt[i],Muon_eta[i],Muon_phi[i],0.105); //the muon mass in GeV is 0.105
@@ -126,6 +127,8 @@ Bool_t disp_ml::Process(Long64_t entry)
       temp.mediumID = Muon_mediumId[i];
       temp.looseID = Muon_looseId[i];
       temp.reliso03 = Muon_pfRelIso03_all[i];
+      temp.dxy = Muon_dxy[i];
+      temp.dz = Muon_dz[i];
 
       h.mu_dxy->Fill(Muon_dxy[i]);
       h.mu_dz->Fill(Muon_dz[i]);
@@ -134,21 +137,25 @@ Bool_t disp_ml::Process(Long64_t entry)
       h.mu_sqrt_dxy2dz2->Fill(mu_sqrt_dxy2dz2_val);
       
       bool passCuts = temp.v.Pt()>10 && fabs(temp.v.Eta())<2.4;
-      passCuts = passCuts && Muon_pfRelIso04_all[i]<0.15;
-      passCuts = passCuts && fabs(Muon_dxy[i])<0.05 && fabs(Muon_dz[i])<0.1;
+      passCuts = passCuts && Muon_pfRelIso03_all[i]<0.15 && Muon_mediumId[i];
       
       if(passCuts){
-	recoMuon.push_back(temp); 
+	recoMuon.push_back(temp);
+	recoLepton.push_back(temp);
+      }
+
+      if(passCuts && fabs(Muon_dxy[i])<0.05 && fabs(Muon_dz[i])<0.1){
+	
       }
     }                                
     
     Sortpt(recoMuon);
 
     genmatchedMu.clear();
+    genmatchedLep.clear();
 
     if(_data==0){
       genMuon.clear();
-      ZgenMuon.clear();
       for(unsigned int i=0; i<(*nGenPart); i++){
 	Lepton temp;
 	temp.status = GenPart_status[i];
@@ -179,6 +186,7 @@ Bool_t disp_ml::Process(Long64_t entry)
 	  //h.motherID[1]->Fill(mumomid);
 	  //h.mu_dr[1]->Fill(mumatchdR);
 	  genmatchedMu.push_back(recoMuon.at(i));
+	  genmatchedLep.push_back(recoMuon.at(i));
 	}
       }
     } //if(_data==0)
@@ -186,6 +194,7 @@ Bool_t disp_ml::Process(Long64_t entry)
     if(_data==1){
       for(int i=0; i<(int)recoMuon.size(); i++){
 	genmatchedMu.push_back(recoMuon.at(i));
+	genmatchedLep.push_back(recoMuon.at(i));
       }
     }
 
@@ -208,8 +217,7 @@ Bool_t disp_ml::Process(Long64_t entry)
       temp.reliso = LowPtElectron_miniPFRelIso_all[i];
 
       bool passCuts = fabs(temp.v.Eta())<2.4 && temp.v.Pt()>10;
-      passCuts = passCuts && fabs(LowPtElectron_dxy[i])<0.05 && fabs(LowPtElectron_dz[i])<0.1;
-
+     
       if(passCuts){
 	lowptElectron.push_back(temp);
       }
@@ -220,6 +228,8 @@ Bool_t disp_ml::Process(Long64_t entry)
     //Electrons
     
     recoElectron.clear();
+    promptLepton.clear();
+    displacedLepton.clear();
     
     for(unsigned int i=0; i<(*nElectron); i++){
       
@@ -228,7 +238,11 @@ Bool_t disp_ml::Process(Long64_t entry)
       temp.id = -11*Electron_charge[i];
       temp.ind = i; 
       temp.reliso03 = Electron_pfRelIso03_all[i]; //h.el_reliso03->Fill(temp.reliso03);
-      temp.cutBased = Electron_cutBased[i]; //h.elcutbased->Fill(temp.cutBased);
+      temp.cutBased = Electron_cutBased[i];
+      temp.dxy = Electron_dxy[i];
+      temp.dz = Electron_dz[i];
+      
+      //h.elcutbased->Fill(temp.cutBased);
 
       h.el_dxy->Fill(Electron_dxy[i]);
       h.el_dz->Fill(Electron_dz[i]);
@@ -237,15 +251,26 @@ Bool_t disp_ml::Process(Long64_t entry)
       h.el_sqrt_dxy2dz2->Fill(el_sqrt_dxy2dz2_val);
       
       bool passCuts = fabs(temp.v.Eta())<2.4 && temp.v.Pt()>10;
-      passCuts = passCuts && fabs(Electron_dxy[i])<0.05 && fabs(Electron_dz[i])<0.1;
-					
+      passCuts = passCuts && Electron_pfRelIso03_all[i]<0.15 && Electron_cutBased[i]>2;
+      					
       if(passCuts){
 	recoElectron.push_back(temp);
+	recoLepton.push_back(temp);
+      }
+
+      if(passCuts && fabs(Electron_dxy[i])<0.05 && fabs(Electron_dz[i])<0.1){
+	promptLepton.push_back(temp);
+      }
+
+      if(passCuts && fabs(Electron_dxy[i])>0.01){
+	displacedLepton.push_back(temp);
       }
     }
-
+    
     Sortpt(recoElectron);
-
+    Sortpt(recoLepton);
+    Sortpt(promptLepton);
+    Sortpt(displacedLepton);
     
     genmatchedEle.clear();
     
@@ -291,6 +316,7 @@ Bool_t disp_ml::Process(Long64_t entry)
 	  //h.motherID[0]->Fill(elmomid);
 	  //h.el_dr[1]->Fill(elmatchdR);
 	  genmatchedEle.push_back(recoElectron.at(i));
+	  genmatchedLep.push_back(recoElectron.at(i));
 	}
       }
     } //if(_data==0)
@@ -298,10 +324,12 @@ Bool_t disp_ml::Process(Long64_t entry)
     if(_data==1){
       for(int i=0; i<(int)recoElectron.size(); i++){
 	genmatchedEle.push_back(recoElectron.at(i));
+	genmatchedLep.push_back(recoElectron.at(i));
       }
     }
 
     Sortpt(genmatchedEle);
+    Sortpt(genmatchedLep);
     
 
     genmatched_lowptEle.clear();
@@ -330,6 +358,13 @@ Bool_t disp_ml::Process(Long64_t entry)
     Sortpt(genmatched_lowptEle);
 
 
+
+
+
+    
+    //#################################################### EVENT SELECTION #########################################################################//
+
+    
     
    
     
