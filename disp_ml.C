@@ -118,6 +118,9 @@ Bool_t disp_ml::Process(Long64_t entry)
     int nmu = 0;                       
     recoMuon.clear();
     recoLepton.clear();
+    promptLepton.clear();
+    displacedLepton.clear();
+    
     for(unsigned int i=0; i<(*nMuon); i++){
       Lepton temp;                      
       temp.v.SetPtEtaPhiM(Muon_pt[i],Muon_eta[i],Muon_phi[i],0.105); //the muon mass in GeV is 0.105
@@ -129,13 +132,7 @@ Bool_t disp_ml::Process(Long64_t entry)
       temp.reliso03 = Muon_pfRelIso03_all[i];
       temp.dxy = Muon_dxy[i];
       temp.dz = Muon_dz[i];
-
-      h.mu_dxy->Fill(Muon_dxy[i]);
-      h.mu_dz->Fill(Muon_dz[i]);
-
-      float mu_sqrt_dxy2dz2_val = sqrt(pow(Muon_dxy[i],2) + pow(Muon_dz[i],2));
-      h.mu_sqrt_dxy2dz2->Fill(mu_sqrt_dxy2dz2_val);
-      
+    
       bool passCuts = temp.v.Pt()>10 && fabs(temp.v.Eta())<2.4;
       passCuts = passCuts && Muon_pfRelIso03_all[i]<0.15 && Muon_mediumId[i];
       
@@ -145,9 +142,13 @@ Bool_t disp_ml::Process(Long64_t entry)
       }
 
       if(passCuts && fabs(Muon_dxy[i])<0.05 && fabs(Muon_dz[i])<0.1){
-	
+	promptLepton.push_back(temp);
       }
-    }                                
+
+      if(passCuts && fabs(Muon_dxy[i]<0.01)){
+	displacedLepton.push_back(temp);
+      }
+    }
     
     Sortpt(recoMuon);
 
@@ -228,8 +229,6 @@ Bool_t disp_ml::Process(Long64_t entry)
     //Electrons
     
     recoElectron.clear();
-    promptLepton.clear();
-    displacedLepton.clear();
     
     for(unsigned int i=0; i<(*nElectron); i++){
       
@@ -241,15 +240,7 @@ Bool_t disp_ml::Process(Long64_t entry)
       temp.cutBased = Electron_cutBased[i];
       temp.dxy = Electron_dxy[i];
       temp.dz = Electron_dz[i];
-      
-      //h.elcutbased->Fill(temp.cutBased);
-
-      h.el_dxy->Fill(Electron_dxy[i]);
-      h.el_dz->Fill(Electron_dz[i]);
-
-      float el_sqrt_dxy2dz2_val = sqrt(pow(Electron_dxy[i],2) + pow(Electron_dz[i],2));
-      h.el_sqrt_dxy2dz2->Fill(el_sqrt_dxy2dz2_val);
-      
+   
       bool passCuts = fabs(temp.v.Eta())<2.4 && temp.v.Pt()>10;
       passCuts = passCuts && Electron_pfRelIso03_all[i]<0.15 && Electron_cutBased[i]>2;
       					
@@ -301,7 +292,7 @@ Bool_t disp_ml::Process(Long64_t entry)
       Sortpt(genElectron);
 
    
-      std::pair<vector<int>, vector<float>> el_result = dR_matching(recoElectron, ZgenElectron);
+      std::pair<vector<int>, vector<float>> el_result = dR_matching(recoElectron, genElectron);
       vector<int> el_matchto_genel = el_result.first;
       vector<float> el_delRmin_genel = el_result.second;
 
@@ -364,11 +355,16 @@ Bool_t disp_ml::Process(Long64_t entry)
     
     //#################################################### EVENT SELECTION #########################################################################//
 
+
+    //1 prompt, 2 displaced leptons
     
+    if(promptLepton.size()==1 && displacedLepton.size()==2){
+      float dispLep_imass = (displacedLepton.at(0).v+displacedLepton.at(1).v).M();
+      h.dispLep_invmass->Fill(dispLep_imass);
+    }
     
+
    
-    
-  
   
     //########### ANALYSIS ENDS HERE ##############
   
@@ -467,12 +463,7 @@ vector<int> disp_ml::pt_binning_count(vector<Lepton> vec)
 void disp_ml::BookHistograms()
 {
 
-  h.mu_dxy = new TH1F("mu_dxy", "muon dxy", 200, -100, 100);
-  h.mu_dz = new TH1F("mu_dz", "muon dz", 200, -100, 100);
-  h.mu_sqrt_dxy2dz2 = new TH1F("mu_sqrt_dxy2dz2", "muon sqrt(dxy^2 + dz^2)", 100, 0, 100);
-  h.el_dxy = new TH1F("el_dxy", "electron dxy", 200, -100, 100);
-  h.el_dz = new TH1F("el_dz", "electron dz", 200, -100, 100);
-  h.el_sqrt_dxy2dz2 = new TH1F("el_sqrt_dxy2dz2", "electron sqrt(dxy^2 + dz^2)", 100, 0, 100);
+  h.dispLep_invmass = new TH1F("imass_D0D1", "", 200, 0, 200);
   
   //############################################################################################################################
   

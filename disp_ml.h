@@ -1856,9 +1856,7 @@ public :
   struct Hists {
     //Histograms are declared here.
  
-    TH1F *mu_dxy, *mu_dz, *mu_sqrt_dxy2dz2;
-    TH1F *el_dxy, *el_dz, *el_sqrt_dxy2dz2;
-    
+    TH1F *dispLep_invmass;
     
   };
   
@@ -1912,7 +1910,7 @@ private:
   vector<Lepton> recoLepton;
   vector<Lepton> genmatchedLep;
   vector<Lepton> promptLepton;
-  vector<Lepton> DisplacedLepton;
+  vector<Lepton> displacedLepton;
 
   ClassDef(disp_ml,0);
   
