@@ -348,23 +348,70 @@ Bool_t disp_ml::Process(Long64_t entry)
 
     Sortpt(genmatched_lowptEle);
 
-
-
-
-
+    //##############################################################################################################################################//
+    
+    float metpt = *MET_pt;
+    float pv_x = *PV_x;
+    float pv_y = *PV_y;
+    float sv_dxy = SV_dxy[0];
+    float PV_2D = sqrt(pow(pv_x,2)+pow(pv_y,2));
+    float SV_2D = fabs(sv_dxy);
+    float delta_2D = SV_2D - PV_2D;  //this variable is the distance between the primary vertex and the zeroth secondary vertex.
+    
     
     //#################################################### EVENT SELECTION #########################################################################//
 
-
+    
     //1 prompt, 2 displaced leptons
     
-    if(promptLepton.size()==1 && displacedLepton.size()==2){
+    if(promptLepton.size()>0 && displacedLepton.size()>1){
+
+      h.met[0]->Fill(metpt);
+
+      h.prompt_pt[0]->Fill(promptLepton.at(0).v.Pt());
+      h.disp_pt[0]->Fill(displacedLepton.at(0).v.Pt());
+      h.disp_pt[1]->Fill(displacedLepton.at(1).v.Pt());
+      h.disp_pt[2]->Fill(displacedLepton.at(0).v.Pt()+displacedLepton.at(1).v.Pt());
+      
       float dispLep_imass = (displacedLepton.at(0).v+displacedLepton.at(1).v).M();
-      h.dispLep_invmass->Fill(dispLep_imass);
+      h.dispLep_invmass[0]->Fill(dispLep_imass);
+
+      float delphi_l0d0 = delta_phi(promptLepton.at(0).v.Phi(), displacedLepton.at(0).v.Phi());
+      float delphi_l0d1 = delta_phi(promptLepton.at(0).v.Phi(), displacedLepton.at(1).v.Phi());
+      float delphi_d0d1 = delta_phi(promptLepton.at(0).v.Phi(), displacedLepton.at(1).v.Phi());
+
+      h.delphi_ll[0]->Fill(delphi_l0d0);
+      h.delphi_ll[1]->Fill(delphi_l0d1);
+      h.delphi_ll[2]->Fill(delphi_d0d1);
+
+      float delR_d0d1 = (displacedLepton.at(0).v).DeltaR(displacedLepton.at(1).v);
+      h.delR_ll[0]->Fill(delR_d0d1);
+
+      h.delta2D[0]->Fill(delta_2D);
+      
+
     }
+
     
 
-   
+    //3 displaced leptons
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
   
     //########### ANALYSIS ENDS HERE ##############
   
@@ -462,8 +509,17 @@ vector<int> disp_ml::pt_binning_count(vector<Lepton> vec)
 
 void disp_ml::BookHistograms()
 {
-
-  h.dispLep_invmass = new TH1F("imass_D0D1", "", 200, 0, 200);
+  h.met[0] = new TH1F("1l2d_metpt", "", 200, 0, 200);
+  h.prompt_pt[0] = new TH1F("1l2d_pt_l0", "", 200, 0, 200);
+  h.disp_pt[0] = new TH1F("1l2d_pt_d0", "", 200, 0, 200);
+  h.disp_pt[1] = new TH1F("1l2d_pt_d1", "", 200, 0, 200);
+  h.disp_pt[2] = new TH1F("1l2d_pt_d0d1", "", 200, 0, 200);
+  h.dispLep_invmass[0] = new TH1F("1l2d_imass_d0d1", "", 200, 0, 200);
+  h.delphi_ll[0] = new TH1F("1l2d_delphi_l0d0", "", 64, 0, 3.2);
+  h.delphi_ll[1] = new TH1F("1l2d_delphi_l0d1", "", 64, 0, 3.2);
+  h.delphi_ll[2] = new TH1F("1l2d_delphi_d0d1", "", 64, 0, 3.2);
+  h.delR_ll[0] = new TH1F("1l2d_delR_d0d1", "", 200, 0, 200);
+  h.delta2D[0] = new TH1F("1l2d_delta2D", "", 100, 0, 100);
   
   //############################################################################################################################
   

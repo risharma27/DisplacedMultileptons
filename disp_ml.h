@@ -1855,9 +1855,14 @@ public :
   public:
   struct Hists {
     //Histograms are declared here.
- 
-    TH1F *dispLep_invmass;
-    
+    TH1F *met[3];
+    TH1F *prompt_pt[3];
+    TH1F *disp_pt[3];
+    TH1F *dispLep_invmass[3];
+    TH1F *delphi_ll[3];
+    TH1F *delR_ll[3];
+    TH1F *delta2D[3];
+  
   };
   
   struct Lepton {//The struct 'Lepton' can store the following variables:
