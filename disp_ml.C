@@ -353,18 +353,26 @@ Bool_t disp_ml::Process(Long64_t entry)
     float metpt = *MET_pt;
     float pv_x = *PV_x;
     float pv_y = *PV_y;
-    float sv_dxy = SV_dxy[0];
-    float PV_2D = sqrt(pow(pv_x,2)+pow(pv_y,2));
-    float SV_2D = fabs(sv_dxy);
-    float delta_2D = SV_2D - PV_2D;  //this variable is the distance between the primary vertex and the zeroth secondary vertex.
+    float pv_2D = sqrt(pow(pv_x,2)+pow(pv_y,2));
+
+    SV2D.clear();
+    Delta2D.clear();
     
+    for(unsigned int i=0; i<(*nSV); i++){
+      float sv_dxy = SV_dxy[i];
+      float sv_2D = fabs(sv_dxy);
+      float delta_2D = sv_2D - pv_2D;  //this variable is the distance between the primary vertex and the zeroth secondary vertex.
+      SV2D.push_back(sv_2D);
+      Delta2D.push_back(delta_2D);
+    }
+
     
     //#################################################### EVENT SELECTION #########################################################################//
 
     
     //1 prompt, 2 displaced leptons
     
-    if(promptLepton.size()>0 && displacedLepton.size()>1){
+    if((int)promptLepton.size()>0 && (int)displacedLepton.size()>1){
 
       h.met[0]->Fill(metpt);
 
@@ -373,8 +381,8 @@ Bool_t disp_ml::Process(Long64_t entry)
       h.disp_pt[1]->Fill(displacedLepton.at(1).v.Pt());
       h.disp_pt[2]->Fill(displacedLepton.at(0).v.Pt()+displacedLepton.at(1).v.Pt());
       
-      float dispLep_imass = (displacedLepton.at(0).v+displacedLepton.at(1).v).M();
-      h.dispLep_invmass[0]->Fill(dispLep_imass);
+      float imass_d0d1 = (displacedLepton.at(0).v+displacedLepton.at(1).v).M();
+      h.dispLep_invmass[0]->Fill(imass_d0d1);
 
       float delphi_l0d0 = delta_phi(promptLepton.at(0).v.Phi(), displacedLepton.at(0).v.Phi());
       float delphi_l0d1 = delta_phi(promptLepton.at(0).v.Phi(), displacedLepton.at(1).v.Phi());
@@ -384,35 +392,58 @@ Bool_t disp_ml::Process(Long64_t entry)
       h.delphi_ll[1]->Fill(delphi_l0d1);
       h.delphi_ll[2]->Fill(delphi_d0d1);
 
+      float delR_l0d0 = (promptLepton.at(0).v).DeltaR(displacedLepton.at(0).v);
+      float delR_l0d1 = (promptLepton.at(0).v).DeltaR(displacedLepton.at(1).v);
       float delR_d0d1 = (displacedLepton.at(0).v).DeltaR(displacedLepton.at(1).v);
-      h.delR_ll[0]->Fill(delR_d0d1);
-
-      h.delta2D[0]->Fill(delta_2D);
+      h.delR_ll[0]->Fill(delR_l0d0);
+      h.delR_ll[1]->Fill(delR_l0d1);
+      h.delR_ll[2]->Fill(delR_d0d1);
       
-
+      h.PV_2D[0]->Fill(pv_2D);
+      h.SV_2D[0]->Fill(SV2D.at(0));
+      h.delta2D[0]->Fill(Delta2D.at(0));
+      
     }
 
     
 
     //3 displaced leptons
 
+    if((int)displacedLepton.size()>2){
 
+      h.met[1]->Fill(metpt);
 
+      h.disp_pt[3]->Fill(displacedLepton.at(0).v.Pt());
+      h.disp_pt[4]->Fill(displacedLepton.at(1).v.Pt());
+      h.disp_pt[5]->Fill(displacedLepton.at(2).v.Pt());
+      
+      float imass_d0d1d2 = ((displacedLepton.at(0).v+displacedLepton.at(1).v)+displacedLepton.at(2).v).M();
+      h.dispLep_invmass[1]->Fill(imass_d0d1d2);
 
+      float delphi_d0d1 = delta_phi(displacedLepton.at(0).v.Phi(), displacedLepton.at(1).v.Phi());
+      float delphi_d0d2 = delta_phi(displacedLepton.at(0).v.Phi(), displacedLepton.at(2).v.Phi());
+      float delphi_d1d2 = delta_phi(displacedLepton.at(1).v.Phi(), displacedLepton.at(2).v.Phi());
 
+      h.delphi_ll[3]->Fill(delphi_d0d1);
+      h.delphi_ll[4]->Fill(delphi_d0d2);
+      h.delphi_ll[5]->Fill(delphi_d1d2);
 
+      float delR_d0d1 = (displacedLepton.at(0).v).DeltaR(displacedLepton.at(1).v);
+      float delR_d0d2 = (displacedLepton.at(0).v).DeltaR(displacedLepton.at(2).v);
+      float delR_d1d2 = (displacedLepton.at(1).v).DeltaR(displacedLepton.at(2).v);
 
+      h.delR_ll[3]->Fill(delR_d0d1);
+      h.delR_ll[4]->Fill(delR_d0d2);
+      h.delR_ll[5]->Fill(delR_d1d2);
 
-
-
-
-
-
-
-
-
+      h.PV_2D[1]->Fill(pv_2D);
+      h.SV_2D[1]->Fill(SV2D.at(0));
+      h.delta2D[1]->Fill(Delta2D.at(0));
+      
+    }
     
-  
+
+
     //########### ANALYSIS ENDS HERE ##############
   
   }//GoodEvt
@@ -509,6 +540,8 @@ vector<int> disp_ml::pt_binning_count(vector<Lepton> vec)
 
 void disp_ml::BookHistograms()
 {
+
+  //1l2d channel
   h.met[0] = new TH1F("1l2d_metpt", "", 200, 0, 200);
   h.prompt_pt[0] = new TH1F("1l2d_pt_l0", "", 200, 0, 200);
   h.disp_pt[0] = new TH1F("1l2d_pt_d0", "", 200, 0, 200);
@@ -518,8 +551,28 @@ void disp_ml::BookHistograms()
   h.delphi_ll[0] = new TH1F("1l2d_delphi_l0d0", "", 64, 0, 3.2);
   h.delphi_ll[1] = new TH1F("1l2d_delphi_l0d1", "", 64, 0, 3.2);
   h.delphi_ll[2] = new TH1F("1l2d_delphi_d0d1", "", 64, 0, 3.2);
-  h.delR_ll[0] = new TH1F("1l2d_delR_d0d1", "", 200, 0, 200);
+  h.delR_ll[0] = new TH1F("1l2d_delR_l0d0", "", 200, 0, 200);
+  h.delR_ll[1] = new TH1F("1l2d_delR_l0d1", "", 200, 0, 200);
+  h.delR_ll[2] = new TH1F("1l2d_delR_d0d1", "", 200, 0, 200);
+  h.PV_2D[0] = new TH1F("1l2d_pv2D", "", 100, 0, 50);
+  h.SV_2D[0] = new TH1F("1l2d_sv2D", "", 100, 0, 50);
   h.delta2D[0] = new TH1F("1l2d_delta2D", "", 100, 0, 100);
+
+  //3d channel
+  h.met[1] = new TH1F("3d_metpt", "", 200, 0, 200);
+  h.disp_pt[3] = new TH1F("3d_pt_d0", "", 200, 0, 200);
+  h.disp_pt[4] = new TH1F("3d_pt_d1", "", 200, 0, 200);
+  h.disp_pt[5] = new TH1F("3d_pt_d2", "", 200, 0, 200);
+  h.dispLep_invmass[1] = new TH1F("3d_imass_d0d1d2", "", 200, 0, 200);
+  h.delphi_ll[3] = new TH1F("3d_delphi_d0d1", "", 64, 0, 3.2);
+  h.delphi_ll[4] = new TH1F("3d_delphi_d0d2", "", 64, 0, 3.2);
+  h.delphi_ll[5] = new TH1F("3d_delphi_d1d2", "", 64, 0, 3.2);
+  h.delR_ll[3] = new TH1F("3d_delR_d0d1", "", 200, 0, 200);
+  h.delR_ll[4] = new TH1F("3d_delR_d0d2", "", 200, 0, 200);
+  h.delR_ll[5] = new TH1F("3d_delR_d1d2", "", 200, 0, 200);
+  h.PV_2D[1] = new TH1F("3d_pv2D", "", 100, 0, 50);
+  h.SV_2D[1] = new TH1F("3d_sv2D", "", 100, 0, 50);
+  h.delta2D[1] = new TH1F("3d_delta2D", "", 100, 0, 100);
   
   //############################################################################################################################
   

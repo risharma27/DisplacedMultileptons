@@ -17,7 +17,7 @@ void ana(int sample=0){
   
   disp_ml m_selec;
   
-   if(sample==0){
+  if(sample==0){
     //Add one file to chain. This is the input file.
     chain->Add("inputs/DYJetsToLL_M-50.root");
     //Set Names of outputfiles
@@ -27,6 +27,19 @@ void ana(int sample=0){
     m_selec.SetData(0); //MC=0, data=1
     m_selec.SetYear(2016);
   }
+
+  if(sample==1){
+    //Add one file to chain. This is the input file.
+    chain->Add("inputs/SingleMuon_2016postVFP_Data/*");
+    //Set Names of outputfiles
+    hstfilename = "hst_output/SingleMuon_2016postVFP.root";
+    sumfilename = "sum_output/SingleMuon_2016postVFP.txt";
+    //Set some options
+    m_selec.SetData(1); //MC=0, data=1
+    m_selec.SetYear(2016);
+  }
+
+   
 
    
   std::cout<<"Output files are "<<hstfilename<<" and "<<sumfilename<<std::endl;
