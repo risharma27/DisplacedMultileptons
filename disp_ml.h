@@ -1474,7 +1474,7 @@ public :
 
   TTreeReaderValue<Bool_t> HLT_IsoMu27 = {fReader_Data, "HLT_IsoMu27"};
   TTreeReaderValue<Bool_t> HLT_IsoMu24 = {fReader_Data, "HLT_IsoMu24"};
-  TTreeReaderValue<Bool_t> HLT_Ele32_WPTight_Gsf = {fReader_Data, "HLT_Ele32_WPTight_Gsf"};
+  //TTreeReaderValue<Bool_t> HLT_Ele32_WPTight_Gsf = {fReader_Data, "HLT_Ele32_WPTight_Gsf"};
   TTreeReaderValue<Bool_t> HLT_Ele27_WPTight_Gsf = {fReader_Data, "HLT_Ele27_WPTight_Gsf"};
   
   

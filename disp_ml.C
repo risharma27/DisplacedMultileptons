@@ -102,11 +102,12 @@ Bool_t disp_ml::Process(Long64_t entry)
     triggerRes=true; //Always true for MC
     
     if(_data==1){
-      trigger2018 = (_year==2018 ? (_lep==1 ? *HLT_IsoMu24==1 : _lep==0 && *HLT_Ele32_WPTight_Gsf) : 1);
-      trigger2017 = (_year==2017 ? (_lep==1 ? *HLT_IsoMu27==1 : _lep==0 && (*HLT_Ele32_WPTight_Gsf)) : 1);
+      //trigger2018 = (_year==2018 ? (_lep==1 ? *HLT_IsoMu24==1 : _lep==0 && *HLT_Ele32_WPTight_Gsf) : 1);
+      //trigger2017 = (_year==2017 ? (_lep==1 ? *HLT_IsoMu27==1 : _lep==0 && (*HLT_Ele32_WPTight_Gsf)) : 1);
       trigger2016 = (_year==2016 ? (_lep==1 ? (*HLT_IsoMu24==1) : _lep==0 && *HLT_Ele27_WPTight_Gsf) : 1);
-      
-      triggerRes = trigger2018 && trigger2017 && trigger2016;
+     
+      //triggerRes = trigger2018 && trigger2017 && trigger2016;
+      triggerRes = trigger2016;
     }
 
     
@@ -400,9 +401,10 @@ Bool_t disp_ml::Process(Long64_t entry)
       h.delR_ll[2]->Fill(delR_d0d1);
       
       h.PV_2D[0]->Fill(pv_2D);
-      h.SV_2D[0]->Fill(SV2D.at(0));
-      h.delta2D[0]->Fill(Delta2D.at(0));
-      
+      if(SV2D.size()>0){
+	h.SV_2D[0]->Fill(SV2D.at(0));
+	h.delta2D[0]->Fill(Delta2D.at(0));
+      }
     }
 
     
@@ -437,9 +439,10 @@ Bool_t disp_ml::Process(Long64_t entry)
       h.delR_ll[5]->Fill(delR_d1d2);
 
       h.PV_2D[1]->Fill(pv_2D);
-      h.SV_2D[1]->Fill(SV2D.at(0));
-      h.delta2D[1]->Fill(Delta2D.at(0));
-      
+      if(SV2D.size()>0){
+	h.SV_2D[1]->Fill(SV2D.at(0));
+	h.delta2D[1]->Fill(Delta2D.at(0));
+      }
     }
     
 
@@ -551,12 +554,12 @@ void disp_ml::BookHistograms()
   h.delphi_ll[0] = new TH1F("1l2d_delphi_l0d0", "", 64, 0, 3.2);
   h.delphi_ll[1] = new TH1F("1l2d_delphi_l0d1", "", 64, 0, 3.2);
   h.delphi_ll[2] = new TH1F("1l2d_delphi_d0d1", "", 64, 0, 3.2);
-  h.delR_ll[0] = new TH1F("1l2d_delR_l0d0", "", 200, 0, 200);
-  h.delR_ll[1] = new TH1F("1l2d_delR_l0d1", "", 200, 0, 200);
-  h.delR_ll[2] = new TH1F("1l2d_delR_d0d1", "", 200, 0, 200);
-  h.PV_2D[0] = new TH1F("1l2d_pv2D", "", 100, 0, 50);
-  h.SV_2D[0] = new TH1F("1l2d_sv2D", "", 100, 0, 50);
-  h.delta2D[0] = new TH1F("1l2d_delta2D", "", 100, 0, 100);
+  h.delR_ll[0] = new TH1F("1l2d_delR_l0d0", "", 20, 0, 10);
+  h.delR_ll[1] = new TH1F("1l2d_delR_l0d1", "", 20, 0, 10);
+  h.delR_ll[2] = new TH1F("1l2d_delR_d0d1", "", 20, 0, 10);
+  h.PV_2D[0] = new TH1F("1l2d_pv2D", "", 20, 0, 10);
+  h.SV_2D[0] = new TH1F("1l2d_sv2D", "", 40, 0, 20);
+  h.delta2D[0] = new TH1F("1l2d_delta2D", "", 40, 0, 20);
 
   //3d channel
   h.met[1] = new TH1F("3d_metpt", "", 200, 0, 200);
@@ -567,12 +570,12 @@ void disp_ml::BookHistograms()
   h.delphi_ll[3] = new TH1F("3d_delphi_d0d1", "", 64, 0, 3.2);
   h.delphi_ll[4] = new TH1F("3d_delphi_d0d2", "", 64, 0, 3.2);
   h.delphi_ll[5] = new TH1F("3d_delphi_d1d2", "", 64, 0, 3.2);
-  h.delR_ll[3] = new TH1F("3d_delR_d0d1", "", 200, 0, 200);
-  h.delR_ll[4] = new TH1F("3d_delR_d0d2", "", 200, 0, 200);
-  h.delR_ll[5] = new TH1F("3d_delR_d1d2", "", 200, 0, 200);
-  h.PV_2D[1] = new TH1F("3d_pv2D", "", 100, 0, 50);
-  h.SV_2D[1] = new TH1F("3d_sv2D", "", 100, 0, 50);
-  h.delta2D[1] = new TH1F("3d_delta2D", "", 100, 0, 100);
+  h.delR_ll[3] = new TH1F("3d_delR_d0d1", "", 20, 0, 10);
+  h.delR_ll[4] = new TH1F("3d_delR_d0d2", "", 20, 0, 10);
+  h.delR_ll[5] = new TH1F("3d_delR_d1d2", "", 20, 0, 10);
+  h.PV_2D[1] = new TH1F("3d_pv2D", "", 20, 0, 10);
+  h.SV_2D[1] = new TH1F("3d_sv2D", "", 40, 0, 20);
+  h.delta2D[1] = new TH1F("3d_delta2D", "", 40, 0, 20);
   
   //############################################################################################################################
   
