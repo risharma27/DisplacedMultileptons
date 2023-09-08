@@ -142,11 +142,11 @@ Bool_t disp_ml::Process(Long64_t entry)
 	recoLepton.push_back(temp);
       }
 
-      if(passCuts && fabs(Muon_dxy[i])<0.05 && fabs(Muon_dz[i])<0.1){
+      if(passCuts && temp.v.Pt()>25 && fabs(Muon_dxy[i])<0.05 && fabs(Muon_dz[i])<0.1){
 	promptLepton.push_back(temp);
       }
 
-      if(passCuts && fabs(Muon_dxy[i]<0.01)){
+      if(passCuts && fabs(Muon_dxy[i])>0.01){
 	displacedLepton.push_back(temp);
       }
     }
@@ -250,7 +250,7 @@ Bool_t disp_ml::Process(Long64_t entry)
 	recoLepton.push_back(temp);
       }
 
-      if(passCuts && fabs(Electron_dxy[i])<0.05 && fabs(Electron_dz[i])<0.1){
+      if(passCuts && temp.v.Pt()>25 && fabs(Electron_dxy[i])<0.05 && fabs(Electron_dz[i])<0.1){
 	promptLepton.push_back(temp);
       }
 
@@ -313,6 +313,7 @@ Bool_t disp_ml::Process(Long64_t entry)
       }
     } //if(_data==0)
 
+    
     if(_data==1){
       for(int i=0; i<(int)recoElectron.size(); i++){
 	genmatchedEle.push_back(recoElectron.at(i));
@@ -387,7 +388,7 @@ Bool_t disp_ml::Process(Long64_t entry)
 
       float delphi_l0d0 = delta_phi(promptLepton.at(0).v.Phi(), displacedLepton.at(0).v.Phi());
       float delphi_l0d1 = delta_phi(promptLepton.at(0).v.Phi(), displacedLepton.at(1).v.Phi());
-      float delphi_d0d1 = delta_phi(promptLepton.at(0).v.Phi(), displacedLepton.at(1).v.Phi());
+      float delphi_d0d1 = delta_phi(displacedLepton.at(0).v.Phi(), displacedLepton.at(1).v.Phi());
 
       h.delphi_ll[0]->Fill(delphi_l0d0);
       h.delphi_ll[1]->Fill(delphi_l0d1);
