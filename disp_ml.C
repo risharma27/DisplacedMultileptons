@@ -100,7 +100,23 @@ Bool_t disp_ml::Process(Long64_t entry)
 
 
     triggerRes=true; //Always true for MC
-    
+
+
+    if(_data==1){
+      triggerRes = false;
+      bool muon_trigger = false;
+      bool electron_trigger = false;
+      if     (_year==2016) {muon_trigger = (*HLT_IsoMu24==1); electron_trigger = (*HLT_Ele27_WPTight_Gsf==1);}
+      else if(_year==2017) {muon_trigger = (*HLT_IsoMu27==1); electron_trigger = (*HLT_Ele32_WPTight_Gsf==1);}
+      else if(_year==2018) {muon_trigger = (*HLT_IsoMu24==1); electron_trigger = (*HLT_Ele27_WPTight_Gsf==1);}
+
+      //Muons are preferrred over electrons.
+      //For the electron dataset, pick up only those events which do not fire a Muon trigger.
+      //Otherwise there will be overcounting.
+      triggerRes = muon_trigger || (!muon_trigger && electron_trigger);      
+    }
+
+    /*
     if(_data==1){
       //trigger2018 = (_year==2018 ? (_lep==1 ? *HLT_IsoMu24==1 : _lep==0 && *HLT_Ele32_WPTight_Gsf) : 1);
       //trigger2017 = (_year==2017 ? (_lep==1 ? *HLT_IsoMu27==1 : _lep==0 && (*HLT_Ele32_WPTight_Gsf)) : 1);
@@ -109,7 +125,7 @@ Bool_t disp_ml::Process(Long64_t entry)
       //triggerRes = trigger2018 && trigger2017 && trigger2016;
       triggerRes = trigger2016;
     }
-
+    */
     
 
     //Construction of the arrays:
@@ -371,11 +387,83 @@ Bool_t disp_ml::Process(Long64_t entry)
     
     //#################################################### EVENT SELECTION #########################################################################//
 
+
+    bool _2l1d = (int)promptLepton.size()==2 && (int)displacedLepton.size()>0;
+    bool _1l2d = (int)promptLepton.size()==1 && (int)displacedLepton.size()>1;
+    bool _3d = (int)promptLepton.size()==0 && (int)displacedLepton.size()>2;
+
+    int evsel = -1;
+    if(_2l1d){
+      evsel=0;
+      myLep.push_back(promptLepton.at(0));
+      myLep.push_back(promptLepton.at(1));
+      myLep.push_back(displacedLepton.at(0));
+    }
+    
+    else if(_1l2d){
+      evsel=1;
+      myLep.push_back(promptLepton.at(0));
+      myLep.push_back(displacedLepton.at(0));
+      myLep.push_back(displacedLepton.at(1));
+    }
+    
+    else if(_3d){
+      evsel=2;
+      myLep.push_back(displacedLepton.at(0));
+      myLep.push_back(displacedLepton.at(1));
+      myLep.push_back(displacedLepton.at(2));
+    }
+
+    if(evsel==-1) return 0;
+    else{
+      h.dispml_h[evsel][0]->Fill(metpt);
+      float sum_pt = 0.0;
+      for(int i=0; i<(int)myLep.size(); i++){
+	sum_pt = sum_pt + myLep.at(i).v.Pt();
+      }
+      h.dispml_h[evsel][1]->Fill(sum_pt);
+      float imass = (myLep.at(0).v + myLep.at(1).v);
+      imass = (imass + myLep.at(2).v).M();
+      h.dispml_h[evsel][2]->Fill(imass);
+      for(int j=3; j<6; j++){
+	h.dispml_h[evsel][j]->Fill(myLep.at(j-3).v.Pt());
+      }
+      float pt_ll[3], delR_ll[3], delPhi_ll[3], M_ll[3];
+      for(int i=0; i<3; i++){
+	for(int j=i+1; j<3; j++){
+	  int index = -1;
+	  if(i==0 && j==1) index=0;
+	  else if(i==1 && j==2) index=1;
+	  else if(i == 0 && j == 2) index=2;
+	  pt_ll[index]=myLep.at(i).v.Pt()+myLep.at(j).v.Pt();
+	  delR_ll[index]=myLep.at(i).v.DeltaR(myLep.at(j).v);
+	  delPhi_ll[index]=myLep.at(i).v.DeltaPhi(myLep.at(j).v);
+	  M_ll[index]=(myLep.at(i).v+myLep.at(j).v).M();
+	}
+      }
+    
+      for(int index=0; index<3; index++){
+	int p=6;
+	h.dispml_h[evsel][index+p]->Fill(pt_ll[index]);
+	h.dispml_h[evsel][index+p+1]->Fill(delR_ll[index]);
+	h.dispml_h[evsel][index+p+2]->Fill(delPhi_ll[index]);
+	h.dispml_h[evsel][index+p+3]->Fill(M_ll[index]);
+	p=p+3;
+      }
+    }
+    
+    
+  
+
+
+
+    /*
+
     
     //1 prompt, 2 displaced leptons
     
     if((int)promptLepton.size()>0 && (int)displacedLepton.size()>1){
-
+     
       h.met[0]->Fill(metpt);
 
       h.prompt_pt[0]->Fill(promptLepton.at(0).v.Pt());
@@ -446,6 +534,7 @@ Bool_t disp_ml::Process(Long64_t entry)
       }
     }
     
+    */
 
 
     //########### ANALYSIS ENDS HERE ##############
@@ -544,6 +633,32 @@ vector<int> disp_ml::pt_binning_count(vector<Lepton> vec)
 
 void disp_ml::BookHistograms()
 {
+  
+  TString evsel_name[3] = {"2l1d", "1l2d", "3d"};
+  TString plotname[7] = {"met","pt_3l","imass_3l","pt0","pt1","pt2","delR_ll","delPhi_ll","imass_ll"};
+  int nbins[5] = {200,200,20,64,200};
+  float blo[5] = {0,0,0,-3.2,0};
+  float bhi[5] = {200,200,10,3.2,200};
+  for(int ievsel=0; ievsel<3; ievsel++){
+    for(int iplot=0; iplot<2; iplot++){
+      TString name = evsel_name[ievsel] + plotname[iplot];
+      h.dispml_h[ievsel][iplot] = new TH1F(name,name,nbins[iplot],blo[iplot],bhi[iplot]);
+      h.dispml_h[ievsel][iplot] = new TH1F(name,name,nbins[iplot],blo[iplot],bhi[iplot]);
+      
+
+      //h.bb_h[icr][iplot]->Sumw2();
+    }
+    for(int iplot=1; iplot<7; iplot++){
+      for(int k=0; k<3; k++){
+	TString name = evsel_name[evsel] + plotname[iplot] + TString(Form("%d", ilep));
+	h.dispml_h[ievsel][iplot] = new TH1F(name,name,nbins[iplot],blo[iplot],bhi[iplot]);
+      }
+    }
+  }
+
+  
+
+  /*
 
   //1l2d channel
   h.met[0] = new TH1F("1l2d_metpt", "", 200, 0, 200);
@@ -577,7 +692,8 @@ void disp_ml::BookHistograms()
   h.PV_2D[1] = new TH1F("3d_pv2D", "", 20, 0, 10);
   h.SV_2D[1] = new TH1F("3d_sv2D", "", 40, 0, 20);
   h.delta2D[1] = new TH1F("3d_delta2D", "", 40, 0, 20);
-  
+
+  */
   //############################################################################################################################
   
   

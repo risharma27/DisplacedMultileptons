@@ -1855,6 +1855,10 @@ public :
   public:
   struct Hists {
     //Histograms are declared here.
+
+    TH1F *dispml_h[3][18];
+
+    /*
     TH1F *met[10];
     TH1F *prompt_pt[10];
     TH1F *disp_pt[10];
@@ -1864,6 +1868,7 @@ public :
     TH1F *PV_2D[10];
     TH1F *SV_2D[10];
     TH1F *delta2D[10];
+    */
   
   };
   
@@ -1918,6 +1923,7 @@ private:
   vector<Lepton> genmatchedLep;
   vector<Lepton> promptLepton;
   vector<Lepton> displacedLepton;
+  vector<Lepton> myLep;
   vector<float> SV2D;
   vector<float> Delta2D;
 
