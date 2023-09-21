@@ -3,6 +3,18 @@
 #include "disp_ml.h"
 #include <TH2.h>
 #include <TStyle.h>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <string>
+
+using namespace std;
+
+//Including the header files
+#include "CustomFunctions.h"
+#include "ProduceGenCollection.h"
+#include "ProduceRecoCollection.h"
 
 void disp_ml::Begin(TTree * /*tree*/)
 {
@@ -116,255 +128,18 @@ Bool_t disp_ml::Process(Long64_t entry)
       triggerRes = muon_trigger || (!muon_trigger && electron_trigger);      
     }
 
-    /*
-    if(_data==1){
-      //trigger2018 = (_year==2018 ? (_lep==1 ? *HLT_IsoMu24==1 : _lep==0 && *HLT_Ele32_WPTight_Gsf) : 1);
-      //trigger2017 = (_year==2017 ? (_lep==1 ? *HLT_IsoMu27==1 : _lep==0 && (*HLT_Ele32_WPTight_Gsf)) : 1);
-      trigger2016 = (_year==2016 ? (_lep==1 ? (*HLT_IsoMu24==1) : _lep==0 && *HLT_Ele27_WPTight_Gsf) : 1);
-     
-      //triggerRes = trigger2018 && trigger2017 && trigger2016;
-      triggerRes = trigger2016;
-    }
-    */
-    
-
-    //Construction of the arrays:
-      
-    //Muons
-    
-    int nmu = 0;                       
-    recoMuon.clear();
-    recoLepton.clear();
-    promptLepton.clear();
-    displacedLepton.clear();
-    
-    for(unsigned int i=0; i<(*nMuon); i++){
-      Lepton temp;                      
-      temp.v.SetPtEtaPhiM(Muon_pt[i],Muon_eta[i],Muon_phi[i],0.105); //the muon mass in GeV is 0.105
-      temp.id = -13*Muon_charge[i];    //pdgID for mu- = 13, pdgID for mu+ = -13  
-      temp.ind = i;
-      temp.tightID = Muon_tightId[i];
-      temp.mediumID = Muon_mediumId[i];
-      temp.looseID = Muon_looseId[i];
-      temp.reliso03 = Muon_pfRelIso03_all[i];
-      temp.dxy = Muon_dxy[i];
-      temp.dz = Muon_dz[i];
-    
-      bool passCuts = temp.v.Pt()>10 && fabs(temp.v.Eta())<2.4;
-      passCuts = passCuts && Muon_pfRelIso03_all[i]<0.15 && Muon_mediumId[i];
-      
-      if(passCuts){
-	recoMuon.push_back(temp);
-	recoLepton.push_back(temp);
-      }
-
-      if(passCuts && temp.v.Pt()>25 && fabs(Muon_dxy[i])<0.05 && fabs(Muon_dz[i])<0.1){
-	promptLepton.push_back(temp);
-      }
-
-      if(passCuts && fabs(Muon_dxy[i])>0.01){
-	displacedLepton.push_back(temp);
-      }
-    }
-    
-    Sortpt(recoMuon);
-
-    genmatchedMu.clear();
-    genmatchedLep.clear();
-
-    if(_data==0){
-      genMuon.clear();
-      for(unsigned int i=0; i<(*nGenPart); i++){
-	Lepton temp;
-	temp.status = GenPart_status[i];
-	if(temp.status==1){
-	  temp.v.SetPtEtaPhiM(GenPart_pt[i],GenPart_eta[i],GenPart_phi[i],GenPart_mass[i]);
-	  temp.ind=i; temp.pdgid=GenPart_pdgId[i]; temp.momid=MotherID(i,GenPart_genPartIdxMother[i]);
-	  bool passCut = abs(temp.pdgid)==13 && temp.v.Pt()>10 && fabs(temp.v.Eta())<2.4;
-	  	
-	  if(passCut){
-	    genMuon.push_back(temp);
-	  }
-	}
-      }
-      
-      Sortpt(genMuon);
-     
-
-      std::pair<vector<int>, vector<float>> mu_result = dR_matching(recoMuon, genMuon);
-      vector<int> mu_matchto_genmu = mu_result.first;
-      vector<float> mu_delRmin_genmu = mu_result.second;
-
-      for(int i=0; i<(int)mu_matchto_genmu.size(); i++){
-	int mumatch=mu_matchto_genmu.at(i);
-	float mumatchdR=mu_delRmin_genmu.at(i);
-	//h.mu_dr[0]->Fill(mumatchdR);
-	if(mumatch>-1 && mumatchdR<0.05){
-	  int mumomid = genMuon.at(mumatch).momid;
-	  //h.motherID[1]->Fill(mumomid);
-	  //h.mu_dr[1]->Fill(mumatchdR);
-	  genmatchedMu.push_back(recoMuon.at(i));
-	  genmatchedLep.push_back(recoMuon.at(i));
-	}
-      }
-    } //if(_data==0)
-
-    if(_data==1){
-      for(int i=0; i<(int)recoMuon.size(); i++){
-	genmatchedMu.push_back(recoMuon.at(i));
-	genmatchedLep.push_back(recoMuon.at(i));
-      }
-    }
-
-    Sortpt(genmatchedMu);
 
     
 
-    //##########################################################################################################################################################//
 
 
-    //Low Pt Electrons
 
-    lowptElectron.clear();
-    for(unsigned int i=0; i<(*nLowPtElectron); i++){
 
-      Lepton temp;
-      temp.v.SetPtEtaPhiM(LowPtElectron_pt[i],LowPtElectron_eta[i],LowPtElectron_phi[i],LowPtElectron_mass[i]);
-      temp.id = -11*LowPtElectron_charge[i];
-      temp.ind = i;
-      temp.reliso = LowPtElectron_miniPFRelIso_all[i];
 
-      bool passCuts = fabs(temp.v.Eta())<2.4 && temp.v.Pt()>10;
-     
-      if(passCuts){
-	lowptElectron.push_back(temp);
-      }
-    }
+
 
 
     
-    //Electrons
-    
-    recoElectron.clear();
-    
-    for(unsigned int i=0; i<(*nElectron); i++){
-      
-      Lepton temp;
-      temp.v.SetPtEtaPhiM(Electron_pt[i],Electron_eta[i],Electron_phi[i],Electron_mass[i]);
-      temp.id = -11*Electron_charge[i];
-      temp.ind = i; 
-      temp.reliso03 = Electron_pfRelIso03_all[i]; //h.el_reliso03->Fill(temp.reliso03);
-      temp.cutBased = Electron_cutBased[i];
-      temp.dxy = Electron_dxy[i];
-      temp.dz = Electron_dz[i];
-   
-      bool passCuts = fabs(temp.v.Eta())<2.4 && temp.v.Pt()>10;
-      passCuts = passCuts && Electron_pfRelIso03_all[i]<0.15 && Electron_cutBased[i]>2;
-      					
-      if(passCuts){
-	recoElectron.push_back(temp);
-	recoLepton.push_back(temp);
-      }
-
-      if(passCuts && temp.v.Pt()>25 && fabs(Electron_dxy[i])<0.05 && fabs(Electron_dz[i])<0.1){
-	promptLepton.push_back(temp);
-      }
-
-      if(passCuts && fabs(Electron_dxy[i])>0.01){
-	displacedLepton.push_back(temp);
-      }
-    }
-    
-    Sortpt(recoElectron);
-    Sortpt(recoLepton);
-    Sortpt(promptLepton);
-    Sortpt(displacedLepton);
-    
-    genmatchedEle.clear();
-    
-    if(_data==0){
-      genElectron.clear();  //truth electrons
-      for(unsigned int i=0; i<(*nGenPart); i++){
-	Lepton temp;
-
-	/*
-	  if(nEvtTotal==12){
-	  cout<<i<<"  "<<GenPart_pdgId[i]<<"  "<<GenPart_genPartIdxMother[i]<<"  "<<GenPart_pdgId[GenPart_genPartIdxMother[i]]<<endl;
-	  }
-	*/
-	
-	temp.status = GenPart_status[i];
-	if(temp.status==1){
-	  temp.v.SetPtEtaPhiM(GenPart_pt[i],GenPart_eta[i],GenPart_phi[i],GenPart_mass[i]);
-	  temp.ind=i; temp.pdgid=GenPart_pdgId[i]; temp.momid=MotherID(i,GenPart_genPartIdxMother[i]);
-	  bool passCut = fabs(temp.v.Eta())<2.4 && temp.v.Pt()>10;
-	  passCut = passCut && abs(temp.pdgid)==11;
-
-	  
-	  if(passCut){
-	    genElectron.push_back(temp);
-	  }
-	}
-      }
-      Sortpt(genElectron);
-
-   
-      std::pair<vector<int>, vector<float>> el_result = dR_matching(recoElectron, genElectron);
-      vector<int> el_matchto_genel = el_result.first;
-      vector<float> el_delRmin_genel = el_result.second;
-
-      // cout<<(int)recoElectron.size()<<" "<<(int)el_matchto_genel.size()<<" "<<el_delRmin_genel.size()<<endl;
-    
-      for(int i=0; i<(int)el_matchto_genel.size(); i++){
-	int elmatch=el_matchto_genel.at(i);
-	float elmatchdR=el_delRmin_genel.at(i);
-	//h.el_dr[0]->Fill(elmatchdR);
-	if(elmatch>-1 && elmatchdR<0.05){
-	  int elmomid = genElectron.at(elmatch).momid;
-	  //h.motherID[0]->Fill(elmomid);
-	  //h.el_dr[1]->Fill(elmatchdR);
-	  genmatchedEle.push_back(recoElectron.at(i));
-	  genmatchedLep.push_back(recoElectron.at(i));
-	}
-      }
-    } //if(_data==0)
-
-    
-    if(_data==1){
-      for(int i=0; i<(int)recoElectron.size(); i++){
-	genmatchedEle.push_back(recoElectron.at(i));
-	genmatchedLep.push_back(recoElectron.at(i));
-      }
-    }
-
-    Sortpt(genmatchedEle);
-    Sortpt(genmatchedLep);
-    
-
-    genmatched_lowptEle.clear();
-    if(_data==0){
-      std::pair<vector<int>, vector<float>> lowptel_result = dR_matching(lowptElectron, genElectron);
-      vector<int> lowptel_matchto_genel = lowptel_result.first;
-      vector<float> lowptel_delRmin_genel = lowptel_result.second;
-
-      for(int i=0; i<(int)lowptel_matchto_genel.size(); i++){
-	int lowptelmatch=lowptel_matchto_genel.at(i);
-	float lowptelmatchdR=lowptel_delRmin_genel.at(i);
-     
-	if(lowptelmatch>-1 && lowptelmatchdR<0.05){
-	  genmatched_lowptEle.push_back(lowptElectron.at(i));
-	}
-      } 
-    } //if(_data==0)
-
-
-    if(_data==1){
-      for(int i=0; i<(int)lowptElectron.size(); i++){
-	genmatched_lowptEle.push_back(lowptElectron.at(i));
-      }
-    }
-
-    Sortpt(genmatched_lowptEle);
 
     //##############################################################################################################################################//
     
@@ -387,32 +162,50 @@ Bool_t disp_ml::Process(Long64_t entry)
     
     //#################################################### EVENT SELECTION #########################################################################//
 
-
-    bool _2l1d = (int)promptLepton.size()==2 && (int)displacedLepton.size()>0;
-    bool _1l2d = (int)promptLepton.size()==1 && (int)displacedLepton.size()>1;
-    bool _3d = (int)promptLepton.size()==0 && (int)displacedLepton.size()>2;
-
-    int evsel = -1;
-    if(_2l1d){
-      evsel=0;
-      myLep.push_back(promptLepton.at(0));
-      myLep.push_back(promptLepton.at(1));
-      myLep.push_back(displacedLepton.at(0));
+    
+    bool passTrigger = false;
+    if(_year==2016){
+      if(fabs(recoLepton.at(0).id)==13 && recoLepton.at(0).v.Pt()>24) passTrigger = true;  //preference is given to muons
+      else if(fabs(recoLepton.at(0).id)==11 && recoLepton.at(0).v.Pt()>27) passTrigger = true;
+    } 
+    else if(_year==2017){
+      if(fabs(recoLepton.at(0).id)==13 && recoLepton.at(0).v.Pt()>27) passTrigger = true;
+      else if(fabs(recoLepton.at(0).id)==11 && recoLepton.at(0).v.Pt()>32) passTrigger = true;
+    }
+    else if(_year==2018){
+      if(fabs(recoLepton.at(0).id)==13 && recoLepton.at(0).v.Pt()>24) passTrigger = true;
+      else if(fabs(recoLepton.at(0).id)==11 && recoLepton.at(0).v.Pt()>27) passTrigger = true;
     }
     
-    else if(_1l2d){
-      evsel=1;
-      myLep.push_back(promptLepton.at(0));
-      myLep.push_back(displacedLepton.at(0));
-      myLep.push_back(displacedLepton.at(1));
+
+    if(passTrigger){
+      bool _2l1d = (int)promptLepton.size()==2 && (int)displacedLepton.size()>0;
+      bool _1l2d = (int)promptLepton.size()==1 && (int)displacedLepton.size()>1;
+      bool _3d = (int)promptLepton.size()==0 && (int)displacedLepton.size()>2;
+
+      int evsel = -1;
+      if(_2l1d){
+	evsel=0;
+	myLep.push_back(promptLepton.at(0));
+	myLep.push_back(promptLepton.at(1));
+	myLep.push_back(displacedLepton.at(0));
+      }
+    
+      else if(_1l2d){
+	evsel=1;
+	myLep.push_back(promptLepton.at(0));
+	myLep.push_back(displacedLepton.at(0));
+	myLep.push_back(displacedLepton.at(1));
+      }
+    
+      else if(_3d){
+	evsel=2;
+	myLep.push_back(displacedLepton.at(0));
+	myLep.push_back(displacedLepton.at(1));
+	myLep.push_back(displacedLepton.at(2));
+      }
     }
     
-    else if(_3d){
-      evsel=2;
-      myLep.push_back(displacedLepton.at(0));
-      myLep.push_back(displacedLepton.at(1));
-      myLep.push_back(displacedLepton.at(2));
-    }
 
     if(evsel==-1) return 0;
     else{
