@@ -1,2 +1,0 @@
-Total events ran = 16882401
-Total good events  = 16877847
