@@ -1,4 +1,4 @@
-//Reco Leptons (Electrons and Muons) Collection//
+// Reco Leptons (Electrons and Muons) Collection //
 
 void disp_ml::RecoLeptonArray(){
   
@@ -17,21 +17,12 @@ void disp_ml::RecoLeptonArray(){
     
     bool ptetacut = temp.v.Pt()>10 && fabs(temp.v.Eta())<2.4;
     bool passcut_mediummu =  ptetacut && Muon_pfRelIso03_all[i]<0.15 && Muon_mediumId[i];
-    bool promptmuon = passcut_mediummu && fabs(Muon_dxy[i])<0.05 && fabs(Muon_dz[i])<0.1;
-    bool displacedmuon = passcut_mediummu && fabs(Muon_dxy[i])>0.05 && fabs(Muon_dz[i])<10;
-      
+         
     if(passcut_mediummu){
       recoMuon.push_back(temp);
       recoLepton.push_back(temp);
     }
 
-    if(promptmuon){
-      promptLepton.push_back(temp);
-    }
-
-    if(displacedmuon){
-      displacedLepton.push_back(temp);
-    }
   } //Muons
 
 
@@ -48,22 +39,36 @@ void disp_ml::RecoLeptonArray(){
     temp.dz = Electron_dz[i];
    
     bool ptetacut = temp.v.Pt()>10 && fabs(temp.v.Eta())<2.4;
-    passcut_mediumel = ptetacut && Electron_pfRelIso03_all[i]<0.15 && Electron_cutBased[i]>2;
-    bool promptelectron = passcut_mediumel && fabs(Electron_dxy[i])<0.05 && fabs(Electron_dz[i])<0.1;
-     bool displacedelectron = passcut_mediumel && fabs(Electron_dxy[i]).0.05;
+    bool passcut_mediumel = ptetacut && Electron_pfRelIso03_all[i]<0.15 && Electron_cutBased[i]>2;
+    //bool promptelectron = passcut_mediumel && fabs(Electron_dxy[i])<0.05 && fabs(Electron_dz[i])<0.1;
+    //bool displacedelectron = passcut_mediumel && fabs(Electron_dxy[i])>0.05;
       					
     if(passcut_mediumel){
       recoElectron.push_back(temp);
       recoLepton.push_back(temp);
     }
 
-    if(promptelectron){
-      promptLepton.push_back(temp);
-    }
-
-    if(displacedelectron){
-      displacedLepton.push_back(temp);
-    }
   } //Electrons
     
+}
+
+
+// Jets Collection //
+
+void disp_ml::RecoJetArray(){
+  for(unsigned int i=0; i< (*nJet); i++){
+    Lepton temp;
+    temp.v.SetPtEtaPhiM(Jet_pt[i],Jet_eta[i],Jet_phi[i],Jet_mass[i]);
+    temp.ind = i;
+
+    bool ptetacut = temp.v.Pt()>30 && fabs(temp.v.Eta())<2.4;
+    bool jetID = _year == 2016 ? Jet_jetId[i]>=1 : Jet_jetId[i]>=2; //if 2016, >=1; else >=2
+    bool passcut = ptetacut && jetID;
+
+    if(passcut){
+      recoJet.push_back(temp);
+      if(Jet_btagDeepB[i]>0.4184) bJet.push_back(temp);
+    }
+  }
+
 }

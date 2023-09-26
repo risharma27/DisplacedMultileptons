@@ -34,6 +34,7 @@ public :
   TTreeReader     fReader;       //reads the common branches
   TTreeReader     fReader_MC;    //reads the MC branches
   TTreeReader     fReader_Data;  //reads the Data branches
+  TTreeReader     fReader_2017;  //reads the braches of 2017 Data, which are different from 2016 and 2018
   TTree          *fChain = 0;    //!pointer to the analyzed TTree or TChain
   
   // Readers to access the data (delete the ones you do not need).
@@ -1472,12 +1473,21 @@ public :
    TTreeReaderValue<Bool_t> HLTriggerFinalPath = {fReader, "HLTriggerFinalPath"};
    TTreeReaderValue<Bool_t> L1simulation_step = {fReader, "L1simulation_step"};*/
 
-  TTreeReaderValue<Bool_t> HLT_IsoMu27 = {fReader_Data, "HLT_IsoMu27"};
+  /*
+  TTreeReaderValue<Bool_t> HLT_IsoMu24;
+  TTreeReaderValue<Bool_t> HLT_Ele27_WPTight_Gsf;
+  TTreeReaderValue<Bool_t> HLT_IsoMu27;
+  TTreeReaderValue<Bool_t> HLT_Ele32_WPTight_Gsf;
+  */
+  
+ 
   TTreeReaderValue<Bool_t> HLT_IsoMu24 = {fReader_Data, "HLT_IsoMu24"};
-  //TTreeReaderValue<Bool_t> HLT_Ele32_WPTight_Gsf = {fReader_Data, "HLT_Ele32_WPTight_Gsf"};
   TTreeReaderValue<Bool_t> HLT_Ele27_WPTight_Gsf = {fReader_Data, "HLT_Ele27_WPTight_Gsf"};
+ 
+  TTreeReaderValue<Bool_t> HLT_IsoMu27 = {fReader_2017, "HLT_IsoMu27"};
+  TTreeReaderValue<Bool_t>  HLT_Ele32_WPTight_Gsf = {fReader_2017, "HLT_Ele32_WPTight_Gsf"};
   
-  
+ 
 
   //#############################################################################
   //Branches which are only present in the Data files are read using fReader_Data
@@ -1852,11 +1862,15 @@ public :
   float transv_mass(float E_lep, float MET, float dphi);
   int MotherID(int partindex, int momindex);
 
+  void RecoLeptonArray();
+  void RecoJetArray();
+  void GenLeptonArray();
+
   public:
   struct Hists {
     //Histograms are declared here.
-
-    TH1F *dispml_h[3][18];
+    TH1F *nevt;
+    TH1F *dispml_h[3][25];
 
     /*
     TH1F *met[10];
@@ -1876,12 +1890,12 @@ public :
     TLorentzVector v;
     int id;  int ind;
     float wt;
-    int status; 
-    int momid;
+    int status;
     int pdgid;
+    int momid;
+    int charge;
     int cutBased;
-    float dxy, dz, reliso03, reliso;
-    bool tightID; bool mediumID; bool looseID;
+    float dxy, dz, reliso03, reliso04;
     //int genmatch;
     //int jetmatch;
   };
@@ -1891,7 +1905,6 @@ public :
   std::pair<vector<int>, vector<float>> dR_matching(vector<Lepton> vec1, vector<Lepton> vec2);
   vector<int> pt_binning_count(vector<Lepton> vec);
   
- 
 protected:
   Hists h;
   
@@ -1902,10 +1915,11 @@ private:
   const char *_SumFileName;
   int _verbosity,_exclude;
   int _data, _lep, _year, _sample;
-  int nEvtTotal,nEvtRan; //Counters
   bool GoodEvt,GoodEvt2016,GoodEvt2017,GoodEvt2018,triggerRes,trigger2016,trigger2017,trigger2018; //Flags
   TString _era;
-  //Event counters can be declared here.
+ 
+  //Event Counters:
+  int nEvtTotal,nEvtGood,nEvtTrigger,nEvtPass;
   
   //######################
   // Declare arrays here:
@@ -1915,14 +1929,14 @@ private:
   vector<Lepton> genMuon;
   vector<Lepton> recoElectron;
   vector<Lepton> genElectron;
-  vector<Lepton> genmatchedEle;
-  vector<Lepton> genmatchedMu;
-  vector<Lepton> lowptElectron;
-  vector<Lepton> genmatched_lowptEle;
   vector<Lepton> recoLepton;
-  vector<Lepton> genmatchedLep;
+  vector<Lepton> Muon;
+  vector<Lepton> Electron;
+  vector<Lepton> lightLep;
   vector<Lepton> promptLepton;
   vector<Lepton> displacedLepton;
+  vector<Lepton> recoJet;
+  vector<Lepton> bJet;
   vector<Lepton> myLep;
   vector<float> SV2D;
   vector<float> Delta2D;
@@ -1943,11 +1957,15 @@ void disp_ml::Init(TTree *tree)
   // Init() will be called many times when running on PROOF
   // (once per file to be processed).
   
-  fReader        .SetTree(tree); //fReader is used to read all the common branches.
-  if(_data == 0)                 //If the input file is MC, activate fReader_MC 
-    fReader_MC   .SetTree(tree);
-  else if(_data == 1)            //If the input file is data, activate fReader_Data
-    fReader_Data .SetTree(tree);
+  fReader.SetTree(tree); //fReader is used to read all the common branches.
+  if(_data == 0)  fReader_MC.SetTree(tree);  //If the input file is MC, activate fReader_MC
+  else if(_data == 1){            //If the input file is data, activate fReader_Data
+    fReader_Data.SetTree(tree);
+    if(_year==2017){
+      fReader_2017.SetTree(tree);
+    }
+ 
+  }
 }
 
 Bool_t disp_ml::Notify()

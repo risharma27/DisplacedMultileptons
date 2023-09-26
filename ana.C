@@ -30,10 +30,10 @@ void ana(int sample=0){
 
   if(sample==1){
     //Add one file to chain. This is the input file.
-    chain->Add("inputs/SingleMuon_2016postVFP_Data/*");
+    chain->Add("inputs/2016_postVFP_F_Data/*");
     //Set Names of outputfiles
-    hstfilename = "hst_output/SingleMuon_2016postVFP.root";
-    sumfilename = "sum_output/SingleMuon_2016postVFP.txt";
+    hstfilename = "hst_output/Data_2016postVFP_F.root";
+    sumfilename = "sum_output/Data_2016postVFP_F.txt";
     //Set some options
     m_selec.SetData(1); //MC=0, data=1
     m_selec.SetYear(2016);
