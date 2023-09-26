@@ -1870,7 +1870,7 @@ public :
   struct Hists {
     //Histograms are declared here.
     TH1F *nevt;
-    TH1F *dispml_h[3][25];
+    TH1F *dispml_h[3][30];
 
     /*
     TH1F *met[10];

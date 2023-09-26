@@ -107,8 +107,8 @@ Bool_t disp_ml::Process(Long64_t entry)
     fReader_Data.SetLocalEntry(entry);
   
   //Verbosity determines the number of processed events after which the root prompt is supposed to display a status update.
-  if(_verbosity==0 && nEvtTotal%1000000==0)cout<<"Processed "<<nEvtTotal<<" event..."<<endl;      
-  else if(_verbosity>0 && nEvtTotal%1000000==0)cout<<"Processed "<<nEvtTotal<<" event..."<<endl;
+  if(_verbosity==0 && nEvtTotal%10000000==0)cout<<"Processed "<<nEvtTotal<<" event..."<<endl;      
+  else if(_verbosity>0 && nEvtTotal%10000000==0)cout<<"Processed "<<nEvtTotal<<" event..."<<endl;
 
   nEvtTotal++;         //Total number of events containing everything (including the trash events).
   h.nevt->Fill(0);
@@ -339,12 +339,14 @@ Bool_t disp_ml::Process(Long64_t entry)
       myLep.push_back(displacedLepton.at(1));
       myLep.push_back(displacedLepton.at(2));
     }
+
     
       
     //if(evsel==-1) return 0;
     if(evsel!=-1){
       nEvtPass++;
       h.nevt->Fill(3);
+
       h.dispml_h[evsel][0]->Fill(metpt);
       float sum_pt = 0.0;
       for(int i=0; i<(int)myLep.size(); i++){
@@ -363,6 +365,7 @@ Bool_t disp_ml::Process(Long64_t entry)
 	  if(i==0 && j==1) index=0;
 	  else if(i==1 && j==2) index=1;
 	  else if(i == 0 && j == 2) index=2;
+	  
 	  pt_ll[index]=myLep.at(i).v.Pt()+myLep.at(j).v.Pt();
 	  delR_ll[index]=myLep.at(i).v.DeltaR(myLep.at(j).v);
 	  delPhi_ll[index]=delta_phi(myLep.at(i).v.Phi(), myLep.at(j).v.Phi());
@@ -371,20 +374,50 @@ Bool_t disp_ml::Process(Long64_t entry)
 	}
       }
 
-      float delphi_lmet[3];
+      float delphi_lmet[3],transvmass[3];
       for(int k=0; k<3; k++){
 	delphi_lmet[k] = delta_phi(metphi, myLep.at(k).v.Phi());
+	transvmass[k] = transv_mass(myLep.at(k).v.Pt(), metpt, delphi_lmet[k]);
       }
-    
+
+      int p=6;
       for(int index=0; index<3; index++){
-	int p=6;
 	h.dispml_h[evsel][index+p]->Fill(pt_ll[index]);
 	h.dispml_h[evsel][index+p+1]->Fill(delR_ll[index]);
 	h.dispml_h[evsel][index+p+2]->Fill(delPhi_ll[index]);
 	h.dispml_h[evsel][index+p+3]->Fill(delphi_lmet[index]);
 	h.dispml_h[evsel][index+p+4]->Fill(M_ll[index]);
-	p=p+4;
+	h.dispml_h[evsel][index+p+5]->Fill(transvmass[index]);
+	p=p+5;
       }
+
+      float jet_pt = 0.0;
+      for(int i=0; i<(int)recoJet.size(); i++){
+	jet_pt = jet_pt + recoJet.at(i).v.Pt();	
+      }
+
+      h.dispml_h[evsel][24]->Fill(jet_pt);
+
+      
+
+      std::pair<vector<int>, vector<float>> result = dR_matching(myLep, recoJet);
+      vector<int> myLep_matchto_recoJet = result.first;
+      vector<float> myLep_delRmin_recoJet = result.second;
+
+      for(int i=0; i<(int)myLep_matchto_recoJet.size(); i++){
+	int matchind=myLep_matchto_recoJet.at(i);
+	float matchdR=myLep_delRmin_recoJet.at(i);
+	if(matchind>-1){
+	  h.dispml_h[evsel][i+25]->Fill(matchdR);
+	}
+	else{
+	  h.dispml_h[evsel][i+25]->Fill(100);
+	}
+      }
+
+
+      
+      
     }//evsel events
 
     
@@ -414,21 +447,18 @@ void disp_ml::BookHistograms()
 
   h.nevt = new TH1F("nEvents", "0-nEvtTotal, 1-nEvtGood, 2-nEvtTrigger, 3-nEvtPass",5,0,5);
 
-  TString evsel_name[3] = {"2l1d", "1l2d", "3d"};
-  TString plotname[25] = {"met","pt_3l","imass_3l","pt0","pt1","pt2","pt_l0l1","delR_l0l1","delPhi_l0l1","delPhi_l0met","imass_l0l1","pt_l1l2","delR_l1l2","delPhi_l1l2","delPhi_l1met","imass_l1l2","pt_l2l0","delR_l2l0","delPhi_l2l0","delPhi_l2met","imass_l2l0"};
-  int nbins[25] = {200,500,500,200,200,200,500,20,64,64,500,500,20,64,64,500,500,20,64,64,500};
-  float blo[25] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-  float bhi[25] = {200,500,500,200,200,200,500,10,3.2,3.2,500,500,10,3.2,3.2,500,500,10,3.2,3.2,500};
+  TString evsel_name[3] = {"2l1d_", "1l2d_", "3d_"};
+  TString plotname[28] = {"met","pt_3l","imass_3l","pt0","pt1","pt2","pt_l0l1","delR_l0l1","delPhi_l0l1","delPhi_l0met","imass_l0l1","mt0","pt_l1l2","delR_l1l2","delPhi_l1l2","delPhi_l1met","imass_l1l2","mt1","pt_l2l0","delR_l2l0","delPhi_l2l0","delPhi_l2met","imass_l2l0","mt2","HT","dRmin_l0j","dRmin_l1j","dRmin_l2j"};
+  int nbins[28] = {200,500,500,200,200,200,500,20,32,32,500,200,500,20,32,32,500,200,500,20,32,32,500,200,200,20,20,20};
+  float blo[28] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+  float bhi[28] = {200,500,500,200,200,200,500,20,3.2,3.2,500,200,500,20,3.2,3.2,500,200,500,20,3.2,3.2,500,200,200,20,20,20};
   for(int ievsel=0; ievsel<3; ievsel++){
-    for(int iplot=0; iplot<6; iplot++){
+    for(int iplot=0; iplot<28; iplot++){
       TString name = evsel_name[ievsel] + plotname[iplot];
       h.dispml_h[ievsel][iplot] = new TH1F(name,name,nbins[iplot],blo[iplot],bhi[iplot]);
      
       //h.bb_h[icr][iplot]->Sumw2();
-    }
-    for(int iplot=6; iplot<21; iplot++){
-      TString name = evsel_name[ievsel] + plotname[iplot];
-      h.dispml_h[ievsel][iplot] = new TH1F(name,name,nbins[iplot],blo[iplot],bhi[iplot]);
+    
     }
   }
  
