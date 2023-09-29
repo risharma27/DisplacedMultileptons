@@ -1871,6 +1871,7 @@ public :
     //Histograms are declared here.
     TH1F *nevt;
     TH1F *dispml_h[3][30];
+    TH1F *flavor[3];
 
     /*
     TH1F *met[10];
@@ -1933,6 +1934,10 @@ private:
   vector<Lepton> Muon;
   vector<Lepton> Electron;
   vector<Lepton> lightLep;
+  vector<Lepton> promptMuon;
+  vector<Lepton> promptElectron;
+  vector<Lepton> displacedMuon;
+  vector<Lepton> displacedElectron;
   vector<Lepton> promptLepton;
   vector<Lepton> displacedLepton;
   vector<Lepton> recoJet;
