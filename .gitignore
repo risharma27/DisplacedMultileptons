@@ -5,4 +5,15 @@
 *#
 *.root
 *.pyc
-
+BbAna.*
+*.png
+*.json
+*.txt
+*.pdf
+*.png
+*.odp
+inputs/
+sum_output/
+hst_output/
+cluster_hst_output/
+others/
