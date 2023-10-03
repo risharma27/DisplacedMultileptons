@@ -1485,7 +1485,7 @@ public :
   TTreeReaderValue<Bool_t> HLT_Ele27_WPTight_Gsf = {fReader_Data, "HLT_Ele27_WPTight_Gsf"};
  
   TTreeReaderValue<Bool_t> HLT_IsoMu27 = {fReader_2017, "HLT_IsoMu27"};
-  TTreeReaderValue<Bool_t>  HLT_Ele32_WPTight_Gsf = {fReader_2017, "HLT_Ele32_WPTight_Gsf"};
+  TTreeReaderValue<Bool_t> HLT_Ele32_WPTight_Gsf = {fReader_2017, "HLT_Ele32_WPTight_Gsf"};
   
  
 
@@ -1870,6 +1870,7 @@ public :
   struct Hists {
     //Histograms are declared here.
     TH1F *nevt;
+    TH1F *nevsel;
     TH1F *dispml_h[3][30];
     TH1F *flavor[3];
 
@@ -1942,9 +1943,9 @@ private:
   vector<Lepton> displacedLepton;
   vector<Lepton> recoJet;
   vector<Lepton> bJet;
-  vector<Lepton> myLep;
   vector<float> SV2D;
   vector<float> Delta2D;
+  vector<Lepton> myLep[3];
 
   ClassDef(disp_ml,0);
   

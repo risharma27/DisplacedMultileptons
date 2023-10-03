@@ -12,9 +12,9 @@
 using namespace std;
 
 //Including the header files
-#include "CustomFunctions.h"
-#include "ProduceGenCollection.h"
-#include "ProduceRecoCollection.h"
+#include "Setup/CustomFunctions.h"
+#include "Setup/ProduceGenCollection.h"
+#include "Setup/ProduceRecoCollection.h"
 
 void disp_ml::Begin(TTree * /*tree*/)
 {
@@ -107,8 +107,8 @@ Bool_t disp_ml::Process(Long64_t entry)
     fReader_Data.SetLocalEntry(entry);
   
   //Verbosity determines the number of processed events after which the root prompt is supposed to display a status update.
-  if(_verbosity==0 && nEvtTotal%100000==0)cout<<"Processed "<<nEvtTotal<<" event..."<<endl;      
-  else if(_verbosity>0 && nEvtTotal%100000==0)cout<<"Processed "<<nEvtTotal<<" event..."<<endl;
+  if(_verbosity==0 && nEvtTotal%10000000==0)cout<<"Processed "<<nEvtTotal<<" event..."<<endl;      
+  else if(_verbosity>0 && nEvtTotal%10000000==0)cout<<"Processed "<<nEvtTotal<<" event..."<<endl;
 
   nEvtTotal++;         //Total number of events containing everything (including the trash events).
   h.nevt->Fill(0);
@@ -334,9 +334,13 @@ Bool_t disp_ml::Process(Long64_t entry)
     //If the event does not pass the single muon trigger then check for the single electron trigger, if it does then keep the event.
     else if(!single_muon && single_electron) triggered_events=true;    
 
-    myLep.clear();
+    for(int i=0; i<3; i++){
+      myLep[i].clear();         //clearing myLep[evsel] for each evsel.
+    }
     
     if(triggered_events){
+
+      h.nevsel->Fill(0);
 
       //h.n_dispL->Fill(displacedlepton.size());
 	
@@ -344,30 +348,35 @@ Bool_t disp_ml::Process(Long64_t entry)
       bool _1l2d = false;
       bool _3d = false;
 
-      if((int)promptLepton.size()>1 && (int)displacedLepton.size()==1) _2l1d = true;
-      else if((int)promptLepton.size()>0 && (int)displacedLepton.size()==2) _1l2d = true;
-      else if((int)promptLepton.size()==0 && (int)displacedLepton.size()>2) _3d = true;
+      //an event can pass all three selections, and all the three analysis will be orthogonal
+
+      if((int)promptLepton.size()>1 && (int)displacedLepton.size()>0) _2l1d = true;
+      if((int)promptLepton.size()>0 && (int)displacedLepton.size()>1) _1l2d = true;
+      if((int)promptLepton.size()>0 && (int)displacedLepton.size()>2) _3d = true;
           
       int evsel = -1;
       if(_2l1d){
 	evsel=0;
-	myLep.push_back(promptLepton.at(0));
-	myLep.push_back(promptLepton.at(1));
-	myLep.push_back(displacedLepton.at(0));
+	h.nevsel->Fill(1);
+	myLep[evsel].push_back(promptLepton.at(0));
+	myLep[evsel].push_back(promptLepton.at(1));
+	myLep[evsel].push_back(displacedLepton.at(0));
       }
     
-      else if(_1l2d){
+      if(_1l2d){
 	evsel=1;
-	myLep.push_back(promptLepton.at(0));
-	myLep.push_back(displacedLepton.at(0));
-	myLep.push_back(displacedLepton.at(1));
+	h.nevsel->Fill(2);
+	myLep[evsel].push_back(promptLepton.at(0));
+	myLep[evsel].push_back(displacedLepton.at(0));
+	myLep[evsel].push_back(displacedLepton.at(1));
       }
     
-      else if(_3d){
+      if(_3d){
 	evsel=2;
-	myLep.push_back(displacedLepton.at(0));
-	myLep.push_back(displacedLepton.at(1));
-	myLep.push_back(displacedLepton.at(2));
+	h.nevsel->Fill(3);
+	myLep[evsel].push_back(displacedLepton.at(0));
+	myLep[evsel].push_back(displacedLepton.at(1));
+	myLep[evsel].push_back(displacedLepton.at(2));
       }
 
     
@@ -379,32 +388,32 @@ Bool_t disp_ml::Process(Long64_t entry)
 
 	//***************************************************** Flavor Classification *****************************************************************//
 
-	if(abs(myLep.at(0).id)==13){
-	  if(abs(myLep.at(1).id)==13 && abs(myLep.at(2).id)==13)                  h.flavor[evsel]->Fill(0);       //mumumu
-	  else if(abs(myLep.at(1).id)==13 && abs(myLep.at(2).id)==11)             h.flavor[evsel]->Fill(1);       //mumue
-	  else if(abs(myLep.at(1).id)==11 && abs(myLep.at(2).id)==13)             h.flavor[evsel]->Fill(2);       //muemu
-	  else if(abs(myLep.at(1).id)==11 && abs(myLep.at(2).id)==11)             h.flavor[evsel]->Fill(3);       //muee
+	if(abs(myLep[evsel].at(0).id)==13){
+	  if(abs(myLep[evsel].at(1).id)==13 && abs(myLep[evsel].at(2).id)==13)                  h.flavor[evsel]->Fill(0);       //mumumu
+	  else if(abs(myLep[evsel].at(1).id)==13 && abs(myLep[evsel].at(2).id)==11)             h.flavor[evsel]->Fill(1);       //mumue
+	  else if(abs(myLep[evsel].at(1).id)==11 && abs(myLep[evsel].at(2).id)==13)             h.flavor[evsel]->Fill(2);       //muemu
+	  else if(abs(myLep[evsel].at(1).id)==11 && abs(myLep[evsel].at(2).id)==11)             h.flavor[evsel]->Fill(3);       //muee
 	}	
 
-	else if(abs(myLep.at(0).id)==11){
-	  if(abs(myLep.at(1).id)==11 && abs(myLep.at(2).id)==11)                  h.flavor[evsel]->Fill(4);       //eee
-	  else if(abs(myLep.at(1).id)==13 && abs(myLep.at(2).id)==11)             h.flavor[evsel]->Fill(5);       //emue
-	  else if(abs(myLep.at(1).id)==11 && abs(myLep.at(2).id)==13)             h.flavor[evsel]->Fill(6);       //eemu
-	  else if(abs(myLep.at(1).id)==13 && abs(myLep.at(2).id)==13)             h.flavor[evsel]->Fill(7);       //emumu	
+	else if(abs(myLep[evsel].at(0).id)==11){
+	  if(abs(myLep[evsel].at(1).id)==11 && abs(myLep[evsel].at(2).id)==11)                  h.flavor[evsel]->Fill(4);       //eee
+	  else if(abs(myLep[evsel].at(1).id)==13 && abs(myLep[evsel].at(2).id)==11)             h.flavor[evsel]->Fill(5);       //emue
+	  else if(abs(myLep[evsel].at(1).id)==11 && abs(myLep[evsel].at(2).id)==13)             h.flavor[evsel]->Fill(6);       //eemu
+	  else if(abs(myLep[evsel].at(1).id)==13 && abs(myLep[evsel].at(2).id)==13)             h.flavor[evsel]->Fill(7);       //emumu	
 	}
 
 	//********************************************************************************************************************************************//
 
 	h.dispml_h[evsel][0]->Fill(metpt);
 	float sum_pt = 0.0;
-	for(int i=0; i<(int)myLep.size(); i++){
-	  sum_pt = sum_pt + myLep.at(i).v.Pt();
+	for(int i=0; i<(int)myLep[evsel].size(); i++){
+	  sum_pt = sum_pt + myLep[evsel].at(i).v.Pt();
 	}
 	h.dispml_h[evsel][1]->Fill(sum_pt);
-	float imass = ((myLep.at(0).v + myLep.at(1).v) + myLep.at(2).v).M();
+	float imass = ((myLep[evsel].at(0).v + myLep[evsel].at(1).v) + myLep[evsel].at(2).v).M();
 	h.dispml_h[evsel][2]->Fill(imass);
 	for(int j=3; j<6; j++){
-	  h.dispml_h[evsel][j]->Fill(myLep.at(j-3).v.Pt());
+	  h.dispml_h[evsel][j]->Fill(myLep[evsel].at(j-3).v.Pt());
 	}
 	float pt_ll[3], delR_ll[3], delPhi_ll[3], M_ll[3];
 	for(int i=0; i<3; i++){
@@ -414,18 +423,18 @@ Bool_t disp_ml::Process(Long64_t entry)
 	    else if(i==1 && j==2) index=1;
 	    else if(i == 0 && j == 2) index=2;
 	  
-	    pt_ll[index]=myLep.at(i).v.Pt()+myLep.at(j).v.Pt();
-	    delR_ll[index]=myLep.at(i).v.DeltaR(myLep.at(j).v);
-	    delPhi_ll[index]=delta_phi(myLep.at(i).v.Phi(), myLep.at(j).v.Phi());
-	    //delPhi_ll[index]=myLep.at(i).v.DeltaPhi(myLep.at(j).v);
-	    M_ll[index]=(myLep.at(i).v+myLep.at(j).v).M();
+	    pt_ll[index]=myLep[evsel].at(i).v.Pt()+myLep[evsel].at(j).v.Pt();
+	    delR_ll[index]=myLep[evsel].at(i).v.DeltaR(myLep[evsel].at(j).v);
+	    delPhi_ll[index]=delta_phi(myLep[evsel].at(i).v.Phi(), myLep[evsel].at(j).v.Phi());
+	    //delPhi_ll[index]=myLep[evsel].at(i).v.DeltaPhi(myLep[evsel].at(j).v);
+	    M_ll[index]=(myLep[evsel].at(i).v+myLep[evsel].at(j).v).M();
 	  }
 	}
 
 	float delphi_lmet[3],transvmass[3];
 	for(int k=0; k<3; k++){
-	  delphi_lmet[k] = delta_phi(metphi, myLep.at(k).v.Phi());
-	  transvmass[k] = transv_mass(myLep.at(k).v.Pt(), metpt, delphi_lmet[k]);
+	  delphi_lmet[k] = delta_phi(metphi, myLep[evsel].at(k).v.Phi());
+	  transvmass[k] = transv_mass(myLep[evsel].at(k).v.Pt(), metpt, delphi_lmet[k]);
 	}
 
 	int p=6;
@@ -448,7 +457,7 @@ Bool_t disp_ml::Process(Long64_t entry)
 
       
 
-	std::pair<vector<int>, vector<float>> result = dR_matching(myLep, recoJet);
+	std::pair<vector<int>, vector<float>> result = dR_matching(myLep[evsel], recoJet);
 	vector<int> myLep_matchto_recoJet = result.first;
 	vector<float> myLep_delRmin_recoJet = result.second;
 
@@ -489,6 +498,7 @@ void disp_ml::BookHistograms()
 {
 
   h.nevt = new TH1F("nEvents", "0-nEvtTotal, 1-nEvtGood, 2-nEvtTrigger, 3-nEvtPass",5,0,5);
+  h.nevsel = new TH1F("nEvSel", "1: 2l1d, 2: 1l2d, 3: 3d", 5,0,5);
   
   TString evsel_name[3] = {"2l1d_", "1l2d_", "3d_"};
   TString plotname[28] = {"met","pt_3l","imass_3l","pt0","pt1","pt2","pt_l0l1","delR_l0l1","delPhi_l0l1","delPhi_l0met","imass_l0l1","mt0","pt_l1l2","delR_l1l2","delPhi_l1l2","delPhi_l1met","imass_l1l2","mt1","pt_l2l0","delR_l2l0","delPhi_l2l0","delPhi_l2met","imass_l2l0","mt2","HT","dRmin_l0j","dRmin_l1j","dRmin_l2j"};
