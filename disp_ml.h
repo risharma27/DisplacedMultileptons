@@ -1871,7 +1871,7 @@ public :
     //Histograms are declared here.
     TH1F *nevt;
     TH1F *nevsel;
-    TH1F *dispml_h[3][30];
+    TH1F *dispml_h[3][43];
     TH1F *flavor[3];
 
     /*
@@ -1897,7 +1897,7 @@ public :
     int momid;
     int charge;
     int cutBased;
-    float dxy, dz, reliso03, reliso04;
+    float dxy, dz, ip3d, sip3d, reliso03, reliso04;
     //int genmatch;
     //int jetmatch;
   };
@@ -1905,6 +1905,7 @@ public :
   //Other user defined functions
   void Sortpt(vector<Lepton> vec);
   std::pair<vector<int>, vector<float>> dR_matching(vector<Lepton> vec1, vector<Lepton> vec2);
+  bool clean_from_array(Lepton target, vector<Lepton> array, float dRcut);
   vector<int> pt_binning_count(vector<Lepton> vec);
   
 protected:

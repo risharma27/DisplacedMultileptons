@@ -107,8 +107,8 @@ Bool_t disp_ml::Process(Long64_t entry)
     fReader_Data.SetLocalEntry(entry);
   
   //Verbosity determines the number of processed events after which the root prompt is supposed to display a status update.
-  if(_verbosity==0 && nEvtTotal%10000000==0)cout<<"Processed "<<nEvtTotal<<" event..."<<endl;      
-  else if(_verbosity>0 && nEvtTotal%10000000==0)cout<<"Processed "<<nEvtTotal<<" event..."<<endl;
+  if(_verbosity==0 && nEvtTotal%1000000==0)cout<<"Processed "<<nEvtTotal<<" event..."<<endl;      
+  else if(_verbosity>0 && nEvtTotal%1000000==0)cout<<"Processed "<<nEvtTotal<<" event..."<<endl;
 
   nEvtTotal++;         //Total number of events containing everything (including the trash events).
   h.nevt->Fill(0);
@@ -139,7 +139,9 @@ Bool_t disp_ml::Process(Long64_t entry)
       //Muons are preferrred over electrons.
       //For the electron dataset, pick up only those events which do not fire a Muon trigger.
       //Otherwise there will be overcounting.
-      triggerRes = muon_trigger || (!muon_trigger && electron_trigger);      
+      
+      triggerRes = muon_trigger || (!muon_trigger && electron_trigger);
+      //triggerRes = electron_trigger || (!electron_trigger && muon_trigger);
     }
 
 
@@ -334,6 +336,12 @@ Bool_t disp_ml::Process(Long64_t entry)
     //If the event does not pass the single muon trigger then check for the single electron trigger, if it does then keep the event.
     else if(!single_muon && single_electron) triggered_events=true;    
 
+    /*
+    if(single_electron) triggered_events=true;
+    else if(!single_electron && single_muon) triggered_events=true;
+    */
+
+      
     for(int i=0; i<3; i++){
       myLep[i].clear();         //clearing myLep[evsel] for each evsel.
     }
@@ -352,7 +360,7 @@ Bool_t disp_ml::Process(Long64_t entry)
 
       if((int)promptLepton.size()>1 && (int)displacedLepton.size()>0) _2l1d = true;
       if((int)promptLepton.size()>0 && (int)displacedLepton.size()>1) _1l2d = true;
-      if((int)promptLepton.size()>0 && (int)displacedLepton.size()>2) _3d = true;
+      if((int)promptLepton.size()>=0 && (int)displacedLepton.size()>2) _3d = true;
           
       int evsel = -1;
       if(_2l1d){
@@ -448,6 +456,7 @@ Bool_t disp_ml::Process(Long64_t entry)
 	  p=p+5;
 	}
 
+	
 	float jet_pt = 0.0;
 	for(int i=0; i<(int)recoJet.size(); i++){
 	  jet_pt = jet_pt + recoJet.at(i).v.Pt();	
@@ -472,8 +481,17 @@ Bool_t disp_ml::Process(Long64_t entry)
 	  }
 	}
 
-
-      
+	
+	int q=28;
+	for(int i=0; i<(int)myLep[evsel].size(); i++){
+	  h.dispml_h[evsel][i+q]->Fill(myLep[evsel].at(i).dxy);
+	  h.dispml_h[evsel][i+q+1]->Fill(myLep[evsel].at(i).dz);
+	  h.dispml_h[evsel][i+q+2]->Fill(myLep[evsel].at(i).ip3d);
+	  h.dispml_h[evsel][i+q+3]->Fill(myLep[evsel].at(i).sip3d);
+	  h.dispml_h[evsel][i+q+4]->Fill(myLep[evsel].at(i).reliso03);
+	  q=q+4;
+	}
+	
       
       }//evsel events
 
@@ -501,15 +519,16 @@ void disp_ml::BookHistograms()
   h.nevsel = new TH1F("nEvSel", "1: 2l1d, 2: 1l2d, 3: 3d", 5,0,5);
   
   TString evsel_name[3] = {"2l1d_", "1l2d_", "3d_"};
-  TString plotname[28] = {"met","pt_3l","imass_3l","pt0","pt1","pt2","pt_l0l1","delR_l0l1","delPhi_l0l1","delPhi_l0met","imass_l0l1","mt0","pt_l1l2","delR_l1l2","delPhi_l1l2","delPhi_l1met","imass_l1l2","mt1","pt_l2l0","delR_l2l0","delPhi_l2l0","delPhi_l2met","imass_l2l0","mt2","HT","dRmin_l0j","dRmin_l1j","dRmin_l2j"};
-  int nbins[28] = {200,500,500,200,200,200,500,20,32,32,500,200,500,20,32,32,500,200,500,20,32,32,500,200,200,20,20,20};
-  float blo[28] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-  float bhi[28] = {200,500,500,200,200,200,500,20,3.2,3.2,500,200,500,20,3.2,3.2,500,200,500,20,3.2,3.2,500,200,200,20,20,20};
+  TString plotname[43] = {"met","pt_3l","imass_3l","pt0","pt1","pt2","pt_l0l1","delR_l0l1","delPhi_l0l1","delPhi_l0met","imass_l0l1","mt0","pt_l1l2","delR_l1l2","delPhi_l1l2","delPhi_l1met","imass_l1l2","mt1","pt_l2l0","delR_l2l0","delPhi_l2l0","delPhi_l2met","imass_l2l0","mt2","HT","dRmin_l0j","dRmin_l1j","dRmin_l2j","l0_dxy","l0_dz","l0_ip3d","l0_sip3d","l0_reliso03","l1_dxy","l1_dz","l1_ip3d","l1_sip3d","l1_reliso03","l2_dxy","l2_dz","l2_ip3d","l2_sip3d","l2_reliso03"};
+  int nbins[43] = {200,500,500,200,200,200,500,100,32,32,500,200,500,100,32,32,500,200,500,100,32,32,500,200,200,100,100,100,2000,2000,200,200,15,2000,2000,200,200,15,2000,2000,200,200,15};
+  float blo[43] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-10,-10,0,0,0,-10,-10,0,0,0,-10,-10,0,0,0};
+  float bhi[43] = {200,500,500,200,200,200,500,10,3.2,3.2,500,200,500,10,3.2,3.2,500,200,500,10,3.2,3.2,500,200,200,100,100,100,10,10,10,10,0.15,10,10,10,10,0.15,10,10,10,10,0.15};
   for(int ievsel=0; ievsel<3; ievsel++){
     TString name1 = evsel_name[ievsel] + "flavor";
     h.flavor[ievsel] = new TH1F(name1,"0:#mu#mu#mu, 1:#mu#mue, 2:#mue#mu, 3:#muee, 4:eee, 5:e#mue, 6:ee#mu, 7:e#mu#mu",10,0,10);
-    for(int iplot=0; iplot<28; iplot++){      
+    for(int iplot=0; iplot<43; iplot++){      
       TString name2 = evsel_name[ievsel] + plotname[iplot];
+      //cout << "Creating histogram " << name2 << " with nbins = " << nbins[iplot] << ", blo = " << blo[iplot] << ", bhi = " << bhi[iplot] << endl;
       h.dispml_h[ievsel][iplot] = new TH1F(name2,name2,nbins[iplot],blo[iplot],bhi[iplot]);
      
       //h.bb_h[icr][iplot]->Sumw2();

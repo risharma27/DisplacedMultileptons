@@ -59,6 +59,18 @@ float disp_ml::transv_mass(float E_lep, float MET, float dphi)
   return mT;
 }
 
+bool disp_ml::clean_from_array(Lepton target, vector<Lepton> array, float dRcut){
+  bool result = true; //cleaned
+  float dRmin = 1000;
+  for(int i=0; i<(int)array.size(); i++){
+    float dR = target.v.DeltaR(array.at(i).v);
+    if(dR < dRmin) dRmin = dR;
+  }
+  //If the minimum dR of any particle from the array with the target particle is less than the dRcut,
+  //then the target is not isolated.
+  if(dRmin < dRcut) result = false;
+  return result;
+}
 
 vector<int> disp_ml::pt_binning_count(vector<Lepton> vec)
 {
@@ -77,4 +89,3 @@ vector<int> disp_ml::pt_binning_count(vector<Lepton> vec)
   
   return pt_binned_count;
 }
-
