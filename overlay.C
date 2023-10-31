@@ -28,8 +28,8 @@ void overlay()
 
   //First declare the file names (just strings)
   
-  TString SEfile = "cluster_hst_output/Data2016_SingleElectron.root";
-  TString SMfile = "cluster_hst_output/Data2016_SingleMuon.root";
+  TString dyfile = "cluster_hst_output/DYJetsToLL_oct19.root";
+  TString datafile = "cluster_hst_output/2016Data_oct19.root";
 
   //Declare other constants, strings that you might need here.
 
@@ -39,8 +39,8 @@ void overlay()
   //TString plotname1 = "mass_mumu_2";
   //TString plotname2 = "mass_mumu_1"; //(here we are picking the same plot from other file)
   
-  TString plotname1 = "2l1d_imass_l0l1";
-  TString plotname2 = "2l1d_imass_3l"; 
+  TString plotname1 = "zcr_invmass";
+  TString plotname2 = "zcr_met"; 
 
 
   //Also give fancy name for the axis titles
@@ -48,31 +48,31 @@ void overlay()
                                                // in strings. For example
                                                // "#mu^{1} p_{T}"
                                                
-  TString xtitle = "imass [GeV]";                                         
+  TString xtitle = "M_{ll} [GeV]";                                         
   TString ytitle = "Events"; // Or "Entries"
 
   //Now let us open the files
-  TFile *fileSM = new TFile(SMfile);
-  TFile *fileSE = new TFile(SEfile);
+  TFile *filedy = new TFile(dyfile);
+  TFile *filedata = new TFile(datafile);
 
   //Now open the respective histograms from the files
-  TH1F *hst1 = (TH1F*)fileSM->Get(plotname1);
-  TH1F *hst2 = (TH1F*)fileSM->Get(plotname2);
+  TH1F *hst1 = (TH1F*)filedy->Get(plotname1);
+  TH1F *hst2 = (TH1F*)filedata->Get(plotname1);
 
 
   //Decorate the histograms using function decorate 
   // See function definition below for syntax
   // See https://root.cern.ch/root/html/TColor.html for color names.
-  decorate(hst1,xtitle,ytitle,"",kBlue,2,kBlue-7,20,1);
-  decorate(hst2,xtitle,ytitle,"",kRed,2,kGreen+2,21,0);
+  decorate(hst1,xtitle,ytitle,"",kBlue,2,kBlue-9,20,1);
+  decorate(hst2,xtitle,ytitle,"",kRed,2,kBlack,21,0);
 
 
   //Now let us set the last bin as the overflow bin
-  /*
-    int nbins = hdy->GetNbinsX();
-    hdy->SetBinContent(nbins,hdy->GetBinContent(nbins+1)+hdy->GetBinContent(nbins));
-    htt->SetBinContent(nbins,htt->GetBinContent(nbins+1)+htt->GetBinContent(nbins));
-  */
+  
+    int nbins = hst1->GetNbinsX();
+    hst1->SetBinContent(nbins,hst1->GetBinContent(nbins+1)+hst1->GetBinContent(nbins));
+    hst2->SetBinContent(nbins,hst2->GetBinContent(nbins+1)+hst2->GetBinContent(nbins));
+  
 
   // Now rebin the histograms if needed
   // Group nrebins bins together
@@ -87,31 +87,48 @@ void overlay()
      Conventionally, when comparing shapes, we normalize to 1, so let us 
      try that here.
   */
-  hst1->Scale(1.0/hst1->Integral());
-  hst2->Scale(1.0/hst2->Integral());
 
+  //hst1->Scale(1.0/hst1->Integral());
+  //hst2->Scale(1.0/hst2->Integral());
+
+  
+  float dtlumi=36.3*1000; //pb
+  float dylumi=70114140/699.0; //pb
+
+  float dysf = dtlumi/dylumi;
+  
+  hst1->Scale(dysf);
+
+  float sf = hst2->Integral() / hst1->Integral();
+  hst1->Scale(sf);
+  cout<<"DY Scale Factor: "<<sf<<endl;
+  
   //Now let us declare a canvas 
   TCanvas *c1 = new TCanvas("c1","c1",800,600);
 
   // Now we define a legend
   TLegend *lg1 = new TLegend(0.55,0.50,0.85,0.75,NULL,"NDC");
   decorate(lg1,0.05,""); // Decorated the legend using function below.
-  lg1->AddEntry(hst1,"2l1d_imass_l0l1","l"); // Added the two entries for the two histograms
-  lg1->AddEntry(hst2,"2l1d_imass_3l","l");           // we shall be drawing.
+  lg1->AddEntry(hst1,"DY","l"); // Added the two entries for the two histograms
+  lg1->AddEntry(hst2,"Data","ep");           // we shall be drawing.
 
+  //c1->SetLogy();
+  
   //We set the stat box for the first one to be invisible first
   hst1->SetStats(0);
 
   // Now to draw the histograms and the legend
   hst1->Draw("hist");            
-  hst2->Draw("hist same");
+  hst2->Draw("ep same");
   lg1->Draw();
 
-  /* To draw with stat boxes for each histogram
+/*  
+To draw with stat boxes for each histogram
      -- Dont use SetStats(0)
      -- Then draw them, first one with option Draw(), next ones with option Draw("sames")
      -- The s at the end is for stats box
-  */
+ */
+
 }
 
 /*
@@ -119,6 +136,8 @@ This function decorates the histogram, by setting the titles of the X and Y axes
 by setting the line and marker colors, the marker style, and by deciding whether
 to fill in the histogram with a color or not.
  */
+
+
 void decorate(TH1*h,const char* xtitle, const char* ytitle, const char* title,
 	      int linecolor, int linewidth, int markercolor, int markerstyle, int tofill) {
 
@@ -134,6 +153,7 @@ void decorate(TH1*h,const char* xtitle, const char* ytitle, const char* title,
   h->SetMarkerSize(1.0);
   h->SetTitle(title);
 }
+ 
 
 /*
 This function decorates the legend, by setting the textsize, and filling in the

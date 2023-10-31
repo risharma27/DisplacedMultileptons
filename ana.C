@@ -60,7 +60,17 @@ void ana(int sample=0){
     m_selec.SetData(1); //MC=0, data=1
     m_selec.SetYear(2016);
   }
-   
+
+  if(sample==4){
+    //Add one file to chain. This is the input file.
+    chain->Add("inputs/WGToLNuG/*");
+    //Set Names of outputfiles
+    hstfilename = "hst_output/hst_WGToLNuG_01J.root";
+    sumfilename = "sum_output/WGToLNuG_01J.txt";
+    //Set some options
+    m_selec.SetData(0); //MC=0, data=1
+    m_selec.SetYear(2016);
+  }
    
   std::cout<<"Output files are "<<hstfilename<<" and "<<sumfilename<<std::endl;
   // Set some more options.. set the output file names.
