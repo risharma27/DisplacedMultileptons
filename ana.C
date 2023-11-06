@@ -71,6 +71,17 @@ void ana(int sample=0){
     m_selec.SetData(0); //MC=0, data=1
     m_selec.SetYear(2016);
   }
+
+   if(sample==5){
+    //Add one file to chain. This is the input file.
+    chain->Add("inputs/NanoPost_QCD_Pt-1000_1.root");
+    //Set Names of outputfiles
+    hstfilename = "hst_output/hst_QCD_MuEnriched.root";
+    sumfilename = "sum_output/sum_QCD_MuEnriched.txt";
+    //Set some options
+    m_selec.SetData(0); //MC=0, data=1
+    m_selec.SetYear(2016);
+  }
    
   std::cout<<"Output files are "<<hstfilename<<" and "<<sumfilename<<std::endl;
   // Set some more options.. set the output file names.

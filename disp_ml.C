@@ -454,122 +454,134 @@ Bool_t disp_ml::Process(Long64_t entry)
 
 	//********************************************************************************************************************************************//
 
-	h.dispml_h[evsel][0]->Fill(metpt, evtwt);
-	float sum_pt = 0.0;
-	for(int i=0; i<(int)myLep[evsel].size(); i++){
-	  sum_pt = sum_pt + myLep[evsel].at(i).v.Pt();
-	}
-	h.dispml_h[evsel][1]->Fill(sum_pt, evtwt);
-	float imass = ((myLep[evsel].at(0).v + myLep[evsel].at(1).v) + myLep[evsel].at(2).v).M();
-	h.dispml_h[evsel][2]->Fill(imass, evtwt);
-	for(int j=3; j<6; j++){
-	  h.dispml_h[evsel][j]->Fill(myLep[evsel].at(j-3).v.Pt(), evtwt);
-	}
-	float pt_ll[3], delR_ll[3], delPhi_ll[3], M_ll[3];
-	for(int i=0; i<3; i++){
-	  for(int j=i+1; j<3; j++){
-	    int index = -1;
-	    if(i==0 && j==1) index=0;
-	    else if(i==1 && j==2) index=1;
-	    else if(i == 0 && j == 2) index=2;
+	float invmassl0l1 = (myLep[evsel].at(0).v+myLep[evsel].at(1).v).M();
+	
+	if((evsel==0 && invmassl0l1>12) || evsel==1 || evsel==2){
+	  h.dispml_h[evsel][0]->Fill(metpt, evtwt);
+	  float sum_pt = 0.0;
+	  for(int i=0; i<(int)myLep[evsel].size(); i++){
+	    sum_pt = sum_pt + myLep[evsel].at(i).v.Pt();
+	  }
+	  h.dispml_h[evsel][1]->Fill(sum_pt, evtwt);
+	  float imass = ((myLep[evsel].at(0).v + myLep[evsel].at(1).v) + myLep[evsel].at(2).v).M();
+	  h.dispml_h[evsel][2]->Fill(imass, evtwt);
+	  for(int j=3; j<6; j++){
+	    h.dispml_h[evsel][j]->Fill(myLep[evsel].at(j-3).v.Pt(), evtwt);
+	  }
+	  float pt_ll[3], delR_ll[3], delPhi_ll[3], M_ll[3];
+	  for(int i=0; i<3; i++){
+	    for(int j=i+1; j<3; j++){
+	      int index = -1;
+	      if(i==0 && j==1) index=0;
+	      else if(i==1 && j==2) index=1;
+	      else if(i == 0 && j == 2) index=2;
 	  
-	    pt_ll[index]=myLep[evsel].at(i).v.Pt()+myLep[evsel].at(j).v.Pt();
-	    delR_ll[index]=myLep[evsel].at(i).v.DeltaR(myLep[evsel].at(j).v);
-	    delPhi_ll[index]=delta_phi(myLep[evsel].at(i).v.Phi(), myLep[evsel].at(j).v.Phi());
-	    //delPhi_ll[index]=myLep[evsel].at(i).v.DeltaPhi(myLep[evsel].at(j).v);
-	    M_ll[index]=(myLep[evsel].at(i).v+myLep[evsel].at(j).v).M();
+	      pt_ll[index]=myLep[evsel].at(i).v.Pt()+myLep[evsel].at(j).v.Pt();
+	      delR_ll[index]=myLep[evsel].at(i).v.DeltaR(myLep[evsel].at(j).v);
+	      delPhi_ll[index]=delta_phi(myLep[evsel].at(i).v.Phi(), myLep[evsel].at(j).v.Phi());
+	      //delPhi_ll[index]=myLep[evsel].at(i).v.DeltaPhi(myLep[evsel].at(j).v);
+	      M_ll[index]=(myLep[evsel].at(i).v+myLep[evsel].at(j).v).M();
+	    }
 	  }
-	}
 
-	float delphi_lmet[3],transvmass[3];
-	for(int k=0; k<3; k++){
-	  delphi_lmet[k] = delta_phi(metphi, myLep[evsel].at(k).v.Phi());
-	  transvmass[k] = transv_mass(myLep[evsel].at(k).v.Pt(), metpt, delphi_lmet[k]);
-	}
+	  float delphi_lmet[3],transvmass[3];
+	  for(int k=0; k<3; k++){
+	    delphi_lmet[k] = delta_phi(metphi, myLep[evsel].at(k).v.Phi());
+	    transvmass[k] = transv_mass(myLep[evsel].at(k).v.Pt(), metpt, delphi_lmet[k]);
+	  }
 
-	int p=6;
-	for(int index=0; index<3; index++){
-	  h.dispml_h[evsel][index+p]->Fill(pt_ll[index], evtwt);
-	  h.dispml_h[evsel][index+p+1]->Fill(delR_ll[index], evtwt);
-	  h.dispml_h[evsel][index+p+2]->Fill(delPhi_ll[index], evtwt);
-	  h.dispml_h[evsel][index+p+3]->Fill(delphi_lmet[index], evtwt);
-	  h.dispml_h[evsel][index+p+4]->Fill(M_ll[index], evtwt);
-	  h.dispml_h[evsel][index+p+5]->Fill(transvmass[index], evtwt);
-	  p=p+5;
-	}
+	  int p=6;
+	  for(int index=0; index<3; index++){
+	    h.dispml_h[evsel][index+p]->Fill(pt_ll[index], evtwt);
+	    h.dispml_h[evsel][index+p+1]->Fill(delR_ll[index], evtwt);
+	    h.dispml_h[evsel][index+p+2]->Fill(delPhi_ll[index], evtwt);
+	    h.dispml_h[evsel][index+p+3]->Fill(delphi_lmet[index], evtwt);
+	    h.dispml_h[evsel][index+p+4]->Fill(M_ll[index], evtwt);
+	    h.dispml_h[evsel][index+p+5]->Fill(transvmass[index], evtwt);
+	    p=p+5;
+	  }
 
 	
-	float jet_pt = 0.0;
-	for(int i=0; i<(int)recoJet.size(); i++){
-	  jet_pt = jet_pt + recoJet.at(i).v.Pt();	
-	}
+	  float jet_pt = 0.0;
+	  for(int i=0; i<(int)recoJet.size(); i++){
+	    jet_pt = jet_pt + recoJet.at(i).v.Pt();	
+	  }
 
-	h.dispml_h[evsel][24]->Fill(jet_pt, evtwt);
-	h.dispml_h[evsel][25]->Fill((int)recoJet.size(), evtwt);
+	  h.dispml_h[evsel][24]->Fill(jet_pt, evtwt);
+	  h.dispml_h[evsel][25]->Fill((int)recoJet.size(), evtwt);
       
-	std::pair<vector<int>, vector<float>> result = dR_matching(myLep[evsel], recoJet);
-	vector<int> myLep_matchto_recoJet = result.first;
-	vector<float> myLep_delRmin_recoJet = result.second;
+	  std::pair<vector<int>, vector<float>> result = dR_matching(myLep[evsel], recoJet);
+	  vector<int> myLep_matchto_recoJet = result.first;
+	  vector<float> myLep_delRmin_recoJet = result.second;
 
-	for(int i=0; i<(int)myLep_matchto_recoJet.size(); i++){
-	  int matchind=myLep_matchto_recoJet.at(i);
-	  float matchdR=myLep_delRmin_recoJet.at(i);
-	  if(matchind>-1){
-	    h.dispml_h[evsel][i+26]->Fill(matchdR, evtwt);
+	  for(int i=0; i<(int)myLep_matchto_recoJet.size(); i++){
+	    int matchind=myLep_matchto_recoJet.at(i);
+	    float matchdR=myLep_delRmin_recoJet.at(i);
+	    if(matchind>-1){
+	      h.dispml_h[evsel][i+26]->Fill(matchdR, evtwt);
+	    }
+	    else{
+	      h.dispml_h[evsel][i+26]->Fill(99, evtwt);
+	    }
 	  }
-	  else{
-	    h.dispml_h[evsel][i+26]->Fill(99, evtwt);
-	  }
-	}
 	
-	int q=29;
-	for(int i=0; i<(int)myLep[evsel].size(); i++){
-	  h.dispml_h[evsel][i+q]->Fill(myLep[evsel].at(i).dxy, evtwt);
-	  h.dispml_h[evsel][i+q+1]->Fill(myLep[evsel].at(i).dz, evtwt);
-	  h.dispml_h[evsel][i+q+2]->Fill(myLep[evsel].at(i).ip3d, evtwt);
-	  h.dispml_h[evsel][i+q+3]->Fill(myLep[evsel].at(i).sip3d, evtwt);
-	  h.dispml_h[evsel][i+q+4]->Fill(myLep[evsel].at(i).reliso03, evtwt);
-	  q=q+4;
-	}
+	  int q=29;
+	  for(int i=0; i<(int)myLep[evsel].size(); i++){
+	    h.dispml_h[evsel][i+q]->Fill(myLep[evsel].at(i).dxy, evtwt);
+	    h.dispml_h[evsel][i+q+1]->Fill(myLep[evsel].at(i).dz, evtwt);
+	    h.dispml_h[evsel][i+q+2]->Fill(myLep[evsel].at(i).ip3d, evtwt);
+	    h.dispml_h[evsel][i+q+3]->Fill(myLep[evsel].at(i).sip3d, evtwt);
+	    h.dispml_h[evsel][i+q+4]->Fill(myLep[evsel].at(i).reliso03, evtwt);
+	    q=q+4;
+	  }
 
+	  h.dispml_h[evsel][44]->Fill((int)bJet.size(), evtwt);
+	  
+	}//if((evsel==0 && invmassl0l1>12) || evsel==1 || evsel==2)
+
+	
 
 	//******************************* 2l1d analysis *******************************//
-
 	
-	if(evsel==0 && abs(myLep[evsel].at(2).id)==11){	
+	
+	if(evsel==0 && invmassl0l1>12 && abs(myLep[evsel].at(2).id)==11){	
 	  h._2l1d[0]->Fill((myLep[0].at(0).v+myLep[0].at(1).v+myLep[0].at(2).v).M());
 	  metpt = *MET_pt;
 	  h._2l1d[1]->Fill(metpt);
 	  h._2l1d[2]->Fill(myLep[0].at(2).dxy);
+	  h._2l1d[3]->Fill(myLep[0].at(2).ip3d);
+	  h._2l1d[4]->Fill(myLep[0].at(2).sip3d);
 	  float delphi_l2met = delta_phi(metphi, myLep[0].at(2).v.Phi());
-	  h._2l1d[3]->Fill(transv_mass(myLep[0].at(2).v.Pt(), metpt, delphi_l2met));
-	  h._2l1d[4]->Fill(myLep[0].at(0).v.DeltaPhi(myLep[0].at(1).v));
-	  h._2l1d[5]->Fill(myLep[0].at(0).v.DeltaR(myLep[0].at(1).v));
-	  h._2l1d[6]->Fill((myLep[0].at(0).v+myLep[0].at(1).v).M());
-	  h._2l1d[7]->Fill(myLep[0].at(1).v.DeltaPhi(myLep[0].at(2).v));
-	  h._2l1d[8]->Fill(myLep[0].at(1).v.DeltaR(myLep[0].at(2).v));
-	  h._2l1d[9]->Fill((myLep[0].at(1).v+myLep[0].at(2).v).M());
-	  h._2l1d[10]->Fill(myLep[0].at(2).v.DeltaPhi(myLep[0].at(0).v));
-	  h._2l1d[11]->Fill(myLep[0].at(2).v.DeltaR(myLep[0].at(0).v));
-	  h._2l1d[12]->Fill((myLep[0].at(2).v+myLep[0].at(0).v).M());
+	  h._2l1d[5]->Fill(transv_mass(myLep[0].at(2).v.Pt(), metpt, delphi_l2met));
+	  h._2l1d[6]->Fill(myLep[0].at(0).v.DeltaPhi(myLep[0].at(1).v));
+	  h._2l1d[7]->Fill(myLep[0].at(0).v.DeltaR(myLep[0].at(1).v));
+	  h._2l1d[8]->Fill((myLep[0].at(0).v+myLep[0].at(1).v).M());
+	  h._2l1d[9]->Fill(myLep[0].at(1).v.DeltaPhi(myLep[0].at(2).v));
+	  h._2l1d[10]->Fill(myLep[0].at(1).v.DeltaR(myLep[0].at(2).v));
+	  h._2l1d[11]->Fill((myLep[0].at(1).v+myLep[0].at(2).v).M());
+	  h._2l1d[12]->Fill(myLep[0].at(2).v.DeltaPhi(myLep[0].at(0).v));
+	  h._2l1d[13]->Fill(myLep[0].at(2).v.DeltaR(myLep[0].at(0).v));
+	  h._2l1d[14]->Fill((myLep[0].at(2).v+myLep[0].at(0).v).M());
 				
 	}
 
-	else if(evsel==0 && abs(myLep[evsel].at(2).id)==13){
-	  h._2l1d[13]->Fill((myLep[0].at(0).v+myLep[0].at(1).v+myLep[0].at(2).v).M());
-	  h._2l1d[14]->Fill(metpt);
-	  h._2l1d[15]->Fill(myLep[0].at(2).dxy);
+	else if(evsel==0 && invmassl0l1>12 && abs(myLep[evsel].at(2).id)==13){
+	  h._2l1d[15]->Fill((myLep[0].at(0).v+myLep[0].at(1).v+myLep[0].at(2).v).M());
+	  h._2l1d[16]->Fill(metpt);
+	  h._2l1d[17]->Fill(myLep[0].at(2).dxy);
+	  h._2l1d[18]->Fill(myLep[0].at(2).ip3d);
+	  h._2l1d[19]->Fill(myLep[0].at(2).sip3d);
 	  float delphi_l2met = delta_phi(metphi, myLep[0].at(2).v.Phi());
-	  h._2l1d[16]->Fill(transv_mass(myLep[0].at(2).v.Pt(), metpt, delphi_l2met));
-	  h._2l1d[17]->Fill(myLep[0].at(0).v.DeltaPhi(myLep[0].at(1).v));
-	  h._2l1d[18]->Fill(myLep[0].at(0).v.DeltaR(myLep[0].at(1).v));
-	  h._2l1d[19]->Fill((myLep[0].at(0).v+myLep[0].at(1).v).M());
-	  h._2l1d[20]->Fill(myLep[0].at(1).v.DeltaPhi(myLep[0].at(2).v));
-	  h._2l1d[21]->Fill(myLep[0].at(1).v.DeltaR(myLep[0].at(2).v));
-	  h._2l1d[22]->Fill((myLep[0].at(1).v+myLep[0].at(2).v).M());
-	  h._2l1d[23]->Fill(myLep[0].at(2).v.DeltaPhi(myLep[0].at(0).v));
-	  h._2l1d[24]->Fill(myLep[0].at(2).v.DeltaR(myLep[0].at(0).v));
-	  h._2l1d[25]->Fill((myLep[0].at(2).v+myLep[0].at(0).v).M());
+	  h._2l1d[20]->Fill(transv_mass(myLep[0].at(2).v.Pt(), metpt, delphi_l2met));
+	  h._2l1d[21]->Fill(myLep[0].at(0).v.DeltaPhi(myLep[0].at(1).v));
+	  h._2l1d[22]->Fill(myLep[0].at(0).v.DeltaR(myLep[0].at(1).v));
+	  h._2l1d[23]->Fill((myLep[0].at(0).v+myLep[0].at(1).v).M());
+	  h._2l1d[24]->Fill(myLep[0].at(1).v.DeltaPhi(myLep[0].at(2).v));
+	  h._2l1d[25]->Fill(myLep[0].at(1).v.DeltaR(myLep[0].at(2).v));
+	  h._2l1d[26]->Fill((myLep[0].at(1).v+myLep[0].at(2).v).M());
+	  h._2l1d[27]->Fill(myLep[0].at(2).v.DeltaPhi(myLep[0].at(0).v));
+	  h._2l1d[28]->Fill(myLep[0].at(2).v.DeltaR(myLep[0].at(0).v));
+	  h._2l1d[29]->Fill((myLep[0].at(2).v+myLep[0].at(0).v).M());
 	}
 
 	
@@ -603,14 +615,14 @@ void disp_ml::BookHistograms()
   h.zcr[1] = new TH1F("zcr_met", "zcr_met", 200, 0, 200);
   h.nevsel = new TH1F("nEvSel", "1: 2l1d, 2: 1l2d, 3: 3d", 5,0,5);
   TString evsel_name[3] = {"2l1d_", "1l2d_", "3d_"};
-  TString plotname[44] = {"met","pt_3l","imass_3l","pt0","pt1","pt2","pt_l0l1","delR_l0l1","delPhi_l0l1","delPhi_l0met","imass_l0l1","mt0","pt_l1l2","delR_l1l2","delPhi_l1l2","delPhi_l1met","imass_l1l2","mt1","pt_l2l0","delR_l2l0","delPhi_l2l0","delPhi_l2met","imass_l2l0","mt2","HT","njet","dRmin_l0j","dRmin_l1j","dRmin_l2j","l0_dxy","l0_dz","l0_ip3d","l0_sip3d","l0_reliso03","l1_dxy","l1_dz","l1_ip3d","l1_sip3d","l1_reliso03","l2_dxy","l2_dz","l2_ip3d","l2_sip3d","l2_reliso03"};
-  int nbins[44] = {200,500,500,200,200,200,500,100,32,32,500,200,500,100,32,32,500,200,500,100,32,32,500,200,200,10,100,100,100,2000,2000,200,500,20,2000,2000,200,500,20,2000,2000,200,1000,20};
-  float blo[44] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-10,-10,0,0,0,-10,-10,0,0,0,-10,-10,0,0,0};
-  float bhi[44] = {200,500,500,200,200,200,500,10,3.2,3.2,500,200,500,10,3.2,3.2,500,200,500,10,3.2,3.2,500,200,200,10,100,100,100,10,10,10,50,0.20,10,10,10,50,0.20,10,10,10,100,0.20};
+  TString plotname[45] = {"met","pt_3l","imass_3l","pt0","pt1","pt2","pt_l0l1","delR_l0l1","delPhi_l0l1","delPhi_l0met","imass_l0l1","mt0","pt_l1l2","delR_l1l2","delPhi_l1l2","delPhi_l1met","imass_l1l2","mt1","pt_l2l0","delR_l2l0","delPhi_l2l0","delPhi_l2met","imass_l2l0","mt2","HT","njet","dRmin_l0j","dRmin_l1j","dRmin_l2j","l0_dxy","l0_dz","l0_ip3d","l0_sip3d","l0_reliso03","l1_dxy","l1_dz","l1_ip3d","l1_sip3d","l1_reliso03","l2_dxy","l2_dz","l2_ip3d","l2_sip3d","l2_reliso03","bjets"};
+  int nbins[45] = {200,500,500,200,200,200,500,100,32,32,500,200,500,100,32,32,500,200,500,100,32,32,500,200,200,10,100,100,100,2000,2000,200,500,150,2000,2000,200,500,150,2000,2000,200,1000,150,20};
+  float blo[45] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-10,-10,0,0,0,-10,-10,0,0,0,-10,-10,0,0,0,0};
+  float bhi[45] = {200,500,500,200,200,200,500,10,3.2,3.2,500,200,500,10,3.2,3.2,500,200,500,10,3.2,3.2,500,200,200,10,100,100,100,10,10,10,50,15.0,10,10,10,50,15.0,10,10,10,100,15.0,20};
   for(int ievsel=0; ievsel<3; ievsel++){
     TString name1 = evsel_name[ievsel] + "flavor";
     h.flavor[ievsel] = new TH1F(name1,"0:#mu#mu#mu, 1:#mu#mue, 2:#mue#mu, 3:#muee, 4:eee, 5:e#mue, 6:ee#mu, 7:e#mu#mu",10,0,10);
-    for(int iplot=0; iplot<43; iplot++){      
+    for(int iplot=0; iplot<45; iplot++){      
       TString name2 = evsel_name[ievsel] + plotname[iplot];
       //cout << "Creating histogram " << name2 << " with nbins = " << nbins[iplot] << ", blo = " << blo[iplot] << ", bhi = " << bhi[iplot] << endl;
       h.dispml_h[ievsel][iplot] = new TH1F(name2,name2,nbins[iplot],blo[iplot],bhi[iplot]);
@@ -620,18 +632,18 @@ void disp_ml::BookHistograms()
     }
   }
 
-  int n_bins[13] = {500,200,100,200,64,20,500,64,20,500,64,20,500};
-  float b_lo[13] = {0,0,-50,0,-3.2,0,0,-3.2,0,0,-3.2,0,0};
-  float b_hi[13] = {500,200,50,200,3.2,10,500,3.2,10,500,3.2,10,500};
+  int n_bins[15] = {500,200,200,100,200,200,64,20,500,64,20,500,64,20,500};
+  float b_lo[15] = {0,0,-10.0,0.0,0.0,0.0,-3.2,0,0,-3.2,0,0,-3.2,0,0};
+  float b_hi[15] = {500,200,10.0,10.0,200.0,200,3.2,10,500,3.2,10,500,3.2,10,500};
   TString flav_type[2] = {"e", "mu"};
-  TString plotnames[13] = {"M_3l", "met", "l2_dxy", "mt2", "dphi_l0l1", "dR_l0l1", "M_l0l1", "dphi_l1l2", "dR_l1l2", "M_l1l2", "dphi_l2l0", "dR_l2l0", "M_l2l0"};
+  TString plotnames[15] = {"M_3l", "met", "l2_dxy", "l2_ip3d", "l2_sip3d", "mt2", "dphi_l0l1", "dR_l0l1", "M_l0l1", "dphi_l1l2", "dR_l1l2", "M_l1l2", "dphi_l2l0", "dR_l2l0", "M_l2l0"};
   int p=0;
   for(int flav=0; flav<2; flav++){
-    for(int plot=0; plot<13; plot++){
+    for(int plot=0; plot<15; plot++){
       TString name = "2l1d_" + flav_type[flav] + "_" + plotnames[plot];
       h._2l1d[plot+p] = new TH1F(name,name,n_bins[plot],b_lo[plot],b_hi[plot]);
     }
-    p=13;
+    p=15;
   }
 
  

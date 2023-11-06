@@ -2,8 +2,6 @@
 
 void disp_ml::GenLeptonArray(){
 
-  //Muons
-
   for(unsigned int i=0; i<(*nGenPart); i++){
     Lepton temp;
     temp.status = GenPart_status[i];
