@@ -1756,6 +1756,8 @@ public :
   TTreeReaderValue<UInt_t>  nPSWeight =                  {fReader_MC, "nPSWeight"};
   TTreeReaderArray<Float_t> PSWeight =                   {fReader_MC, "PSWeight"};
 
+  
+  /*
   //LHE (read using fReader_MC)
   TTreeReaderValue<Float_t> LHE_HT =             {fReader_MC, "LHE_HT"};
   TTreeReaderValue<Float_t> LHE_HTIncoming =     {fReader_MC, "LHE_HTIncoming"};
@@ -1777,7 +1779,10 @@ public :
   TTreeReaderArray<Int_t>   LHEPart_pdgId =      {fReader_MC, "LHEPart_pdgId"};
   TTreeReaderArray<Int_t>   LHEPart_status =     {fReader_MC, "LHEPart_status"};
   TTreeReaderArray<Int_t>   LHEPart_spin =       {fReader_MC, "LHEPart_spin"};
+  */
 
+
+  
   //GenMet (read using fReader_MC)
   TTreeReaderValue<Float_t> GenMET_phi =         {fReader_MC, "GenMET_phi"};
   TTreeReaderValue<Float_t> GenMET_pt =          {fReader_MC, "GenMET_pt"};

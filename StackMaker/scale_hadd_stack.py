@@ -1,9 +1,75 @@
+import os
+import sys
 import ROOT
 from ROOT import *
-import sys
-import os
+import subprocess
 import warnings
 warnings.filterwarnings('ignore')
+
+from bkgsamples import bkg_samples
+
+####################################################################################
+
+def scale_histograms(input_file, output_file, scale_factor):
+    # Open the input root file
+    in_file = ROOT.TFile.Open(input_file, "READ")
+    if not in_file or in_file.IsZombie():
+        print("Error: Unable to open input file:", input_file)
+        return
+
+    # Create the output directory if it doesn't exist
+    output_directory = os.path.dirname(output_file)
+    os.makedirs(output_directory, exist_ok=True)
+
+    # Create an output root file
+    out_file = ROOT.TFile(output_file, "RECREATE")
+
+    # loop over all histograms in the input file
+    for key in in_file.GetListOfKeys():
+        obj = key.ReadObj()
+
+        # Check if the object is a histogram
+        if obj.IsA().InheritsFrom("TH1"):
+            hist = obj.Clone()  # Clone to avoid modifying the original histogram
+            hist.Scale(scale_factor)
+
+            # Write the scaled histogram to the output file
+            hist.Write()
+
+    # Close the input and output files
+    in_file.Close()
+    out_file.Close()
+
+def hadd_files(output_dir, set_name, input_files):
+    # Ensure the output directory exists
+    os.makedirs(output_dir, exist_ok=True)
+
+    # Construct the hadd command
+    output_file = os.path.join(output_dir, f"{set_name}.root")
+    hadd_command = ["hadd", "-f",  output_file] + input_files
+
+    subprocess.call(hadd_command)
+
+def process_samples(samples, input_dir, output_dir, data_lumi):
+    for sample_group, sample_info in samples.items():
+        scaled_files = []  # List to store paths of scaled files for hadding
+
+        for sub_sample_name, sub_sample_info in sample_info.items():
+            input_filename = os.path.join(input_dir, sub_sample_info["filename"])
+            output_filename = os.path.join(output_dir, f"scaled_{sub_sample_info['filename']}")
+            
+            # Calculate scale factor for each sub-sample
+            scale_factor = data_lumi / (sub_sample_info["nevents"] / sub_sample_info["xsec"])
+
+            # Scale histograms
+            scale_histograms(input_filename, output_filename, scale_factor)
+
+            # Append the scaled file path to the list
+            scaled_files.append(output_filename)
+
+        # Merge the scaled files into one final file for each sample
+        hadd_files(output_dir, sample_group, scaled_files)
+
 
 def SetOverflowBin(histo):
     nbins = histo.GetNbinsX()
@@ -77,68 +143,55 @@ def SetLegendStyle(legend):
     legend.SetFillStyle(0)
     legend.SetBorderSize(0)
     legend.SetTextSize(0.024)    
-    
-######################################################################################################################################################################
+           
+            
+####################################################################################
+
+
+###########################
+# main function begins here
+###########################
 
 def main():
-
     # Set ROOT's verbosity level to suppress info and warnings
     gROOT.SetBatch(True)
     gROOT.ProcessLine("gErrorIgnoreLevel = 1001;")  # suppress info messages
-    gROOT.ProcessLine("gErrorIgnoreLevel = 3001;")  # suppress warning messages    
+    gROOT.ProcessLine("gErrorIgnoreLevel = 3001;")  # suppress warning messages
 
-    inputDir = "../cluster_hst_output/"
-
-    MCfile_names = [
-        
-        "DYJetsToLL_oct20.root",
-        "TTTo2L2Nu_oct20.root",
-        "WZTo3LNu_oct20.root",
-        
-    ]  # this is a list of names of all MC samples root files
-
-    # open all the ROOT files
-    files_mc = [TFile.Open(inputDir + file_name, "READ") for file_name in MCfile_names] #storing the MC root files in a list
-    file_data = TFile.Open(inputDir + "2016Data_oct20.root", "READ")
-
-    print("\nFiles opened in ROOT successfully..")
+    inputDir = "../cluster_hst_output/nov09/"
+    outputDir = "finalhaddOutput/"
     
-    # get a list of histogram names from one of the files (since all the root files have the same set of histograms)
-    '''
-    mc_file = files_mc[0]
-    list_of_histograms = mc_file.GetListOfKeys()
-    hist_names = [hist.GetName() for hist in list_of_histograms] #storing all the histogram names (plotnames) in a list
+    data_lumi = 36.3*1000
+    
+    # Process all samples, scale histograms, and hadd files
+    process_samples(bkg_samples, inputDir, outputDir, data_lumi)
+    
+    scaled_files_to_delete = [f for f in os.listdir(outputDir) if f.startswith("scaled")]
+    for file_to_delete in scaled_files_to_delete:
+        os.remove(os.path.join(outputDir, file_to_delete))
+        
+    #Stacking begins
+    
+    MC_files = ["DYJetsToLL.root","TTBar.root","WJets.root","QCD_MuEnriched.root","QCD_EMEnriched.root","WGamma.root","ZGamma.root"]
+    
+    hist_colors = [kBlue-9, kGreen-9, kRed-9, kYellow-9, kYellow-9, kMagenta-9, kCyan-9]
+     
+    files_mc = [TFile.Open(outputDir + file_name, "READ") for file_name in MC_files] #storing the MC root files in a list
+ 
+    file_data = TFile.Open(outputDir + "TTBar.root", "READ")
 
-    '''
-
+    print("\nFiles opened in ROOT successfully..") 
+    
     hist_names = [ "flavor", "met", "imass_3l", "delR_l0l1", "delPhi_l0l1", "delPhi_l0met", "imass_l0l1", "mt0", "delR_l1l2", "delPhi_l1l2", "delPhi_l1met", "imass_l1l2", "mt1", "delR_l2l0", "delPhi_l2l0", "delPhi_l2met", "imass_l2l0", "mt2" ]
     hist_prefix = ["2l1d_", "1l2d_", "3d_"]
-
+    
     hists = []
-
+    
     for prefix in hist_prefix:
         for hist in hist_names:
             hist_name = prefix + hist
             hists.append(hist_name)
-    
-    hist_colors = [kBlue-9, kGreen-9, kRed-9]
-    
-    #######################
-    # Luminosity Scaling #
-    #######################
-    
-    dtlumi = 36.3*1000;
-    dylumi = 616760700/5765.0
-    ttlumi = 243094700/88.29
-    wzlumi = 60224600/5.052
 
-    lumi_sf = [dtlumi/dylumi, dtlumi/ttlumi, dtlumi/wzlumi]
-   
-    #########################
-     # Stacking Histograms # 
-    #########################
-    
-    # Loop through each histogram name
     for plotname in hists:
         hst_data = file_data.Get(plotname)
         hst_data.SetMarkerStyle(20)
@@ -151,18 +204,16 @@ def main():
             rebin = 5
         hst_data.Rebin(rebin)
         SetOverflowBin(hst_data)
-        
+            
         # initialize a list to store the same histograms from all files
         histograms = []
         hstMC_integral = []
-        
-        # loop through all the files and retrieve histograms with the same name
+
         for i, file_mc in enumerate(files_mc):
             hst_MC = file_mc.Get(plotname)
             if hst_MC:
-                hst_MC.Scale(lumi_sf[i])
                 hstMC_integral.append(hst_MC.Integral())
-                color = hist_colors[i % len(hist_colors)] #filling each histogram with a different color
+                color = hist_colors[i] 
                 decorate(hst_MC, color)  
                 hst_MC.Rebin(rebin)
                 SetOverflowBin(hst_MC)
@@ -193,16 +244,20 @@ def main():
             hst_ratio.Divide(hst_bkg)
 
             #legend
+            
             legend   = TLegend(0.95,0.50,0.80,0.86)
             ratioleg = TLegend(0.90,0.90,0.81,0.87)
-            ratioleg.SetHeader(f"obs/exp={hst_data.Integral()/hst_bkg.Integral():.2f}   exp: {hst_bkg.Integral():.2f}")
+            ratioleg.SetHeader(f"obs/exp={hst_data.Integral()/hst_bkg.Integral():.0f}   exp: {hst_bkg.Integral():.0f}")
             legend.AddEntry(hst_data,f"Data[{hst_data.Integral():.0f}]",'ep')
-            for i, file_name in enumerate(MCfile_names):
-                legend.AddEntry(histograms[i], f"{file_name}[{hstMC_integral[i]:.0f}]", "lf")
+            for i, filename in enumerate(MC_files):
+                legend.AddEntry(histograms[i], f"{filename}[{hstMC_integral[i]:.0f}]", "lf")
+                
 
             SetLegendStyle(ratioleg)
             SetLegendStyle(legend)
 
+            
+            
             ###########################################################
 
             #                 PLOTTING START                          
@@ -275,7 +330,10 @@ def main():
     file_data.Close()
     for file_mc in files_mc:
         file_mc.Close()
-
-if __name__ == '__main__':
+            
+    
+    
+if __name__ == "__main__":
     main()
 
+        
