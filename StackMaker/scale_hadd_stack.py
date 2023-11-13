@@ -187,7 +187,7 @@ def main():
 
     print("\nFiles opened in ROOT successfully..") 
     
-    hist_names = [ "flavor", "met", "imass_3l", "delR_l0l1", "delPhi_l0l1", "delPhi_l0met", "imass_l0l1", "mt0", "delR_l1l2", "delPhi_l1l2", "delPhi_l1met", "imass_l1l2", "mt1", "delR_l2l0", "delPhi_l2l0", "delPhi_l2met", "imass_l2l0", "mt2", "njet", "l0_reliso03", "l1_reliso03", "l2_reliso03", "l2_dxy", "l2_dz", "l2_ip3d", "sip3d" ]
+    hist_names = [ "flavor", "met", "imass_3l", "delR_l0l1", "delPhi_l0l1", "delPhi_l0met", "imass_l0l1", "mt0", "delR_l1l2", "delPhi_l1l2", "delPhi_l1met", "imass_l1l2", "mt1", "delR_l2l0", "delPhi_l2l0", "delPhi_l2met", "imass_l2l0", "mt2", "njet", "l0_reliso03", "l1_reliso03", "l2_reliso03", "l2_dxy", "l2_dz", "l2_ip3d", "l2_sip3d"]
     hist_prefix = ["2l1d_", "1l2d_", "3d_"]
     
     hists = []
@@ -203,7 +203,7 @@ def main():
         hst_data.SetMarkerSize(0.6)
         hst_data.SetLineColor(kBlack)
         #if plotname != "nEvents" and plotname != "nEvSel":
-        if "flavor" in plotname:
+        if "flavor" in plotname or "reliso03" in plotname:
             rebin = 1
         else:
             rebin = 5
