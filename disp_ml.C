@@ -157,67 +157,113 @@ Bool_t disp_ml::Process(Long64_t entry)
       nEvtTrigger++; //Total number of events that pass the trigger
       h.nevt->Fill(2);
 
-    //#################################################################//
-    //                         RecoParticle Block                      //
-    //#################################################################//
+      //#################################################################//
+      //                         RecoParticle Block                      //
+      //#################################################################//
 
-    recoMuon.clear();
-    recoElectron.clear();
-    recoLepton.clear();
-    recoJet.clear();
-    bJet.clear();
+      recoMuon.clear();
+      recoElectron.clear();
+      recoLepton.clear();
+      recoJet.clear();
+      bJet.clear();
     
-    RecoLeptonArray();
-    RecoJetArray();
+      RecoLeptonArray();
+      RecoJetArray();
 
-    Sortpt(recoMuon);
-    Sortpt(recoElectron);
-    Sortpt(recoLepton);
-    Sortpt(recoJet);
-    Sortpt(bJet);
+      Sortpt(recoMuon);
+      Sortpt(recoElectron);
+      Sortpt(recoLepton);
+      Sortpt(recoJet);
+      Sortpt(bJet);
 
       
-    //#################################################################//
-    //                         GenParticle Block                      //
-    //#################################################################//
+      //#################################################################//
+      //                         GenParticle Block                      //
+      //#################################################################//
 
    
-    Muon.clear();
-    Electron.clear();
-    lightLep.clear();
-    promptMuon.clear();
-    displacedMuon.clear();
-    promptElectron.clear();
-    displacedElectron.clear();
-    promptLepton.clear();
-    displacedLepton.clear();
+      Muon.clear();
+      Electron.clear();
+      lightLep.clear();
+      promptMuon.clear();
+      displacedMuon.clear();
+      promptElectron.clear();
+      displacedElectron.clear();
+      promptLepton.clear();
+      displacedLepton.clear();
 
-    if(_data==0){
-      genMuon.clear();
-      genElectron.clear();
+      if(_data==0){
+	genMuon.clear();
+	genElectron.clear();
 
-      GenLeptonArray();
+	GenLeptonArray();
 
-      Sortpt(genMuon);
-      Sortpt(genElectron);
+	Sortpt(genMuon);
+	Sortpt(genElectron);
 
-      //####################### MC genmatching #############################//
+	//####################### MC genmatching #############################//
     
-      std::pair<vector<int>, vector<float>> mu_result = dR_matching(recoMuon, genMuon);
-      vector<int> mu_matchto_genmu = mu_result.first;
-      vector<float> mu_delRmin_genmu = mu_result.second;
+	std::pair<vector<int>, vector<float>> mu_result = dR_matching(recoMuon, genMuon);
+	vector<int> mu_matchto_genmu = mu_result.first;
+	vector<float> mu_delRmin_genmu = mu_result.second;
    
-      for(int i=0; i<(int)mu_matchto_genmu.size(); i++){
-	int mumatch=mu_matchto_genmu.at(i);
-	float mumatchdR=mu_delRmin_genmu.at(i);
-	if(mumatch>-1 && mumatchdR<0.05){
-	  //int mumomid = genMuon.at(mumatch).momid;
-	  //h.motherID[1]->Fill(mumomid);
-	  //h.mu_dr[1]->Fill(mumatchdR);
+	for(int i=0; i<(int)mu_matchto_genmu.size(); i++){
+	  int mumatch=mu_matchto_genmu.at(i);
+	  float mumatchdR=mu_delRmin_genmu.at(i);
+	  if(mumatch>-1 && mumatchdR<0.05){
+	    //int mumomid = genMuon.at(mumatch).momid;
+	    //h.motherID[1]->Fill(mumomid);
+	    //h.mu_dr[1]->Fill(mumatchdR);
+	    Muon.push_back(recoMuon.at(i));
+	    lightLep.push_back(recoMuon.at(i));
+	    bool promptmuon = fabs(recoMuon.at(i).dxy)<0.05 && fabs(recoMuon.at(i).dz)<0.1;
+	    bool displacedmuon = fabs(recoMuon.at(i).dxy)>0.05 && fabs(recoMuon.at(i).dz)<10; //the dz<10 cut for displaced muons is to reduce cosmic muons backgrounds
+	    if(promptmuon){
+	      promptMuon.push_back(recoMuon.at(i));
+	      promptLepton.push_back(recoMuon.at(i));
+	    }
+	    else if(displacedmuon){
+	      displacedMuon.push_back(recoMuon.at(i));
+	      displacedLepton.push_back(recoMuon.at(i));
+	    }
+	  }
+	}
+
+	std::pair<vector<int>, vector<float>> el_result = dR_matching(recoElectron, genElectron);
+	vector<int> el_matchto_genel = el_result.first;
+	vector<float> el_delRmin_genel = el_result.second;
+
+	for(int i=0; i<(int)el_matchto_genel.size(); i++){
+	  int elmatch=el_matchto_genel.at(i);
+	  float elmatchdR=el_delRmin_genel.at(i);
+	  if(elmatch>-1 && elmatchdR<0.05){
+	    //int elmomid = genElon.at(elmatch).momid;
+	    //h.motherID[1]->Fill(elmomid);
+	    //h.el_dr[1]->Fill(elmatchdR);
+	    Electron.push_back(recoElectron.at(i));
+	    lightLep.push_back(recoElectron.at(i));
+	    bool promptelectron = fabs(recoElectron.at(i).dxy)<0.05 && fabs(recoElectron.at(i).dz)<0.1;
+	    bool displacedelectron = fabs(recoElectron.at(i).dxy)>0.05;         //no cut on dz for displaced electrons
+	    if(promptelectron){
+	      promptElectron.push_back(recoElectron.at(i));
+	      promptLepton.push_back(recoElectron.at(i));
+	    }
+	    else if(displacedelectron){
+	      displacedElectron.push_back(recoElectron.at(i));
+	      displacedLepton.push_back(recoElectron.at(i));
+	    }
+	  }
+	}
+
+      } //if(_data==0)
+
+
+      if(_data==1){
+	for(int i=0; i<(int)recoMuon.size(); i++){
 	  Muon.push_back(recoMuon.at(i));
 	  lightLep.push_back(recoMuon.at(i));
 	  bool promptmuon = fabs(recoMuon.at(i).dxy)<0.05 && fabs(recoMuon.at(i).dz)<0.1;
-	  bool displacedmuon = fabs(recoMuon.at(i).dxy)>0.05 && fabs(recoMuon.at(i).dz)<10; //the dz<10 cut for displaced muons is to reduce cosmic muons backgrounds
+	  bool displacedmuon = fabs(recoMuon.at(i).dxy)>0.05 && fabs(recoMuon.at(i).dz)<10; 
 	  if(promptmuon){
 	    promptMuon.push_back(recoMuon.at(i));
 	    promptLepton.push_back(recoMuon.at(i));
@@ -226,372 +272,331 @@ Bool_t disp_ml::Process(Long64_t entry)
 	    displacedMuon.push_back(recoMuon.at(i));
 	    displacedLepton.push_back(recoMuon.at(i));
 	  }
+
 	}
-      }
-
-      std::pair<vector<int>, vector<float>> el_result = dR_matching(recoElectron, genElectron);
-      vector<int> el_matchto_genel = el_result.first;
-      vector<float> el_delRmin_genel = el_result.second;
-
-      for(int i=0; i<(int)el_matchto_genel.size(); i++){
-	int elmatch=el_matchto_genel.at(i);
-	float elmatchdR=el_delRmin_genel.at(i);
-	if(elmatch>-1 && elmatchdR<0.05){
-	  //int elmomid = genElon.at(elmatch).momid;
-	  //h.motherID[1]->Fill(elmomid);
-	  //h.el_dr[1]->Fill(elmatchdR);
-	  Electron.push_back(recoElectron.at(i));
-	  lightLep.push_back(recoElectron.at(i));
-	  bool promptelectron = fabs(recoElectron.at(i).dxy)<0.05 && fabs(recoElectron.at(i).dz)<0.1;
-	  bool displacedelectron = fabs(recoElectron.at(i).dxy)>0.05;         //no cut on dz for displaced electrons
+      
+	for(int j=0; j<(int)recoElectron.size(); j++){
+	  Electron.push_back(recoElectron.at(j));
+	  lightLep.push_back(recoElectron.at(j));
+	  bool promptelectron = fabs(recoElectron.at(j).dxy)<0.05 && fabs(recoElectron.at(j).dz)<0.1;
+	  bool displacedelectron = fabs(recoElectron.at(j).dxy)>0.05;
 	  if(promptelectron){
-	    promptElectron.push_back(recoElectron.at(i));
-	    promptLepton.push_back(recoElectron.at(i));
+	    promptElectron.push_back(recoElectron.at(j));
+	    promptLepton.push_back(recoElectron.at(j));
 	  }
 	  else if(displacedelectron){
-	    displacedElectron.push_back(recoElectron.at(i));
-	    displacedLepton.push_back(recoElectron.at(i));
+	    displacedElectron.push_back(recoElectron.at(j));
+	    displacedLepton.push_back(recoElectron.at(j));
 	  }
 	}
-      }
-
-    } //if(_data==0)
-
-
-    if(_data==1){
-      for(int i=0; i<(int)recoMuon.size(); i++){
-	Muon.push_back(recoMuon.at(i));
-	lightLep.push_back(recoMuon.at(i));
-	bool promptmuon = fabs(recoMuon.at(i).dxy)<0.05 && fabs(recoMuon.at(i).dz)<0.1;
-	bool displacedmuon = fabs(recoMuon.at(i).dxy)>0.05 && fabs(recoMuon.at(i).dz)<10; 
-	if(promptmuon){
-	  promptMuon.push_back(recoMuon.at(i));
-	  promptLepton.push_back(recoMuon.at(i));
-	}
-	else if(displacedmuon){
-	  displacedMuon.push_back(recoMuon.at(i));
-	  displacedLepton.push_back(recoMuon.at(i));
-	}
-
-      }
       
-      for(int j=0; j<(int)recoElectron.size(); j++){
-	Electron.push_back(recoElectron.at(j));
-	lightLep.push_back(recoElectron.at(j));
-	bool promptelectron = fabs(recoElectron.at(j).dxy)<0.05 && fabs(recoElectron.at(j).dz)<0.1;
-	bool displacedelectron = fabs(recoElectron.at(j).dxy)>0.05;
-	if(promptelectron){
-	  promptElectron.push_back(recoElectron.at(j));
-	  promptLepton.push_back(recoElectron.at(j));
-	}
-	else if(displacedelectron){
-	  displacedElectron.push_back(recoElectron.at(j));
-	  displacedLepton.push_back(recoElectron.at(j));
-	}
-      }
-      
-    } //if(_data==1)
+      } //if(_data==1)
 
     
-    Sortpt(Muon);
-    Sortpt(Electron);
-    Sortpt(lightLep);
-    Sortpt(promptMuon);
-    Sortpt(displacedMuon);
-    Sortpt(promptElectron);
-    Sortpt(displacedElectron);
-    Sortpt(promptLepton);
-    Sortpt(displacedLepton);
+      Sortpt(Muon);
+      Sortpt(Electron);
+      Sortpt(lightLep);
+      Sortpt(promptMuon);
+      Sortpt(displacedMuon);
+      Sortpt(promptElectron);
+      Sortpt(displacedElectron);
+      Sortpt(promptLepton);
+      Sortpt(displacedLepton);
     
     
-    //####################### ANALYSIS STARTS HERE ######################//
+      //####################### ANALYSIS STARTS HERE ######################//
     
-    float metpt = *MET_pt;
-    float metphi = *MET_phi;
+      float metpt = *MET_pt;
+      float metphi = *MET_phi;
 
 
    
-    //********************* Z Control Region ********************//
+      //********************* Z Control Region ********************//
     
-    float invmass_ll=-1.0;
-    bool z_cr = false;
-    if((int)lightLep.size()>1 && lightLep.at(0).id==-lightLep.at(1).id){
-      invmass_ll = (lightLep.at(0).v+lightLep.at(1).v).M();
-      if(76.0<invmass_ll && invmass_ll<106.0){
-	z_cr = true;
+      float invmass_ll=-1.0;
+      bool z_cr = false;
+      if((int)lightLep.size()>1 && lightLep.at(0).id==-lightLep.at(1).id){
+	invmass_ll = (lightLep.at(0).v+lightLep.at(1).v).M();
+	if(76.0<invmass_ll && invmass_ll<106.0){
+	  z_cr = true;
+	}
       }
-    }
 
-    if(z_cr){
-      h.zcr[0]->Fill(invmass_ll);
-      h.zcr[1]->Fill(metpt);
-    }
+      if(z_cr){
+	h.zcr[0]->Fill(invmass_ll);
+	h.zcr[1]->Fill(metpt);
+      }
 
 
-    //************************************************************//
+      //************************************************************//
 
    
     
-    //##################### EVENT SELECTION ####################//
+      //##################### EVENT SELECTION ####################//
 
 
-    //Applying trigger to MC  
-    bool single_muon = false;
-    bool single_electron = false;
+      //Applying trigger to MC  
+      bool single_muon = false;
+      bool single_electron = false;
  
-    if((int)Muon.size()>0 && Muon.at(0).v.Pt()>24)            single_muon = true;
-    if((int)Electron.size()>0 && Electron.at(0).v.Pt()>27)    single_electron = true;
+      if((int)Muon.size()>0 && Muon.at(0).v.Pt()>24)            single_muon = true;
+      if((int)Electron.size()>0 && Electron.at(0).v.Pt()>27)    single_electron = true;
        
-    bool triggered_events = false;
-    //If the event has a single muon passing the trigger, keep it.
-    if(single_muon) triggered_events=true;
-    //If the event does not pass the single muon trigger then check for the single electron trigger, if it does then keep the event.
-    else if(!single_muon && single_electron) triggered_events=true;    
+      bool triggered_events = false;
+      //If the event has a single muon passing the trigger, keep it.
+      if(single_muon) triggered_events=true;
+      //If the event does not pass the single muon trigger then check for the single electron trigger, if it does then keep the event.
+      else if(!single_muon && single_electron) triggered_events=true;    
 
-    /*
-    if(single_electron) triggered_events=true;
-    else if(!single_electron && single_muon) triggered_events=true;
-    */
+      /*
+	if(single_electron) triggered_events=true;
+	else if(!single_electron && single_muon) triggered_events=true;
+      */
 
       
-    for(int i=0; i<3; i++){
-      myLep[i].clear();         //clearing myLep[evsel] for each evsel.
-    }
+      for(int i=0; i<3; i++){
+	myLep[i].clear();         //clearing myLep[evsel] for each evsel.
+      }
 
     
-    if(triggered_events){
+      if(triggered_events){
      
-      h.nevsel->Fill(0);
+	h.nevsel->Fill(0);
 
-      //h.n_dispL->Fill(displacedlepton.size());
+	//h.n_dispL->Fill(displacedlepton.size());
 	
-      bool _2l1d = false;
-      bool _1l2d = false;
-      bool _3d = false;
-
-      //an event can pass all three selections, and all the three analysis will be orthogonal
-
-      if((int)promptLepton.size()>1 && (int)displacedLepton.size()>0) _2l1d = true;
-      if((int)promptLepton.size()>0 && (int)displacedLepton.size()>1) _1l2d = true;
-      if((int)promptLepton.size()>=0 && (int)displacedLepton.size()>2) _3d = true;
-          
-      int evsel = -1;
-      if(_2l1d){
-	evsel=0;
-	h.nevsel->Fill(1);
-	myLep[evsel].push_back(promptLepton.at(0));
-	myLep[evsel].push_back(promptLepton.at(1));
-	myLep[evsel].push_back(displacedLepton.at(0));
-      }
-    
-      if(_1l2d){
-	evsel=1;
-	h.nevsel->Fill(2);
-	myLep[evsel].push_back(promptLepton.at(0));
-	myLep[evsel].push_back(displacedLepton.at(0));
-	myLep[evsel].push_back(displacedLepton.at(1));
-      }
-    
-      if(_3d){
-	evsel=2;
-	h.nevsel->Fill(3);
-	myLep[evsel].push_back(displacedLepton.at(0));
-	myLep[evsel].push_back(displacedLepton.at(1));
-	myLep[evsel].push_back(displacedLepton.at(2));
-      }
-
-      //if(evsel==-1) return 0;
-      if(evsel!=-1){
+	bool _2l1d = false, _1l2d = false, _3d = false;
 	
-	nEvtPass++;
-	h.nevt->Fill(3);
+	//an event can pass all three selections, and all the three analysis will be orthogonal
 
-	evtwt = 1.0; //default value
+	if((int)promptLepton.size()>1 && (int)displacedLepton.size()>0)   _2l1d = true;
+	if((int)promptLepton.size()>0 && (int)displacedLepton.size()>1)   _1l2d = true;
+	if((int)promptLepton.size()>=0 && (int)displacedLepton.size()>2)  _3d = true;
 
-	/*
-	  if(_data==0){//MC
-	  float scalefactor = 1.0;
-	  float triggeff = 1.0;
+	vec_evsel.clear();
+	
+	if(_2l1d){
+	  h.nevsel->Fill(1);
+	  vec_evsel.push_back(0);
+	  myLep[0].push_back(promptLepton.at(0));
+	  myLep[0].push_back(promptLepton.at(1));
+	  myLep[0].push_back(displacedLepton.at(0));
+	}
+    
+	if(_1l2d){
+	  h.nevsel->Fill(2);
+	  vec_evsel.push_back(1);
+	  myLep[1].push_back(promptLepton.at(0));
+	  myLep[1].push_back(displacedLepton.at(0));
+	  myLep[1].push_back(displacedLepton.at(1));
+	}
+    
+	if(_3d){
+	  h.nevsel->Fill(3);
+	  vec_evsel.push_back(2);
+	  myLep[2].push_back(displacedLepton.at(0));
+	  myLep[2].push_back(displacedLepton.at(1));
+	  myLep[2].push_back(displacedLepton.at(2));
+	}
 
-	  //Apply corrections to MC
-	  float lep0SF = LeptonIDSF(myLep[evsel].at(0).id, myLep[evsel].at(0).v.Pt(), myLep[evsel].at(0).v.Eta());
-	  float lep1SF = LeptonIDSF(myLep[evsel].at(1).id, myLep[evsel].at(1).v.Pt(), myLep[evsel].at(1).v.Eta());
-	  float lep2SF = LeptonIDSF(myLep[evsel].at(2).id, myLep[evsel].at(2).v.Pt(), myLep[evsel].at(2).v.Eta());
-	  scalefactor = lep0SF * lep1SF * lep2SF;
+	//if(evsel==-1) return 0;
 
-	  float e1=SingleLepTrigger_eff(myLep[evsel].at(0).id, myLep[evsel].at(0).v.Pt(), myLep[evsel].at(0).v.Eta());
-	  float e2=SingleLepTrigger_eff(myLep[evsel].at(1).id, myLep[evsel].at(1).v.Pt(), myLep[evsel].at(1).v.Eta());
-	  float e3=SingleLepTrigger_eff(myLep[evsel].at(2).id, myLep[evsel].at(2).v.Pt(), myLep[evsel].at(2).v.Eta());	  
-	  triggeff=1-((1-e1)*(1-e2)*(1-e3));
+	if((int)vec_evsel.size()>0){
+	
+	  nEvtPass++;
+	  h.nevt->Fill(3);
 
-	  evtwt = scalefactor * triggeff;
+	  evtwt = 1.0; //default value
+    
+	  /*
+	    if(_data==0){//MC
+	    float scalefactor = 1.0;
+	    float triggeff = 1.0;
+
+	    //Apply corrections to MC
+	    float lep0SF = LeptonIDSF(myLep[evsel].at(0).id, myLep[evsel].at(0).v.Pt(), myLep[evsel].at(0).v.Eta());
+	    float lep1SF = LeptonIDSF(myLep[evsel].at(1).id, myLep[evsel].at(1).v.Pt(), myLep[evsel].at(1).v.Eta());
+	    float lep2SF = LeptonIDSF(myLep[evsel].at(2).id, myLep[evsel].at(2).v.Pt(), myLep[evsel].at(2).v.Eta());
+	    scalefactor = lep0SF * lep1SF * lep2SF;
+
+	    float e1=SingleLepTrigger_eff(myLep[evsel].at(0).id, myLep[evsel].at(0).v.Pt(), myLep[evsel].at(0).v.Eta());
+	    float e2=SingleLepTrigger_eff(myLep[evsel].at(1).id, myLep[evsel].at(1).v.Pt(), myLep[evsel].at(1).v.Eta());
+	    float e3=SingleLepTrigger_eff(myLep[evsel].at(2).id, myLep[evsel].at(2).v.Pt(), myLep[evsel].at(2).v.Eta());	  
+	    triggeff=1-((1-e1)*(1-e2)*(1-e3));
+
+	    evtwt = scalefactor * triggeff;
  	
 	  
-	  h.evtweight[0]->Fill(scalefactor);
-	  h.evtweight[1]->Fill(triggeff);
-	  h.evtweight[2]->Fill(evtwt);
+	    h.evtweight[0]->Fill(scalefactor);
+	    h.evtweight[1]->Fill(triggeff);
+	    h.evtweight[2]->Fill(evtwt);
 	 
-	  }
-	*/
+	    }
+	  */
 
+	 
+	  for(int ev=0; ev<(int)vec_evsel.size(); ev++){
+	    int evsel=vec_evsel.at(ev);
+
+	    //***************************************************** Flavor Classification *****************************************************************//
+
+	    if(abs(myLep[evsel].at(0).id)==13){
+	      if(abs(myLep[evsel].at(1).id)==13 && abs(myLep[evsel].at(2).id)==13)                  h.flavor[evsel]->Fill(0);       //mumumu
+	      else if(abs(myLep[evsel].at(1).id)==13 && abs(myLep[evsel].at(2).id)==11)             h.flavor[evsel]->Fill(1);       //mumue
+	      else if(abs(myLep[evsel].at(1).id)==11 && abs(myLep[evsel].at(2).id)==13)             h.flavor[evsel]->Fill(2);       //muemu
+	      else if(abs(myLep[evsel].at(1).id)==11 && abs(myLep[evsel].at(2).id)==11)             h.flavor[evsel]->Fill(3);       //muee
+	    }	
+
+	    else if(abs(myLep[evsel].at(0).id)==11){
+	      if(abs(myLep[evsel].at(1).id)==11 && abs(myLep[evsel].at(2).id)==11)                  h.flavor[evsel]->Fill(4);       //eee
+	      else if(abs(myLep[evsel].at(1).id)==13 && abs(myLep[evsel].at(2).id)==11)             h.flavor[evsel]->Fill(5);       //emue
+	      else if(abs(myLep[evsel].at(1).id)==11 && abs(myLep[evsel].at(2).id)==13)             h.flavor[evsel]->Fill(6);       //eemu
+	      else if(abs(myLep[evsel].at(1).id)==13 && abs(myLep[evsel].at(2).id)==13)             h.flavor[evsel]->Fill(7);       //emumu	
+	    }
+
+	    //********************************************************************************************************************************************//
+
+	    float invmassl0l1 = (myLep[evsel].at(0).v+myLep[evsel].at(1).v).M();
 	
-
-	//***************************************************** Flavor Classification *****************************************************************//
-
-	if(abs(myLep[evsel].at(0).id)==13){
-	  if(abs(myLep[evsel].at(1).id)==13 && abs(myLep[evsel].at(2).id)==13)                  h.flavor[evsel]->Fill(0);       //mumumu
-	  else if(abs(myLep[evsel].at(1).id)==13 && abs(myLep[evsel].at(2).id)==11)             h.flavor[evsel]->Fill(1);       //mumue
-	  else if(abs(myLep[evsel].at(1).id)==11 && abs(myLep[evsel].at(2).id)==13)             h.flavor[evsel]->Fill(2);       //muemu
-	  else if(abs(myLep[evsel].at(1).id)==11 && abs(myLep[evsel].at(2).id)==11)             h.flavor[evsel]->Fill(3);       //muee
-	}	
-
-	else if(abs(myLep[evsel].at(0).id)==11){
-	  if(abs(myLep[evsel].at(1).id)==11 && abs(myLep[evsel].at(2).id)==11)                  h.flavor[evsel]->Fill(4);       //eee
-	  else if(abs(myLep[evsel].at(1).id)==13 && abs(myLep[evsel].at(2).id)==11)             h.flavor[evsel]->Fill(5);       //emue
-	  else if(abs(myLep[evsel].at(1).id)==11 && abs(myLep[evsel].at(2).id)==13)             h.flavor[evsel]->Fill(6);       //eemu
-	  else if(abs(myLep[evsel].at(1).id)==13 && abs(myLep[evsel].at(2).id)==13)             h.flavor[evsel]->Fill(7);       //emumu	
-	}
-
-	//********************************************************************************************************************************************//
-
-	float invmassl0l1 = (myLep[evsel].at(0).v+myLep[evsel].at(1).v).M();
-	
-	if((evsel==0 && invmassl0l1>12) || evsel==1 || evsel==2){
-	  h.dispml_h[evsel][0]->Fill(metpt, evtwt);
-	  float sum_pt = 0.0;
-	  for(int i=0; i<(int)myLep[evsel].size(); i++){
-	    sum_pt = sum_pt + myLep[evsel].at(i).v.Pt();
-	  }
-	  h.dispml_h[evsel][1]->Fill(sum_pt, evtwt);
-	  float imass = ((myLep[evsel].at(0).v + myLep[evsel].at(1).v) + myLep[evsel].at(2).v).M();
-	  h.dispml_h[evsel][2]->Fill(imass, evtwt);
-	  for(int j=3; j<6; j++){
-	    h.dispml_h[evsel][j]->Fill(myLep[evsel].at(j-3).v.Pt(), evtwt);
-	  }
-	  float pt_ll[3], delR_ll[3], delPhi_ll[3], M_ll[3];
-	  for(int i=0; i<3; i++){
-	    for(int j=i+1; j<3; j++){
-	      int index = -1;
-	      if(i==0 && j==1) index=0;
-	      else if(i==1 && j==2) index=1;
-	      else if(i == 0 && j == 2) index=2;
+	    if((evsel==0 && invmassl0l1>12) || evsel==1 || evsel==2){
+	      h.dispml_h[evsel][0]->Fill(metpt, evtwt);
+	      float sum_pt = 0.0;
+	      for(int i=0; i<(int)myLep[evsel].size(); i++){
+		sum_pt = sum_pt + myLep[evsel].at(i).v.Pt();
+	      }
+	      h.dispml_h[evsel][1]->Fill(sum_pt, evtwt);
+	      float imass = ((myLep[evsel].at(0).v + myLep[evsel].at(1).v) + myLep[evsel].at(2).v).M();
+	      h.dispml_h[evsel][2]->Fill(imass, evtwt);
+	      for(int j=3; j<6; j++){
+		h.dispml_h[evsel][j]->Fill(myLep[evsel].at(j-3).v.Pt(), evtwt);
+	      }
+	      float pt_ll[3], delR_ll[3], delPhi_ll[3], M_ll[3];
+	      for(int i=0; i<3; i++){
+		for(int j=i+1; j<3; j++){
+		  int index = -1;
+		  if(i==0 && j==1) index=0;
+		  else if(i==1 && j==2) index=1;
+		  else if(i == 0 && j == 2) index=2;
 	  
-	      pt_ll[index]=myLep[evsel].at(i).v.Pt()+myLep[evsel].at(j).v.Pt();
-	      delR_ll[index]=myLep[evsel].at(i).v.DeltaR(myLep[evsel].at(j).v);
-	      delPhi_ll[index]=delta_phi(myLep[evsel].at(i).v.Phi(), myLep[evsel].at(j).v.Phi());
-	      //delPhi_ll[index]=myLep[evsel].at(i).v.DeltaPhi(myLep[evsel].at(j).v);
-	      M_ll[index]=(myLep[evsel].at(i).v+myLep[evsel].at(j).v).M();
-	    }
-	  }
+		  pt_ll[index]=myLep[evsel].at(i).v.Pt()+myLep[evsel].at(j).v.Pt();
+		  delR_ll[index]=myLep[evsel].at(i).v.DeltaR(myLep[evsel].at(j).v);
+		  delPhi_ll[index]=delta_phi(myLep[evsel].at(i).v.Phi(), myLep[evsel].at(j).v.Phi());
+		  //delPhi_ll[index]=myLep[evsel].at(i).v.DeltaPhi(myLep[evsel].at(j).v);
+		  M_ll[index]=(myLep[evsel].at(i).v+myLep[evsel].at(j).v).M();
+		}
+	      }
 
-	  float delphi_lmet[3],transvmass[3];
-	  for(int k=0; k<3; k++){
-	    delphi_lmet[k] = delta_phi(metphi, myLep[evsel].at(k).v.Phi());
-	    transvmass[k] = transv_mass(myLep[evsel].at(k).v.Pt(), metpt, delphi_lmet[k]);
-	  }
+	      float delphi_lmet[3],transvmass[3];
+	      for(int k=0; k<3; k++){
+		delphi_lmet[k] = delta_phi(metphi, myLep[evsel].at(k).v.Phi());
+		transvmass[k] = transv_mass(myLep[evsel].at(k).v.Pt(), metpt, delphi_lmet[k]);
+	      }
 
-	  int p=6;
-	  for(int index=0; index<3; index++){
-	    h.dispml_h[evsel][index+p]->Fill(pt_ll[index], evtwt);
-	    h.dispml_h[evsel][index+p+1]->Fill(delR_ll[index], evtwt);
-	    h.dispml_h[evsel][index+p+2]->Fill(delPhi_ll[index], evtwt);
-	    h.dispml_h[evsel][index+p+3]->Fill(delphi_lmet[index], evtwt);
-	    h.dispml_h[evsel][index+p+4]->Fill(M_ll[index], evtwt);
-	    h.dispml_h[evsel][index+p+5]->Fill(transvmass[index], evtwt);
-	    p=p+5;
-	  }
+	      int p=6;
+	      for(int index=0; index<3; index++){
+		h.dispml_h[evsel][index+p]->Fill(pt_ll[index], evtwt);
+		h.dispml_h[evsel][index+p+1]->Fill(delR_ll[index], evtwt);
+		h.dispml_h[evsel][index+p+2]->Fill(delPhi_ll[index], evtwt);
+		h.dispml_h[evsel][index+p+3]->Fill(delphi_lmet[index], evtwt);
+		h.dispml_h[evsel][index+p+4]->Fill(M_ll[index], evtwt);
+		h.dispml_h[evsel][index+p+5]->Fill(transvmass[index], evtwt);
+		p=p+5;
+	      }
 
 	
-	  float jet_pt = 0.0;
-	  for(int i=0; i<(int)recoJet.size(); i++){
-	    jet_pt = jet_pt + recoJet.at(i).v.Pt();	
-	  }
+	      float jet_pt = 0.0;
+	      for(int i=0; i<(int)recoJet.size(); i++){
+		jet_pt = jet_pt + recoJet.at(i).v.Pt();	
+	      }
 
-	  h.dispml_h[evsel][24]->Fill(jet_pt, evtwt);
-	  h.dispml_h[evsel][25]->Fill((int)recoJet.size(), evtwt);
+	      h.dispml_h[evsel][24]->Fill(jet_pt, evtwt);
+	      h.dispml_h[evsel][25]->Fill((int)recoJet.size(), evtwt);
       
-	  std::pair<vector<int>, vector<float>> result = dR_matching(myLep[evsel], recoJet);
-	  vector<int> myLep_matchto_recoJet = result.first;
-	  vector<float> myLep_delRmin_recoJet = result.second;
+	      std::pair<vector<int>, vector<float>> result = dR_matching(myLep[evsel], recoJet);
+	      vector<int> myLep_matchto_recoJet = result.first;
+	      vector<float> myLep_delRmin_recoJet = result.second;
 
-	  for(int i=0; i<(int)myLep_matchto_recoJet.size(); i++){
-	    int matchind=myLep_matchto_recoJet.at(i);
-	    float matchdR=myLep_delRmin_recoJet.at(i);
-	    if(matchind>-1){
-	      h.dispml_h[evsel][i+26]->Fill(matchdR, evtwt);
-	    }
-	    else{
-	      h.dispml_h[evsel][i+26]->Fill(99, evtwt);
-	    }
-	  }
+	      for(int i=0; i<(int)myLep_matchto_recoJet.size(); i++){
+		int matchind=myLep_matchto_recoJet.at(i);
+		float matchdR=myLep_delRmin_recoJet.at(i);
+		if(matchind>-1){
+		  h.dispml_h[evsel][i+26]->Fill(matchdR, evtwt);
+		}
+		else{
+		  h.dispml_h[evsel][i+26]->Fill(99, evtwt);
+		}
+	      }
 	
-	  int q=29;
-	  for(int i=0; i<(int)myLep[evsel].size(); i++){
-	    h.dispml_h[evsel][i+q]->Fill(myLep[evsel].at(i).dxy, evtwt);
-	    h.dispml_h[evsel][i+q+1]->Fill(myLep[evsel].at(i).dz, evtwt);
-	    h.dispml_h[evsel][i+q+2]->Fill(myLep[evsel].at(i).ip3d, evtwt);
-	    h.dispml_h[evsel][i+q+3]->Fill(myLep[evsel].at(i).sip3d, evtwt);
-	    h.dispml_h[evsel][i+q+4]->Fill(myLep[evsel].at(i).reliso03, evtwt);
-	    q=q+4;
-	  }
+	      int q=29;
+	      for(int i=0; i<(int)myLep[evsel].size(); i++){
+		h.dispml_h[evsel][i+q]->Fill(myLep[evsel].at(i).dxy, evtwt);
+		h.dispml_h[evsel][i+q+1]->Fill(myLep[evsel].at(i).dz, evtwt);
+		h.dispml_h[evsel][i+q+2]->Fill(myLep[evsel].at(i).ip3d, evtwt);
+		h.dispml_h[evsel][i+q+3]->Fill(myLep[evsel].at(i).sip3d, evtwt);
+		h.dispml_h[evsel][i+q+4]->Fill(myLep[evsel].at(i).reliso03, evtwt);
+		q=q+4;
+	      }
 
-	  h.dispml_h[evsel][44]->Fill((int)bJet.size(), evtwt);
+	      h.dispml_h[evsel][44]->Fill((int)bJet.size(), evtwt);
 	  
-	}//if((evsel==0 && invmassl0l1>12) || evsel==1 || evsel==2)
+	    }//if((evsel==0 && invmassl0l1>12) || evsel==1 || evsel==2)
 
+	  
 	
 
-	//******************************* 2l1d analysis *******************************//
+	    //******************************* 2l1d analysis *******************************//
 	
 	
-	if(evsel==0 && invmassl0l1>12 && abs(myLep[evsel].at(2).id)==11){	
-	  h._2l1d[0]->Fill((myLep[0].at(0).v+myLep[0].at(1).v+myLep[0].at(2).v).M());
-	  metpt = *MET_pt;
-	  h._2l1d[1]->Fill(metpt);
-	  h._2l1d[2]->Fill(myLep[0].at(2).dxy);
-	  h._2l1d[3]->Fill(myLep[0].at(2).ip3d);
-	  h._2l1d[4]->Fill(myLep[0].at(2).sip3d);
-	  float delphi_l2met = delta_phi(metphi, myLep[0].at(2).v.Phi());
-	  h._2l1d[5]->Fill(transv_mass(myLep[0].at(2).v.Pt(), metpt, delphi_l2met));
-	  h._2l1d[6]->Fill(myLep[0].at(0).v.DeltaPhi(myLep[0].at(1).v));
-	  h._2l1d[7]->Fill(myLep[0].at(0).v.DeltaR(myLep[0].at(1).v));
-	  h._2l1d[8]->Fill((myLep[0].at(0).v+myLep[0].at(1).v).M());
-	  h._2l1d[9]->Fill(myLep[0].at(1).v.DeltaPhi(myLep[0].at(2).v));
-	  h._2l1d[10]->Fill(myLep[0].at(1).v.DeltaR(myLep[0].at(2).v));
-	  h._2l1d[11]->Fill((myLep[0].at(1).v+myLep[0].at(2).v).M());
-	  h._2l1d[12]->Fill(myLep[0].at(2).v.DeltaPhi(myLep[0].at(0).v));
-	  h._2l1d[13]->Fill(myLep[0].at(2).v.DeltaR(myLep[0].at(0).v));
-	  h._2l1d[14]->Fill((myLep[0].at(2).v+myLep[0].at(0).v).M());
-				
-	}
+	    if(evsel==0 && abs(myLep[0].at(2).id)==11){
+	      if((myLep[0].at(0).v+myLep[0].at(1).v).M()>12){
+		h._2l1d[0]->Fill((myLep[0].at(0).v+myLep[0].at(1).v+myLep[0].at(2).v).M());
+		metpt = *MET_pt;
+		h._2l1d[1]->Fill(metpt);
+		h._2l1d[2]->Fill(myLep[0].at(2).dxy);
+		h._2l1d[3]->Fill(myLep[0].at(2).ip3d);
+		h._2l1d[4]->Fill(myLep[0].at(2).sip3d);
+		float delphi_l2met = delta_phi(metphi, myLep[0].at(2).v.Phi());
+		h._2l1d[5]->Fill(transv_mass(myLep[0].at(2).v.Pt(), metpt, delphi_l2met));
+		h._2l1d[6]->Fill(myLep[0].at(0).v.DeltaPhi(myLep[0].at(1).v));
+		h._2l1d[7]->Fill(myLep[0].at(0).v.DeltaR(myLep[0].at(1).v));
+		h._2l1d[8]->Fill((myLep[0].at(0).v+myLep[0].at(1).v).M());
+		h._2l1d[9]->Fill(myLep[0].at(1).v.DeltaPhi(myLep[0].at(2).v));
+		h._2l1d[10]->Fill(myLep[0].at(1).v.DeltaR(myLep[0].at(2).v));
+		h._2l1d[11]->Fill((myLep[0].at(1).v+myLep[0].at(2).v).M());
+		h._2l1d[12]->Fill(myLep[0].at(2).v.DeltaPhi(myLep[0].at(0).v));
+		h._2l1d[13]->Fill(myLep[0].at(2).v.DeltaR(myLep[0].at(0).v));
+		h._2l1d[14]->Fill((myLep[0].at(2).v+myLep[0].at(0).v).M());
+	      }	
+	    }
 
-	else if(evsel==0 && invmassl0l1>12 && abs(myLep[evsel].at(2).id)==13){
-	  h._2l1d[15]->Fill((myLep[0].at(0).v+myLep[0].at(1).v+myLep[0].at(2).v).M());
-	  h._2l1d[16]->Fill(metpt);
-	  h._2l1d[17]->Fill(myLep[0].at(2).dxy);
-	  h._2l1d[18]->Fill(myLep[0].at(2).ip3d);
-	  h._2l1d[19]->Fill(myLep[0].at(2).sip3d);
-	  float delphi_l2met = delta_phi(metphi, myLep[0].at(2).v.Phi());
-	  h._2l1d[20]->Fill(transv_mass(myLep[0].at(2).v.Pt(), metpt, delphi_l2met));
-	  h._2l1d[21]->Fill(myLep[0].at(0).v.DeltaPhi(myLep[0].at(1).v));
-	  h._2l1d[22]->Fill(myLep[0].at(0).v.DeltaR(myLep[0].at(1).v));
-	  h._2l1d[23]->Fill((myLep[0].at(0).v+myLep[0].at(1).v).M());
-	  h._2l1d[24]->Fill(myLep[0].at(1).v.DeltaPhi(myLep[0].at(2).v));
-	  h._2l1d[25]->Fill(myLep[0].at(1).v.DeltaR(myLep[0].at(2).v));
-	  h._2l1d[26]->Fill((myLep[0].at(1).v+myLep[0].at(2).v).M());
-	  h._2l1d[27]->Fill(myLep[0].at(2).v.DeltaPhi(myLep[0].at(0).v));
-	  h._2l1d[28]->Fill(myLep[0].at(2).v.DeltaR(myLep[0].at(0).v));
-	  h._2l1d[29]->Fill((myLep[0].at(2).v+myLep[0].at(0).v).M());
-	}
+	    else if(evsel==0 && abs(myLep[0].at(2).id)==13){
+	      if((myLep[0].at(0).v+myLep[0].at(1).v).M()>12){
+		h._2l1d[15]->Fill((myLep[0].at(0).v+myLep[0].at(1).v+myLep[0].at(2).v).M());
+		h._2l1d[16]->Fill(metpt);
+		h._2l1d[17]->Fill(myLep[0].at(2).dxy);
+		h._2l1d[18]->Fill(myLep[0].at(2).ip3d);
+		h._2l1d[19]->Fill(myLep[0].at(2).sip3d);
+		float delphi_l2met = delta_phi(metphi, myLep[0].at(2).v.Phi());
+		h._2l1d[20]->Fill(transv_mass(myLep[0].at(2).v.Pt(), metpt, delphi_l2met));
+		h._2l1d[21]->Fill(myLep[0].at(0).v.DeltaPhi(myLep[0].at(1).v));
+		h._2l1d[22]->Fill(myLep[0].at(0).v.DeltaR(myLep[0].at(1).v));
+		h._2l1d[23]->Fill((myLep[0].at(0).v+myLep[0].at(1).v).M());
+		h._2l1d[24]->Fill(myLep[0].at(1).v.DeltaPhi(myLep[0].at(2).v));
+		h._2l1d[25]->Fill(myLep[0].at(1).v.DeltaR(myLep[0].at(2).v));
+		h._2l1d[26]->Fill((myLep[0].at(1).v+myLep[0].at(2).v).M());
+		h._2l1d[27]->Fill(myLep[0].at(2).v.DeltaPhi(myLep[0].at(0).v));
+		h._2l1d[28]->Fill(myLep[0].at(2).v.DeltaR(myLep[0].at(0).v));
+		h._2l1d[29]->Fill((myLep[0].at(2).v+myLep[0].at(0).v).M());
+	      }
+	    }
+	  }
+	  
 
-	
-
-       //*******************************************************************************//
+	  //*******************************************************************************//
       
-      }//evsel events
-
+	  }//evsel events
     
-    }//triggered_events
+      }//triggered_events
 
     }//triggerRes
   

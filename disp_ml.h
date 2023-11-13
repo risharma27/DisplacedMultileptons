@@ -2045,6 +2045,7 @@ private:
   vector<float> SV2D;
   vector<float> Delta2D;
   vector<Lepton> myLep[3];
+  vector<int> vec_evsel;
 
   ClassDef(disp_ml,0);
   

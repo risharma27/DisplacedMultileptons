@@ -1,5 +1,5 @@
 bkg_samples = {
-    "DYJetsToLL": {
+    "DY": {
 	"DYJetsToLL_M10to50_preVFP": {
 	    "filename": "DYJetsToLL_M10to50_preVFP.root",
             "nevents": 49632553,
