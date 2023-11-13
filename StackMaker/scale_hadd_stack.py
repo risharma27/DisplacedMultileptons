@@ -9,6 +9,9 @@ warnings.filterwarnings('ignore')
 from bkgsamples import bkg_samples
 
 ####################################################################################
+#                    User Defined functions                                        #
+####################################################################################
+
 
 def scale_histograms(input_file, output_file, scale_factor):
     # Open the input root file
@@ -59,8 +62,10 @@ def process_samples(samples, input_dir, output_dir, data_lumi):
             output_filename = os.path.join(output_dir, f"scaled_{sub_sample_info['filename']}")
             
             # Calculate scale factor for each sub-sample
-            scale_factor = data_lumi / (sub_sample_info["nevents"] / sub_sample_info["xsec"])
-
+            if sub_sample_info["data"]==0:
+                scale_factor = data_lumi / (sub_sample_info["nevents"] / sub_sample_info["xsec"])
+            else:
+                scale_factor = 1
             # Scale histograms
             scale_histograms(input_filename, output_filename, scale_factor)
 
@@ -172,13 +177,13 @@ def main():
         
     #Stacking begins
     
-    MC_files = ["DYJetsToLL.root","TTBar.root","WJets.root","QCD_MuEnriched.root","QCD_EMEnriched.root","WGamma.root","ZGamma.root"]
+    MC_files = ["DYJetsToLL.root","TTBar.root","WJets.root","QCD.root","WGamma.root","ZGamma.root"]
     
-    hist_colors = [kBlue-9, kGreen-9, kRed-9, kYellow-9, kYellow-9, kMagenta-9, kCyan-9]
+    hist_colors = [kBlue-9, kGreen-9, kRed-9, kYellow-9, kMagenta-9, kCyan-9]
      
     files_mc = [TFile.Open(outputDir + file_name, "READ") for file_name in MC_files] #storing the MC root files in a list
  
-    file_data = TFile.Open(outputDir + "TTBar.root", "READ")
+    file_data = TFile.Open(outputDir + "Data.root", "READ")
 
     print("\nFiles opened in ROOT successfully..") 
     
@@ -247,10 +252,19 @@ def main():
             
             legend   = TLegend(0.95,0.50,0.80,0.86)
             ratioleg = TLegend(0.90,0.90,0.81,0.87)
-            ratioleg.SetHeader(f"obs/exp={hst_data.Integral()/hst_bkg.Integral():.0f}   exp: {hst_bkg.Integral():.0f}")
+            ratioleg.SetHeader(f"obs/exp={hst_data.Integral()/hst_bkg.Integral():.5f} | exp: {hst_bkg.Integral():.0f}")
+
+            # create pairs of samples and corresponding integrals
+            file_integral_pairs = zip(MC_files, hstMC_integral)
+            
+            # sort based on the integral values (using the second element of each pair)
+            sorted_file_integral_pairs = sorted(file_integral_pairs, key=lambda x: x[1], reverse=True)
+            
             legend.AddEntry(hst_data,f"Data[{hst_data.Integral():.0f}]",'ep')
-            for i, filename in enumerate(MC_files):
-                legend.AddEntry(histograms[i], f"{filename}[{hstMC_integral[i]:.0f}]", "lf")
+            
+            for filename, integral in sorted_file_integral_pairs:
+                fileleg = filename.split('.',1)[0]
+                legend.AddEntry(histograms[MC_files.index(filename)], f"{fileleg}[{integral:.0f}]", "lf")
                 
 
             SetLegendStyle(ratioleg)
@@ -264,7 +278,7 @@ def main():
             
             ###########################################################
             
-            # Create a TCanvas to display the stacked histogram
+            # create a TCanvas to display the stacked plots
             canvas = TCanvas("c", "canvas", 750, 600)
             gStyle.SetOptStat(0)
 
@@ -279,7 +293,7 @@ def main():
                             #happens in the mainPad
             mainPad.SetLogy(1)
 
-            # Draw the stacked histogram
+            # draw the stacked histogram
             hst_stack.SetMinimum(0.001)
             hst_stack.SetMaximum(1e6)
             hst_stack.Draw("HIST")
@@ -296,7 +310,7 @@ def main():
             legend.Draw()
             ratioleg.Draw()
 
-            #Plotting ratioPad
+            #plotting ratioPad
 
             decorate_hratio(hst_ratio)
             ratioPad.cd()  #subsequent plotting will happen in the ratioPad
@@ -308,10 +322,10 @@ def main():
             hst_ratio.SetTitle('')
             hst_ratio.Draw("ep")
 
-            # Display the histogram
+            # display the plot
             canvas.Draw()
            
-            # Saving the stacked histograms
+            # saving the stacked plots
             if plotname.startswith("2l1d_"):
                 output_filename = f"stackoutput/evsel_2l1d/{plotname}.png"
                 canvas.SaveAs(output_filename)
@@ -324,14 +338,23 @@ def main():
             else:
                 output_filename = f"stackoutput/{plotname}.png"
                 canvas.SaveAs(output_filename)
-            
 
-    # Close all ROOT files
+                
+    print("Stacking Complete")
+    
+    # now close all root files
     file_data.Close()
     for file_mc in files_mc:
         file_mc.Close()
-            
-    
+        
+
+        
+#########################           
+# main function ends here
+#########################
+
+
+
     
 if __name__ == "__main__":
     main()
