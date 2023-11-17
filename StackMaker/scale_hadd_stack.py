@@ -12,70 +12,65 @@ from bkgsamples import bkg_samples
 #                    User Defined functions                                        #
 ####################################################################################
 
-
+#function to scale the histograms to data luminosity
 def scale_histograms(input_file, output_file, scale_factor):
-    # Open the input root file
-    in_file = ROOT.TFile.Open(input_file, "READ")
+   
+    in_file = TFile.Open(input_file, "READ")
     if not in_file or in_file.IsZombie():
         print("Error: Unable to open input file:", input_file)
         return
 
-    # Create the output directory if it doesn't exist
     output_directory = os.path.dirname(output_file)
     os.makedirs(output_directory, exist_ok=True)
 
-    # Create an output root file
-    out_file = ROOT.TFile(output_file, "RECREATE")
+    out_file = TFile(output_file, "RECREATE") # output root file which will store the scaled histograms
 
     # loop over all histograms in the input file
     for key in in_file.GetListOfKeys():
         obj = key.ReadObj()
-
-        # Check if the object is a histogram
-        if obj.IsA().InheritsFrom("TH1"):
-            hist = obj.Clone()  # Clone to avoid modifying the original histogram
+        if obj.IsA().InheritsFrom("TH1"):  #check if the object is a histogram
+            hist = obj.Clone()  # clone to avoid modifying the original histogram
             hist.Scale(scale_factor)
+            hist.Write()  # write the scaled histogram to the output file
 
-            # Write the scaled histogram to the output file
-            hist.Write()
-
-    # Close the input and output files
     in_file.Close()
     out_file.Close()
 
-def hadd_files(output_dir, set_name, input_files):
-    # Ensure the output directory exists
-    os.makedirs(output_dir, exist_ok=True)
 
-    # Construct the hadd command
-    output_file = os.path.join(output_dir, f"{set_name}.root")
+#function to hadd the all files of data and every bkg
+#the output files with the scaled histograms are hadded
+def hadd_files(output_dir, setname, input_files): 
+    os.makedirs(output_dir, exist_ok=True) 
+    output_file = os.path.join(output_dir, f"{setname}.root")
     hadd_command = ["hadd", "-f",  output_file] + input_files
 
     subprocess.call(hadd_command)
 
+    
+#this functions uses the above two functions
+#each bkg sample has subdivisions for different pT/HT/mass bins with different xsec, this function scales all of them to their respective value
+#the info is taken from the bkg_samples dictionary
+#and final output is one file for every bkg and data
 def process_samples(samples, input_dir, output_dir, data_lumi):
     for sample_group, sample_info in samples.items():
-        scaled_files = []  # List to store paths of scaled files for hadding
-
+        scaled_files = []  
         for sub_sample_name, sub_sample_info in sample_info.items():
             input_filename = os.path.join(input_dir, sub_sample_info["filename"])
             output_filename = os.path.join(output_dir, f"scaled_{sub_sample_info['filename']}")
             
-            # Calculate scale factor for each sub-sample
             if sub_sample_info["data"]==0:
-                scale_factor = data_lumi / (sub_sample_info["nevents"] / sub_sample_info["xsec"])
+                scale_factor = data_lumi / (sub_sample_info["nevents"] / sub_sample_info["xsec"])  # calculating the scale factor for each sub-sample
             else:
                 scale_factor = 1
-            # Scale histograms
-            scale_histograms(input_filename, output_filename, scale_factor)
-
-            # Append the scaled file path to the list
+            
+            scale_histograms(input_filename, output_filename, scale_factor)          
             scaled_files.append(output_filename)
 
-        # Merge the scaled files into one final file for each sample
+        # merge the scaled files into one final file for each sample
         hadd_files(output_dir, sample_group, scaled_files)
 
-
+        
+#following functions are for decoration
 def SetOverflowBin(histo):
     nbins = histo.GetNbinsX()
     histo.SetBinContent(nbins, histo.GetBinContent(nbins) + histo.GetBinContent(nbins+1)); ## Overflow
@@ -151,6 +146,9 @@ def SetLegendStyle(legend):
            
             
 ####################################################################################
+#                                                                                  #
+####################################################################################
+
 
 
 ###########################
@@ -163,26 +161,28 @@ def main():
     gROOT.ProcessLine("gErrorIgnoreLevel = 1001;")  # suppress info messages
     gROOT.ProcessLine("gErrorIgnoreLevel = 3001;")  # suppress warning messages
 
-    inputDir = "../cluster_hst_output/nov09/"
-    outputDir = "finalhaddOutput/"
+    inputDir = "../cluster_hst_output/nov15/"
+    outputDir = "finalhaddOutput/nov15/"
+    stackDir = "stackoutput/nov15/"
     
     data_lumi = 36.3*1000
     
-    # Process all samples, scale histograms, and hadd files
+    # process all samples, scale histograms, and hadd files
     process_samples(bkg_samples, inputDir, outputDir, data_lumi)
     
     scaled_files_to_delete = [f for f in os.listdir(outputDir) if f.startswith("scaled")]
     for file_to_delete in scaled_files_to_delete:
         os.remove(os.path.join(outputDir, file_to_delete))
+
         
-    #Stacking begins
+    ###########################
+     # Stacking begins
+    ###########################
+
     
-    MC_files = ["DYJetsToLL.root","TTBar.root","WJets.root","QCD.root","WGamma.root","ZGamma.root"]
-    
+    MC_files = ["DY.root","TTBar.root","WJets.root","QCD.root","WGamma.root","ZGamma.root"]    
     hist_colors = [kBlue-9, kGreen-9, kRed-9, kYellow-9, kMagenta-9, kCyan-9]
-     
     files_mc = [TFile.Open(outputDir + file_name, "READ") for file_name in MC_files] #storing the MC root files in a list
- 
     file_data = TFile.Open(outputDir + "Data.root", "READ")
 
     print("\nFiles opened in ROOT successfully..") 
@@ -203,7 +203,7 @@ def main():
         hst_data.SetMarkerSize(0.6)
         hst_data.SetLineColor(kBlack)
         #if plotname != "nEvents" and plotname != "nEvSel":
-        if "flavor" in plotname or "reliso03" in plotname:
+        if "flavor" in plotname or "reliso03" in plotname or "njet" in plotname:
             rebin = 1
         else:
             rebin = 5
@@ -324,19 +324,20 @@ def main():
 
             # display the plot
             canvas.Draw()
-           
+
+            
             # saving the stacked plots
             if plotname.startswith("2l1d_"):
-                output_filename = f"stackoutput/evsel_2l1d/{plotname}.png"
+                output_filename = os.path.join(stackDir, "evsel_2l1d", f"{plotname}.png")
                 canvas.SaveAs(output_filename)
             elif plotname.startswith("1l2d_"):
-                output_filename = f"stackoutput/evsel_1l2d/{plotname}.png"
+                output_filename = os.path.join(stackDir, "evsel_1l2d", f"{plotname}.png")
                 canvas.SaveAs(output_filename)
             elif plotname.startswith("3d_"):
-                output_filename = f"stackoutput/evsel_3d/{plotname}.png"
+                output_filename = os.path.join(stackDir, "evsel_3d", f"{plotname}.png")
                 canvas.SaveAs(output_filename)
             else:
-                output_filename = f"stackoutput/{plotname}.png"
+                output_filename = os.path.join(stackDir, f"{plotname}.png")
                 canvas.SaveAs(output_filename)
 
                 

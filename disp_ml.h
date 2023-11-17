@@ -1969,19 +1969,6 @@ public :
     TH1F *dispml_h[3][45];
     TH1F *flavor[3];
     TH1F *_2l1d[30];
-   
-    
-    /*
-    TH1F *met[10];
-    TH1F *prompt_pt[10];
-    TH1F *disp_pt[10];
-    TH1F *dispLep_invmass[10];
-    TH1F *delphi_ll[10];
-    TH1F *delR_ll[10];
-    TH1F *PV_2D[10];
-    TH1F *SV_2D[10];
-    TH1F *delta2D[10];
-    */
   
   };
   

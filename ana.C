@@ -63,10 +63,10 @@ void ana(int sample=0){
 
   if(sample==4){
     //Add one file to chain. This is the input file.
-    chain->Add("inputs/WGToLNuG/*");
+    chain->Add("inputs/WJets_HT-400To600_9.root");
     //Set Names of outputfiles
-    hstfilename = "hst_output/hst_WGToLNuG_01J.root";
-    sumfilename = "sum_output/WGToLNuG_01J.txt";
+    hstfilename = "hst_output/hst_WJets.root";
+    sumfilename = "sum_output/WJets.txt";
     //Set some options
     m_selec.SetData(0); //MC=0, data=1
     m_selec.SetYear(2016);

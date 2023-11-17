@@ -28,8 +28,8 @@ void overlay()
 
   //First declare the file names (just strings)
   
-  TString dyfile = "cluster_hst_output/DYJetsToLL_oct19.root";
-  TString datafile = "cluster_hst_output/2016Data_oct19.root";
+  TString dyfile = "finalhaddOutput/nov15/";
+  TString datafile = "finalhaddOutput/nov15/";
 
   //Declare other constants, strings that you might need here.
 
