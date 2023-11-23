@@ -60,7 +60,7 @@ def process_samples(samples, input_dir, output_dir, data_lumi):
             
             if sub_sample_info["data"]==0:
                 scale_factor = data_lumi / (sub_sample_info["nevents"] / sub_sample_info["xsec"])  # calculating the scale factor for each sub-sample
-            else:
+            elif sub_sample_info["data"]==1:
                 scale_factor = 1
             
             scale_histograms(input_filename, output_filename, scale_factor)          
@@ -166,14 +166,16 @@ def main():
     stackDir = "stackoutput/nov15/"
     
     data_lumi = 36.3*1000
-    
+
     # process all samples, scale histograms, and hadd files
     process_samples(bkg_samples, inputDir, outputDir, data_lumi)
-    
+
+    '''
     scaled_files_to_delete = [f for f in os.listdir(outputDir) if f.startswith("scaled")]
     for file_to_delete in scaled_files_to_delete:
         os.remove(os.path.join(outputDir, file_to_delete))
-
+    '''
+    
         
     ###########################
      # Stacking begins
@@ -188,6 +190,7 @@ def main():
     print("\nFiles opened in ROOT successfully..") 
     
     hist_names = [ "flavor", "met", "imass_3l", "delR_l0l1", "delPhi_l0l1", "delPhi_l0met", "imass_l0l1", "mt0", "delR_l1l2", "delPhi_l1l2", "delPhi_l1met", "imass_l1l2", "mt1", "delR_l2l0", "delPhi_l2l0", "delPhi_l2met", "imass_l2l0", "mt2", "njet", "l0_reliso03", "l1_reliso03", "l2_reliso03", "l2_dxy", "l2_dz", "l2_ip3d", "l2_sip3d"]
+
     hist_prefix = ["2l1d_", "1l2d_", "3d_"]
     
     hists = []
@@ -205,6 +208,8 @@ def main():
         #if plotname != "nEvents" and plotname != "nEvSel":
         if "flavor" in plotname or "reliso03" in plotname or "njet" in plotname:
             rebin = 1
+        elif "dxy" in plotname or "dz" in plotname:
+            rebin = 10
         else:
             rebin = 5
         hst_data.Rebin(rebin)

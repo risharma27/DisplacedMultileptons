@@ -81,6 +81,21 @@ void disp_ml::SlaveTerminate()
   ofstream fout(_SumFileName);
   fout<<"Total events ran = "<<nEvtTotal<<endl;
   fout<<"Total good events  = "<<nEvtGood<<endl;
+  fout<<" "<<endl;
+  fout<<"2l1d event list"<<endl;
+  for(int i=0; i<(int)evt_2l1d.size(); i++){
+    fout<<evt_2l1d.at(i)<<" ";
+  }
+  fout<<"\n \n";
+  fout<<"1l2d event list"<<endl;
+  for(int i=0; i<(int)evt_1l2d.size(); i++){
+    fout<<evt_1l2d.at(i)<<" ";
+  }
+  fout<<"\n \n";
+  fout<<"3d event list"<<endl;
+  for(int i=0; i<(int)evt_3d.size(); i++){
+    fout<<evt_3d.at(i)<<" ";
+  }
 }
 
 void disp_ml::Terminate()
@@ -119,6 +134,7 @@ Bool_t disp_ml::Process(Long64_t entry)
   else if(_verbosity>0 && nEvtTotal%1000000==0)cout<<"Processed "<<nEvtTotal<<" event..."<<endl;
 
   nEvtTotal++;         //Total number of events containing everything (including the trash events).
+ 
   h.nevt->Fill(0);
   
   //The following flags throws away some events based on unwanted properties (such as detector problems)
@@ -333,7 +349,32 @@ Bool_t disp_ml::Process(Long64_t entry)
 
       //**************************************************************//
 
-   
+
+      
+
+      //**************************************************************//
+      //*********************** 2L Control Region ********************//
+      //**************************************************************//
+
+      if((int)recoLepton.size()>1 && recoLepton.at(0).reliso03<0.15){
+	float l0l1_imass = (recoLepton.at(0).v+recoLepton.at(1).v).M();
+	if(60.0<l0l1_imass && l0l1_imass<120.0){  //complete l1 iso range
+	  h._2l[0]->Fill(l0l1_imass);
+	  h._2l[1]->Fill(recoLepton.at(0).reliso03);
+	  h._2l[2]->Fill(recoLepton.at(1).reliso03);
+	}
+	if((60.0<l0l1_imass && l0l1_imass<120.0) && recoLepton.at(1).reliso03<0.15){ //l1 is isolated (reliso03<0.15)
+	  h._2liso[0]->Fill(l0l1_imass);
+	  h._2liso[1]->Fill(recoLepton.at(0).reliso03);
+	  h._2liso[2]->Fill(recoLepton.at(1).reliso03);
+	}
+	if((60.0<l0l1_imass && l0l1_imass<120.0) && recoLepton.at(1).reliso03>1.0){ //l1 is not isolated (reliso03>0.15)
+	  h._2lnoiso[0]->Fill(l0l1_imass);
+	  h._2lnoiso[1]->Fill(recoLepton.at(0).reliso03);
+	  h._2lnoiso[2]->Fill(recoLepton.at(1).reliso03);
+	}
+      }
+      
     
       //##################### EVENT SELECTION ####################//
 
@@ -363,7 +404,7 @@ Bool_t disp_ml::Process(Long64_t entry)
 
     
       if(triggered_events){
-     
+    
 	h.nevsel->Fill(0);
 
 	//h.n_dispL->Fill(displacedlepton.size());
@@ -379,6 +420,7 @@ Bool_t disp_ml::Process(Long64_t entry)
 	vec_evsel.clear();
 	
 	if(_2l1d){
+	  evt_2l1d.push_back(nEvtTotal);
 	  h.nevsel->Fill(1);
 	  vec_evsel.push_back(0);
 	  myLep[0].push_back(promptLepton.at(0));
@@ -387,6 +429,7 @@ Bool_t disp_ml::Process(Long64_t entry)
 	}
     
 	if(_1l2d){
+	  evt_1l2d.push_back(nEvtTotal);
 	  h.nevsel->Fill(2);
 	  vec_evsel.push_back(1);
 	  myLep[1].push_back(promptLepton.at(0));
@@ -395,6 +438,7 @@ Bool_t disp_ml::Process(Long64_t entry)
 	}
     
 	if(_3d){
+	  evt_3d.push_back(nEvtTotal);
 	  h.nevsel->Fill(3);
 	  vec_evsel.push_back(2);
 	  myLep[2].push_back(displacedLepton.at(0));
@@ -635,13 +679,26 @@ void disp_ml::BookHistograms()
 {
 
   h.nevt = new TH1F("nEvents", "0-nEvtTotal, 1-nEvtGood, 2-nEvtTrigger, 3-nEvtPass",5,0,5);
-  
+
   h.zcr[0] = new TH1F("zcr_invmass", "zcr_invmass", 200, 0, 200);
   h.zcr[1] = new TH1F("zcr_met", "zcr_met", 200, 0, 200);
+
+  h._2l[0] = new TH1F("2l_Ml0l1", "M_{l_{0}l_{1}}", 200, 0, 200);
+  h._2l[1] = new TH1F("2l_l0iso", "l_{0} reliso03", 20, 0, 0.2);
+  h._2l[2] = new TH1F("2l_l1iso", "l_{1} reliso03", 150, 0, 15.0);
+
+  h._2liso[0] = new TH1F("2liso_Ml0l1", "M_{l_{0}l_{1}}", 200, 0, 200);
+  h._2liso[1] = new TH1F("2liso_l0iso", "l_{0} reliso03", 20, 0, 0.2);
+  h._2liso[2] = new TH1F("2liso_l1iso", "l_{1} reliso03", 20, 0, 0.2);
+
+  h._2lnoiso[0] = new TH1F("2lnoiso_Ml0l1", "M_{l_{0}l_{1}}", 200, 0, 200);
+  h._2lnoiso[1] = new TH1F("2lnoiso_l0iso", "l_{0} reliso03", 20, 0, 2.0);
+  h._2lnoiso[2] = new TH1F("2lnoiso_l1iso", "l_{1} reliso03", 150, 0, 15.0);
+  
   h.nevsel = new TH1F("nEvSel", "1: 2l1d, 2: 1l2d, 3: 3d", 5,0,5);
   TString evsel_name[3] = {"2l1d_", "1l2d_", "3d_"};
   TString plotname[45] = {"met","pt_3l","imass_3l","pt0","pt1","pt2","pt_l0l1","delR_l0l1","delPhi_l0l1","delPhi_l0met","imass_l0l1","mt0","pt_l1l2","delR_l1l2","delPhi_l1l2","delPhi_l1met","imass_l1l2","mt1","pt_l2l0","delR_l2l0","delPhi_l2l0","delPhi_l2met","imass_l2l0","mt2","HT","njet","dRmin_l0j","dRmin_l1j","dRmin_l2j","l0_dxy","l0_dz","l0_ip3d","l0_sip3d","l0_reliso03","l1_dxy","l1_dz","l1_ip3d","l1_sip3d","l1_reliso03","l2_dxy","l2_dz","l2_ip3d","l2_sip3d","l2_reliso03","bjets"};
-  int nbins[45] = {200,500,500,200,200,200,500,100,32,32,500,200,500,100,32,32,500,200,500,100,32,32,500,200,200,10,100,100,100,2000,2000,200,500,150,2000,2000,200,500,150,2000,2000,200,1000,15.0,20};
+  int nbins[45] = {200,500,500,200,200,200,500,100,32,32,500,200,500,100,32,32,500,200,500,100,32,32,500,200,200,10,100,100,100,2000,2000,200,500,1500,2000,2000,200,500,1500,2000,2000,200,1000,1500,20};
   float blo[45] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-10,-10,0,0,0,-10,-10,0,0,0,-10,-10,0,0,0,0};
   float bhi[45] = {200,500,500,200,200,200,500,10,3.2,3.2,500,200,500,10,3.2,3.2,500,200,500,10,3.2,3.2,500,200,200,10,100,100,100,10,10,10,50,15.0,10,10,10,50,15.0,10,10,10,100,15.0,20};
   for(int ievsel=0; ievsel<3; ievsel++){

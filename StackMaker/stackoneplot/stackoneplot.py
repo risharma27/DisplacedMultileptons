@@ -47,7 +47,7 @@ def SetLegendStyle(legend):
 def main():
     
     # Read the file from the disk    
-    inputDir = "../finalhaddOutput/nov15/"
+    inputDir = "../finalhaddOutput/vaidehi/"
     
     file_DY     =  TFile.Open(inputDir + "DY.root",     "READ")
     file_ttbar  =  TFile.Open(inputDir + "TTBar.root",  "READ")
@@ -62,15 +62,17 @@ def main():
     
     ## Get the histograms
 
-    plotname = "1l2d_l0_reliso03"
+    plotname = "1l2d_MET"
     h_dy     = file_DY.Get(plotname);      decorate(h_dy,     kBlue-9);
     h_tt     = file_ttbar.Get(plotname);   decorate(h_tt,     kGreen-9); 
     h_qcd    = file_QCD.Get(plotname);     decorate(h_qcd,    kYellow-9);
     h_wjets  = file_WJets.Get(plotname);   decorate(h_wjets,  kRed-9);
     h_zgamma = file_ZGamma.Get(plotname);  decorate(h_zgamma, kCyan-9);
     h_wgamma = file_WGamma.Get(plotname);  decorate(h_wgamma, kMagenta-9);
+
+    print(h_wgamma)
     
-    h_data = file_Data.Get(plotname);
+    h_data = file_Data.Get("1l2d_met");
     h_data.SetMarkerStyle(20)
     h_data.SetMarkerSize(0.6)
     h_data.SetLineColor(kBlack)
@@ -124,8 +126,9 @@ def main():
     #Scaling
 
     print("number of bins", h_data.GetNbinsX())
-    bin_lo = 5
-    bin_hi = h_data.GetNbinsX()
+    nbins = h_data.GetNbinsX()
+    bin_lo = 7
+    bin_hi = nbins
     
     h_otherbkg = h_dy.Clone()
     for hist, integral, name in histograms:

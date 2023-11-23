@@ -34,8 +34,10 @@ std::pair<vector<int>, vector<float>> disp_ml::dR_matching(vector<Lepton> vec1, 
 	delR_min=delR; match=j;
       }
     }
-    foundMatch.push_back(match);
-    delRmin.push_back(delR_min);
+    if(delR_min<0.05){
+      foundMatch.push_back(match);
+      delRmin.push_back(delR_min);
+    }
   }
   
   return std::make_pair(foundMatch, delRmin);

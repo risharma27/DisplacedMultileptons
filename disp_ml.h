@@ -1964,6 +1964,9 @@ public :
     //Histograms are declared here.
     TH1F *nevt;
     TH1F *zcr[5];
+    TH1F *_2l[5];
+    TH1F *_2liso[5];
+    TH1F *_2lnoiso[5];
     TH1F *nevsel;
     TH1F *evtweight[3];
     TH1F *dispml_h[3][45];
@@ -2033,6 +2036,7 @@ private:
   vector<float> Delta2D;
   vector<Lepton> myLep[3];
   vector<int> vec_evsel;
+  vector<int> evt_2l1d, evt_1l2d, evt_3d;
 
   ClassDef(disp_ml,0);
   
