@@ -219,7 +219,7 @@ Bool_t disp_ml::Process(Long64_t entry)
 
 	//####################### MC genmatching #############################//
     
-	std::pair<vector<int>, vector<float>> mu_result = dR_matching(recoMuon, genMuon);
+	std::pair<vector<int>, vector<float>> mu_result = dR_matching(recoMuon, genMuon, 0.05);
 	vector<int> mu_matchto_genmu = mu_result.first;
 	vector<float> mu_delRmin_genmu = mu_result.second;
    
@@ -248,7 +248,7 @@ Bool_t disp_ml::Process(Long64_t entry)
 
 	
 
-	std::pair<vector<int>, vector<float>> el_result = dR_matching(recoElectron, genElectron);
+	std::pair<vector<int>, vector<float>> el_result = dR_matching(recoElectron, genElectron, 0.05);
 	vector<int> el_matchto_genel = el_result.first;
 	vector<float> el_delRmin_genel = el_result.second;
 
@@ -326,10 +326,16 @@ Bool_t disp_ml::Process(Long64_t entry)
       Sortpt(displacedLepton);
     
       //####################### ANALYSIS STARTS HERE ######################//
-    
+
+      for(int i=0; i<(int)Electron.size(); i++){
+	h.mediumlep_iso[0]->Fill(Electron.at(i).reliso03);
+      }
+      for(int i=0; i<(int)Muon.size(); i++){
+	h.mediumlep_iso[1]->Fill(Muon.at(i).reliso03);
+      }
+      
       float metpt = *MET_pt;
       float metphi = *MET_phi;
-
    
       //*********************** Z Control Region **********************//
     
@@ -350,28 +356,35 @@ Bool_t disp_ml::Process(Long64_t entry)
       //**************************************************************//
 
 
-      
+      //********************************************************************************************//
+      //*********************** 2L (both prompt and l0 isolated) Control Region ********************//
+      //********************************************************************************************//
 
-      //**************************************************************//
-      //*********************** 2L Control Region ********************//
-      //**************************************************************//
-
-      if((int)recoLepton.size()>1 && recoLepton.at(0).reliso03<0.15){
-	float l0l1_imass = (recoLepton.at(0).v+recoLepton.at(1).v).M();
-	if(60.0<l0l1_imass && l0l1_imass<120.0){  //complete l1 iso range
+      if((int)promptLepton.size()>1 && (promptLepton.at(0).id == -promptLepton.at(1).id) && promptLepton.at(0).reliso03<0.15){
+	float l0l1_imass = (promptLepton.at(0).v+promptLepton.at(1).v).M();
+	if(76.0<l0l1_imass && l0l1_imass<106.0){  //complete l1 iso range
 	  h._2l[0]->Fill(l0l1_imass);
-	  h._2l[1]->Fill(recoLepton.at(0).reliso03);
-	  h._2l[2]->Fill(recoLepton.at(1).reliso03);
+	  h._2l[1]->Fill(promptLepton.at(0).reliso03);
+	  h._2l[2]->Fill(promptLepton.at(1).reliso03);
+	  h._2l[3]->Fill(promptLepton.at(0).v.Pt());
+	  h._2l[4]->Fill(promptLepton.at(1).v.Pt());
+	  h._2l[5]->Fill(metpt);
 	}
-	if((60.0<l0l1_imass && l0l1_imass<120.0) && recoLepton.at(1).reliso03<0.15){ //l1 is isolated (reliso03<0.15)
+	if((76.0<l0l1_imass && l0l1_imass<106.0) && promptLepton.at(1).reliso03<0.15){ //l1 is isolated (reliso03<0.15)
 	  h._2liso[0]->Fill(l0l1_imass);
-	  h._2liso[1]->Fill(recoLepton.at(0).reliso03);
-	  h._2liso[2]->Fill(recoLepton.at(1).reliso03);
+	  h._2liso[1]->Fill(promptLepton.at(0).reliso03);
+	  h._2liso[2]->Fill(promptLepton.at(1).reliso03);
+	  h._2liso[3]->Fill(promptLepton.at(0).v.Pt());
+	  h._2liso[4]->Fill(promptLepton.at(1).v.Pt());
+	  h._2liso[5]->Fill(metpt);
 	}
-	if((60.0<l0l1_imass && l0l1_imass<120.0) && recoLepton.at(1).reliso03>1.0){ //l1 is not isolated (reliso03>0.15)
+	if((76.0<l0l1_imass && l0l1_imass<106.0) && promptLepton.at(1).reliso03>1.0){ //l1 is not isolated (reliso03>1.0)
 	  h._2lnoiso[0]->Fill(l0l1_imass);
-	  h._2lnoiso[1]->Fill(recoLepton.at(0).reliso03);
-	  h._2lnoiso[2]->Fill(recoLepton.at(1).reliso03);
+	  h._2lnoiso[1]->Fill(promptLepton.at(0).reliso03);
+	  h._2lnoiso[2]->Fill(promptLepton.at(1).reliso03);
+	  h._2lnoiso[3]->Fill(promptLepton.at(0).v.Pt());
+	  h._2lnoiso[4]->Fill(promptLepton.at(1).v.Pt());
+	  h._2lnoiso[5]->Fill(metpt);
 	}
       }
       
@@ -559,7 +572,7 @@ Bool_t disp_ml::Process(Long64_t entry)
 	      h.dispml_h[evsel][24]->Fill(jet_pt, evtwt);
 	      h.dispml_h[evsel][25]->Fill((int)recoJet.size(), evtwt);
       
-	      std::pair<vector<int>, vector<float>> result = dR_matching(myLep[evsel], recoJet);
+	      std::pair<vector<int>, vector<float>> result = dR_matching(myLep[evsel], recoJet, 0.05);
 	      vector<int> myLep_matchto_recoJet = result.first;
 	      vector<float> myLep_delRmin_recoJet = result.second;
 
@@ -636,28 +649,12 @@ Bool_t disp_ml::Process(Long64_t entry)
 		h._2l1d[29]->Fill((myLep[0].at(2).v+myLep[0].at(0).v).M());
 	      }
 	    }
-
-
-
-	    
-	    //********************** 1l2d QCD Control Region ********************//
-
-	    //if(evsel==1 ){
-
-
-
-
-
-      
-
-
-     
 	  }
 	  
 
 	  //*******************************************************************************//
       
-	  }//evsel events
+	}//evsel events
     
       }//triggered_events
 
@@ -680,20 +677,33 @@ void disp_ml::BookHistograms()
 
   h.nevt = new TH1F("nEvents", "0-nEvtTotal, 1-nEvtGood, 2-nEvtTrigger, 3-nEvtPass",5,0,5);
 
+  h.mediumlep_iso[0] = new TH1F("iso_mvamedium_el", "", 150, 0, 15);
+  h.mediumlep_iso[1] = new TH1F("iso_medium_mu", "", 150, 0, 15);
+  //h.elBitmap = new TH1F("el_bitmap", "", 10, 0, 10);
+
   h.zcr[0] = new TH1F("zcr_invmass", "zcr_invmass", 200, 0, 200);
   h.zcr[1] = new TH1F("zcr_met", "zcr_met", 200, 0, 200);
 
   h._2l[0] = new TH1F("2l_Ml0l1", "M_{l_{0}l_{1}}", 200, 0, 200);
   h._2l[1] = new TH1F("2l_l0iso", "l_{0} reliso03", 20, 0, 0.2);
   h._2l[2] = new TH1F("2l_l1iso", "l_{1} reliso03", 150, 0, 15.0);
-
+  h._2l[3] = new TH1F("2l_l0pt", "l_{0} p_{T}", 200, 0, 200);
+  h._2l[4] = new TH1F("2l_l1pt", "l_{1} p_{T}", 200, 0, 200);
+  h._2l[5] = new TH1F("2l_met", "MET", 200, 0, 200);
+  
   h._2liso[0] = new TH1F("2liso_Ml0l1", "M_{l_{0}l_{1}}", 200, 0, 200);
   h._2liso[1] = new TH1F("2liso_l0iso", "l_{0} reliso03", 20, 0, 0.2);
   h._2liso[2] = new TH1F("2liso_l1iso", "l_{1} reliso03", 20, 0, 0.2);
-
+  h._2liso[3] = new TH1F("2liso_l0pt", "l_{0} p_{T}", 200, 0, 200);
+  h._2liso[4] = new TH1F("2liso_l1pt", "l_{1} p_{T}", 200, 0, 200);
+  h._2liso[5] = new TH1F("2liso_met", "MET", 200, 0, 200);
+  
   h._2lnoiso[0] = new TH1F("2lnoiso_Ml0l1", "M_{l_{0}l_{1}}", 200, 0, 200);
   h._2lnoiso[1] = new TH1F("2lnoiso_l0iso", "l_{0} reliso03", 20, 0, 2.0);
   h._2lnoiso[2] = new TH1F("2lnoiso_l1iso", "l_{1} reliso03", 150, 0, 15.0);
+  h._2lnoiso[3] = new TH1F("2lnoiso_l0pt", "l_{0} p_{T}", 200, 0, 200);
+  h._2lnoiso[4] = new TH1F("2lnoiso_l1pt", "l_{1} p_{T}", 200, 0, 200);
+  h._2lnoiso[5] = new TH1F("2lnoiso_met", "MET", 200, 0, 200);
   
   h.nevsel = new TH1F("nEvSel", "1: 2l1d, 2: 1l2d, 3: 3d", 5,0,5);
   TString evsel_name[3] = {"2l1d_", "1l2d_", "3d_"};

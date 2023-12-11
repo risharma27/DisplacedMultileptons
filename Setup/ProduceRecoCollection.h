@@ -30,9 +30,9 @@ void disp_ml::RecoLeptonArray(){
 
 
   //Electrons
-
   int nel=0;
-  for(unsigned int i=0; i<(*nElectron); i++){
+  for (unsigned int i = 0; i < (*nElectron); i++) {
+    
     Lepton temp;
     temp.v.SetPtEtaPhiM(Electron_pt[i],Electron_eta[i],Electron_phi[i],Electron_mass[i]);
     temp.id = -11*Electron_charge[i];
@@ -45,11 +45,12 @@ void disp_ml::RecoLeptonArray(){
 	    
     bool ptetacut = temp.v.Pt()>10 && fabs(temp.v.Eta())<2.4;
     //bool passcut_mediumel = ptetacut && Electron_pfRelIso03_all[i]<0.15 && Electron_cutBased[i]>1;
-    bool passcut_mediumel = ptetacut && Electron_cutBased[i]>1;
+    bool passcut_mediumel = ptetacut && Electron_mvaFall17V2noIso_WP80[i];
+    //bool passcut_mediumel = ptetacut && Electron_cutBased[i]>1;
     
     //bool promptelectron = passcut_mediumel && fabs(Electron_dxy[i])<0.05 && fabs(Electron_dz[i])<0.1;
     //bool displacedelectron = passcut_mediumel && fabs(Electron_dxy[i])>0.05;
-      					
+    
     if(passcut_mediumel){
       recoElectron.push_back(temp);
       recoLepton.push_back(temp);

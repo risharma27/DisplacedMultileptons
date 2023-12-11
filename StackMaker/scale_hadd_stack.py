@@ -161,20 +161,18 @@ def main():
     gROOT.ProcessLine("gErrorIgnoreLevel = 1001;")  # suppress info messages
     gROOT.ProcessLine("gErrorIgnoreLevel = 3001;")  # suppress warning messages
 
-    inputDir = "../cluster_hst_output/nov15/"
-    outputDir = "finalhaddOutput/nov15/"
-    stackDir = "stackoutput/nov15/"
+    inputDir = "../cluster_hst_output/dec06/"
+    outputDir = "finalhaddOutput/dec06/"
+    stackDir = "stackoutput/dec06/"
     
-    data_lumi = 36.3*1000
+    data_lumi = 36.313753344*1000
 
     # process all samples, scale histograms, and hadd files
     process_samples(bkg_samples, inputDir, outputDir, data_lumi)
 
-    '''
     scaled_files_to_delete = [f for f in os.listdir(outputDir) if f.startswith("scaled")]
     for file_to_delete in scaled_files_to_delete:
         os.remove(os.path.join(outputDir, file_to_delete))
-    '''
     
         
     ###########################
@@ -190,15 +188,18 @@ def main():
     print("\nFiles opened in ROOT successfully..") 
     
     hist_names = [ "flavor", "met", "imass_3l", "delR_l0l1", "delPhi_l0l1", "delPhi_l0met", "imass_l0l1", "mt0", "delR_l1l2", "delPhi_l1l2", "delPhi_l1met", "imass_l1l2", "mt1", "delR_l2l0", "delPhi_l2l0", "delPhi_l2met", "imass_l2l0", "mt2", "njet", "l0_reliso03", "l1_reliso03", "l2_reliso03", "l2_dxy", "l2_dz", "l2_ip3d", "l2_sip3d"]
+    
+    hist_2l = ["2l_l0iso", "2l_l1iso", "2l_Ml0l1", "2liso_l0iso", "2liso_l1iso", "2liso_Ml0l1", "2lnoiso_l0iso", "2lnoiso_l1iso", "2lnoiso_Ml0l1"]
 
-    hist_prefix = ["2l1d_", "1l2d_", "3d_"]
-    
-    hists = []
-    
+    hist_prefix = ["2l1d_", "1l2d_", "3d_"]    
+    hists = []   
     for prefix in hist_prefix:
         for hist in hist_names:
             hist_name = prefix + hist
             hists.append(hist_name)
+            
+    for hist in hist_2l:
+        hists.append(hist)
 
     for plotname in hists:
         hst_data = file_data.Get(plotname)
@@ -206,7 +207,7 @@ def main():
         hst_data.SetMarkerSize(0.6)
         hst_data.SetLineColor(kBlack)
         #if plotname != "nEvents" and plotname != "nEvSel":
-        if "flavor" in plotname or "reliso03" in plotname or "njet" in plotname:
+        if "flavor" in plotname or "reliso03" in plotname or "njet" in plotname or plotname == "2liso_l1iso":
             rebin = 1
         elif "dxy" in plotname or "dz" in plotname:
             rebin = 10
@@ -300,7 +301,7 @@ def main():
 
             # draw the stacked histogram
             hst_stack.SetMinimum(0.001)
-            hst_stack.SetMaximum(1e6)
+            hst_stack.SetMaximum(1e8)
             hst_stack.Draw("HIST")
             hst_stack.GetYaxis().SetTitle('Events')
             hst_stack.GetYaxis().CenterTitle()

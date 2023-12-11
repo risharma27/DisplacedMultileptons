@@ -47,7 +47,7 @@ def SetLegendStyle(legend):
 def main():
     
     # Read the file from the disk    
-    inputDir = "../finalhaddOutput/vaidehi/"
+    inputDir = "../finalhaddOutput/nov23/"
     
     file_DY     =  TFile.Open(inputDir + "DY.root",     "READ")
     file_ttbar  =  TFile.Open(inputDir + "TTBar.root",  "READ")
@@ -62,7 +62,7 @@ def main():
     
     ## Get the histograms
 
-    plotname = "1l2d_MET"
+    plotname = "2lnoiso_l1iso"
     h_dy     = file_DY.Get(plotname);      decorate(h_dy,     kBlue-9);
     h_tt     = file_ttbar.Get(plotname);   decorate(h_tt,     kGreen-9); 
     h_qcd    = file_QCD.Get(plotname);     decorate(h_qcd,    kYellow-9);
@@ -72,7 +72,7 @@ def main():
 
     print(h_wgamma)
     
-    h_data = file_Data.Get("1l2d_met");
+    h_data = file_Data.Get(plotname);
     h_data.SetMarkerStyle(20)
     h_data.SetMarkerSize(0.6)
     h_data.SetLineColor(kBlack)
@@ -101,7 +101,7 @@ def main():
 
     
     ##Rebining
-    rebin = 1
+    rebin = 5
     h_dy.Rebin(rebin)
     h_tt.Rebin(rebin)
     h_qcd.Rebin(rebin)
@@ -143,13 +143,13 @@ def main():
     print("qcd", qcd_integral)
     print("other bkg", otherbkg_integral)
 
-    qcd_sf = (data_integral-otherbkg_integral)/qcd_integral
+    #qcd_sf = (data_integral-otherbkg_integral)/qcd_integral
 
-    print("qcd before scaling", h_qcd.Integral(1,bin_hi))
+    #print("qcd before scaling", h_qcd.Integral(1,bin_hi))
 
     #h_qcd.Scale(qcd_sf)
    
-    print("qcd after scaling", h_qcd.Integral(1,bin_hi))
+    #print("qcd after scaling", h_qcd.Integral(1,bin_hi))
     
     # Create THStack 
     h_stack = THStack()
@@ -216,8 +216,8 @@ def main():
     h_stack.Draw("HIST")
     h_data.Draw('ep same')
 
-    h_stack.GetXaxis().SetRangeUser(0,1)
-    h_data.GetXaxis().SetRangeUser(0,1)
+    #h_stack.GetXaxis().SetRangeUser(0,1)
+    #h_data.GetXaxis().SetRangeUser(0,1)
 
     #mainPad.Modified()
     #mainPad.Update()
@@ -252,7 +252,7 @@ def main():
 
     ##plot ratiopad
     ratioPad.cd()
-    h_ratio.GetXaxis().SetTitle("l0 reliso03")
+    h_ratio.GetXaxis().SetTitle("M_l0l1")
     h_ratio.GetYaxis().SetTitle("obs/exp")
     h_ratio.GetXaxis().CenterTitle()
     h_ratio.GetYaxis().CenterTitle()
@@ -270,7 +270,7 @@ def main():
     h_ratio.GetYaxis().SetLabelSize(12)
     h_ratio.GetYaxis().SetNdivisions(503)
     h_ratio.GetYaxis().SetRangeUser(0,2)
-    h_ratio.GetXaxis().SetRangeUser(0,1)
+    #h_ratio.GetXaxis().SetRangeUser(0,1)
     
     h_ratio.SetTitle('')
     h_ratio.Draw("ep")

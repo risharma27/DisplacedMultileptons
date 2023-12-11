@@ -15,14 +15,15 @@ void ana(int sample=0){
   TChain *chain = new TChain("Events"); //"Events"
   //Declare an instance of our code class
   
-  disp_ml m_selec;
+  //disp_ml m_selec;
+  nano9Ana m_selec;
   
   if(sample==0){
     //Add one file to chain. This is the input file.
     chain->Add("inputs/DYJetsToLL_M-50.root");
     //Set Names of outputfiles
     hstfilename = "hst_output/hst_DYToLL.root";
-    sumfilename = "sum_output/sum_DYToLL.txt";
+    sumfilename = "sum_output/vaidehi/sum_DYToLL.txt";
     //Set some options
     m_selec.SetData(0); //MC=0, data=1
     m_selec.SetYear(2016);

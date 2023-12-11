@@ -22,7 +22,7 @@ int disp_ml::MotherID(int partindex, int momindex)
 }
 
 
-std::pair<vector<int>, vector<float>> disp_ml::dR_matching(vector<Lepton> vec1, vector<Lepton> vec2)
+std::pair<vector<int>, vector<float>> disp_ml::dR_matching(vector<Lepton> vec1, vector<Lepton> vec2, float dRcut)
 {
   float delR_min = 999; int match = -1;
   vector<int> foundMatch;
@@ -34,7 +34,7 @@ std::pair<vector<int>, vector<float>> disp_ml::dR_matching(vector<Lepton> vec1, 
 	delR_min=delR; match=j;
       }
     }
-    if(delR_min<0.05){
+    if(delR_min<dRcut){
       foundMatch.push_back(match);
       delRmin.push_back(delR_min);
     }
@@ -91,3 +91,4 @@ vector<int> disp_ml::pt_binning_count(vector<Lepton> vec)
   
   return pt_binned_count;
 }
+
