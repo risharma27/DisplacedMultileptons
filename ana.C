@@ -15,8 +15,8 @@ void ana(int sample=0){
   TChain *chain = new TChain("Events"); //"Events"
   //Declare an instance of our code class
   
-  //disp_ml m_selec;
-  nano9Ana m_selec;
+  disp_ml m_selec;
+  //nano9Ana m_selec;
   
   if(sample==0){
     //Add one file to chain. This is the input file.

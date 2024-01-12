@@ -208,6 +208,8 @@ Bool_t disp_ml::Process(Long64_t entry)
       promptLepton.clear();
       displacedLepton.clear();
 
+      
+
       if(_data==0){
 	genMuon.clear();
 	genElectron.clear();
@@ -216,8 +218,14 @@ Bool_t disp_ml::Process(Long64_t entry)
 
 	Sortpt(genMuon);
 	Sortpt(genElectron);
+      }
 
-	//####################### MC genmatching #############################//
+
+      /*
+
+      //####################### MC genmatching #############################//
+
+      if(_data==0){
     
 	std::pair<vector<int>, vector<float>> mu_result = dR_matching(recoMuon, genMuon, 0.05);
 	vector<int> mu_matchto_genmu = mu_result.first;
@@ -279,8 +287,11 @@ Bool_t disp_ml::Process(Long64_t entry)
 
       } //if(_data==0)
 
+      */
 
-      if(_data==1){
+
+	// if(_data==1){
+	
 	for(int i=0; i<(int)recoMuon.size(); i++){
 	  Muon.push_back(recoMuon.at(i));
 	  lightLep.push_back(recoMuon.at(i));
@@ -312,7 +323,7 @@ Bool_t disp_ml::Process(Long64_t entry)
 	  }
 	}
       
-      } //if(_data==1)
+	//  } //if(_data==1)
 
     
       Sortpt(Muon);
@@ -336,25 +347,55 @@ Bool_t disp_ml::Process(Long64_t entry)
       
       float metpt = *MET_pt;
       float metphi = *MET_phi;
+
+      float invmass_ll = -1.0;
+      float invmass_lll = -1.0;
    
       //*********************** Z Control Region **********************//
     
-      float invmass_ll=-1.0;
-      bool z_cr = false;
-      if((int)lightLep.size()>1 && lightLep.at(0).id==-lightLep.at(1).id){
-	invmass_ll = (lightLep.at(0).v+lightLep.at(1).v).M();
-	if(76.0<invmass_ll && invmass_ll<106.0){
-	  z_cr = true;
+      if((int)promptLepton.size()>1 && (promptLepton.at(0).id)*(promptLepton.at(1).id)==-169){  //considering Z->mumu events for now
+	invmass_ll = (promptLepton.at(0).v+promptLepton.at(1).v).M();
+	if(76.0<invmass_ll && invmass_ll<106.0 && metpt<40.0){
+	  h.zcr[0]->Fill(invmass_ll);
+	  h.zcr[1]->Fill(metpt);
+	}
+      }
+      
+      //********************* ll+d selection **************************//
+
+      if((int)promptLepton.size()>1 && (int)displacedLepton.size()>0){
+	invmass_ll = (promptLepton.at(0).v+promptLepton.at(1).v).M();
+	invmass_lll = (promptLepton.at(0).v+promptLepton.at(1).v+displacedLepton.at(0).v).M();
+	h.lld[0]->Fill(invmass_ll);
+	h.lld[1]->Fill(invmass_lll);
+	h.lld[2]->Fill(metpt);
+      }
+
+      //******************** mumu+d selection ************************//
+
+      if((int)promptLepton.size()>1 && (int)displacedLepton.size()>0){
+	if(fabs(promptLepton.at(0).id)==13 && fabs(promptLepton.at(1).id)==13){
+	  invmass_ll = (promptLepton.at(0).v+promptLepton.at(1).v).M();
+	  invmass_lll = (promptLepton.at(0).v+promptLepton.at(1).v+displacedLepton.at(0).v).M();
+	  h.mumud[0]->Fill(invmass_ll);
+	  h.mumud[1]->Fill(invmass_lll);
+	  h.mumud[2]->Fill(metpt);
 	}
       }
 
-      if(z_cr){
-	h.zcr[0]->Fill(invmass_ll);
-	h.zcr[1]->Fill(metpt);
+      //******************** ee+d selection ************************//
+
+      if((int)promptLepton.size()>1 && (int)displacedLepton.size()>0){
+	if(fabs(promptLepton.at(0).id)==11 && fabs(promptLepton.at(1).id)==11){
+	  invmass_ll = (promptLepton.at(0).v+promptLepton.at(1).v).M();
+	  invmass_lll = (promptLepton.at(0).v+promptLepton.at(1).v+displacedLepton.at(0).v).M();
+	  h.eed[0]->Fill(invmass_ll);
+	  h.eed[1]->Fill(invmass_lll);
+	  h.eed[2]->Fill(metpt);
+	}
       }
-
-      //**************************************************************//
-
+ 
+     
 
       //********************************************************************************************//
       //*********************** 2L (both prompt and l0 isolated) Control Region ********************//
@@ -428,7 +469,7 @@ Bool_t disp_ml::Process(Long64_t entry)
 
 	if((int)promptLepton.size()>1 && (int)displacedLepton.size()>0)   _2l1d = true;
 	if((int)promptLepton.size()>0 && (int)displacedLepton.size()>1)   _1l2d = true;
-	if((int)promptLepton.size()>=0 && (int)displacedLepton.size()>2)  _3d = true;
+	if((int)promptLepton.size()>=0 && (int)displacedLepton.size()>2)  _3d   = true;
 
 	vec_evsel.clear();
 	
@@ -683,6 +724,18 @@ void disp_ml::BookHistograms()
 
   h.zcr[0] = new TH1F("zcr_invmass", "zcr_invmass", 200, 0, 200);
   h.zcr[1] = new TH1F("zcr_met", "zcr_met", 200, 0, 200);
+
+  h.lld[0] = new TH1F("lld_invmass_ll", "lld_invmass_ll", 200, 0, 200);
+  h.lld[1] = new TH1F("lld_invmass_3l", "lld_invmass_3l", 500, 0, 500);
+  h.lld[2] = new TH1F("lld_met", "lld_met", 200, 0, 200);
+
+  h.mumud[0] = new TH1F("mumud_invmass_ll", "mumud_invmass_ll", 200, 0, 200);
+  h.mumud[1] = new TH1F("mumud_invmass_3l", "mumud_invmass_3l", 500, 0, 500);
+  h.mumud[2] = new TH1F("mumud_met", "mumud_met", 200, 0, 200);
+
+  h.eed[0] = new TH1F("eed_invmass_ll", "eed_invmass_ll", 200, 0, 200);
+  h.eed[1] = new TH1F("eed_invmass_3l", "eed_invmass_3l", 500, 0, 500);
+  h.eed[2] = new TH1F("eed_met", "eed_met", 200, 0, 200);
 
   h._2l[0] = new TH1F("2l_Ml0l1", "M_{l_{0}l_{1}}", 200, 0, 200);
   h._2l[1] = new TH1F("2l_l0iso", "l_{0} reliso03", 20, 0, 0.2);

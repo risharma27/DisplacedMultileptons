@@ -51,7 +51,7 @@ def hadd_files(output_dir, setname, input_files):
 #each bkg sample has subdivisions for different pT/HT/mass bins with different xsec, this function scales all of them to their respective value
 #the info is taken from the bkg_samples dictionary
 #and final output is one file for every bkg and data
-def process_samples(samples, input_dir, output_dir, data_lumi):
+def process_samples(samples, input_dir, output_dir, datalumi_pre, datalumi_post):
     for sample_group, sample_info in samples.items():
         scaled_files = []  
         for sub_sample_name, sub_sample_info in sample_info.items():
@@ -59,10 +59,15 @@ def process_samples(samples, input_dir, output_dir, data_lumi):
             output_filename = os.path.join(output_dir, f"scaled_{sub_sample_info['filename']}")
             
             if sub_sample_info["data"]==0:
-                scale_factor = data_lumi / (sub_sample_info["nevents"] / sub_sample_info["xsec"])  # calculating the scale factor for each sub-sample
+                if "preVFP" in sub_sample_info['filename']:
+                    print(sub_sample_info['filename'])
+                    scale_factor = datalumi_pre / (sub_sample_info["nevents"] / sub_sample_info["xsec"])  # calculating the scale factor
+                elif "postVFP" in sub_sample_info['filename']:
+                    print(sub_sample_info['filename'])
+                    scale_factor = datalumi_post / (sub_sample_info["nevents"] / sub_sample_info["xsec"])  
             elif sub_sample_info["data"]==1:
                 scale_factor = 1
-            
+                    
             scale_histograms(input_filename, output_filename, scale_factor)          
             scaled_files.append(output_filename)
 
@@ -161,14 +166,15 @@ def main():
     gROOT.ProcessLine("gErrorIgnoreLevel = 1001;")  # suppress info messages
     gROOT.ProcessLine("gErrorIgnoreLevel = 3001;")  # suppress warning messages
 
-    inputDir = "../cluster_hst_output/dec06/"
-    outputDir = "finalhaddOutput/dec06/"
-    stackDir = "stackoutput/dec06/"
+    inputDir = "../cluster_hst_output/jan11/"
+    outputDir = "finalhaddOutput/jan11/"
+    stackDir = "stackoutput/jan11/"
     
-    data_lumi = 36.313753344*1000
+    preVFP_lumi  = 19.3 * 1000
+    postVFP_lumi = 17 * 1000
 
     # process all samples, scale histograms, and hadd files
-    process_samples(bkg_samples, inputDir, outputDir, data_lumi)
+    process_samples(bkg_samples, inputDir, outputDir, preVFP_lumi, postVFP_lumi)
 
     scaled_files_to_delete = [f for f in os.listdir(outputDir) if f.startswith("scaled")]
     for file_to_delete in scaled_files_to_delete:
@@ -191,6 +197,12 @@ def main():
     
     hist_2l = ["2l_l0iso", "2l_l1iso", "2l_Ml0l1", "2liso_l0iso", "2liso_l1iso", "2liso_Ml0l1", "2lnoiso_l0iso", "2lnoiso_l1iso", "2lnoiso_Ml0l1"]
 
+    hist_zcr = ["zcr_invmass", "zcr_met"]
+
+    hist_lld = ["lld_invmass_ll", "lld_invmass_3l", "lld_met"]
+    hist_mumud = ["mumud_invmass_ll", "mumud_invmass_3l", "mumud_met"]
+    hist_eed = ["eed_invmass_ll", "eed_invmass_3l", "eed_met"]
+
     hist_prefix = ["2l1d_", "1l2d_", "3d_"]    
     hists = []   
     for prefix in hist_prefix:
@@ -199,6 +211,14 @@ def main():
             hists.append(hist_name)
             
     for hist in hist_2l:
+        hists.append(hist)
+    for hist in hist_zcr:
+        hists.append(hist)
+    for hist in hist_lld:
+        hists.append(hist)
+    for hist in hist_mumud:
+        hists.append(hist)
+    for hist in hist_eed:
         hists.append(hist)
 
     for plotname in hists:

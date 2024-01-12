@@ -1966,6 +1966,9 @@ public :
     TH1F *mediumlep_iso[2];
     TH1F *elBitmap;
     TH1F *zcr[5];
+    TH1F *lld[5];
+    TH1F *mumud[5];
+    TH1F *eed[5];
     TH1F *_2l[6];
     TH1F *_2liso[6];
     TH1F *_2lnoiso[6];
