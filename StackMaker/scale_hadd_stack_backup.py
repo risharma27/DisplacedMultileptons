@@ -125,7 +125,7 @@ def decorate_hratio(h_ratio):
     h_ratio.GetYaxis().SetNdivisions(503)
     h_ratio.GetYaxis().SetRangeUser(0,2)
 
-
+'''
 def PadStyling(pad,rpad):
     pad.SetLeftMargin(0.15)
     pad.SetRightMargin(0.20)
@@ -144,6 +144,7 @@ def PadStyling(pad,rpad):
     rpad.SetGrid(1)
 
 '''
+
 def PadStyling(pad):
     pad.SetLeftMargin(0.15)
     pad.SetRightMargin(0.20)
@@ -151,7 +152,6 @@ def PadStyling(pad):
     pad.SetBottomMargin(0.1)
     pad.SetTickx(1)
     pad.SetTicky(1)
-'''
 
 def SetLegendStyle(legend):
     legend.SetTextFont(62)
@@ -241,13 +241,18 @@ def main():
         if "flavor" in plotname or "reliso03" in plotname or "njet" in plotname or plotname == "2liso_l1iso":
             rebin = 1
         elif "dxy" in plotname or "dz" in plotname or "lep" in plotname:
-            rebin = 100
+            rebin = 10
         elif plotname == "zcr_invmass":
             rebin = 2
+        elif "imass" in plotname:
+            rebin = 25
         else:
             rebin = 5
         hst_data.Rebin(rebin)
         SetOverflowBin(hst_data)
+
+        if "lep" in plotname:
+            hst_data.GetXaxis().SetRangeUser(0, 5)
             
         # initialize a list to store the same histograms from all files
         histograms = []
@@ -256,6 +261,8 @@ def main():
         for i, file_mc in enumerate(files_mc):
             hst_MC = file_mc.Get(plotname)
             if hst_MC:
+                if "lep" in plotname:
+                    hst_MC.GetXaxis().SetRangeUser(0, 5)
                 hstMC_integral.append(hst_MC.Integral())
                 color = hist_colors[i] 
                 decorate(hst_MC, color)  
@@ -273,10 +280,26 @@ def main():
                 xtitle = hst_title[1]
             else:
                 xtitle = plotname
+            if plotname == "2l1d_imass_3l":
+                xtitle = "M_{lld}"
+            if plotname == "1l2d_imass_3l":
+                xtitle = "M_{ldd}"
+            if plotname == "3d_imass_3l":
+                xtitle = "M_{ddd}"
             
             # Create a THStack to stack the histograms
             hst_stack = THStack()
-            hst_stack.SetTitle(plotname)
+            if plotname == "2l1d_imass_3l":
+                plottitle = "2L1D M_{lld}"
+            elif plotname == "1l2d_imass_3l":
+                plottitle = "1L2D M_{ldd}"
+            elif plotname == "3d_imass_3l":
+                plottitle = "3D M_{ddd}"
+            else:
+                plottitle = plotname
+                
+            hst_stack.SetTitle(plottitle)
+            
           
             # Add histograms with the same name to the THStack
             for histogram in sorted_histograms:  
@@ -295,7 +318,7 @@ def main():
             legend   = TLegend(0.95,0.50,0.80,0.86)
             ratioleg = TLegend(0.90,0.90,0.81,0.87)
             print(hst_bkg , hst_bkg.Integral())
-            #ratioleg.SetHeader(f"obs/exp={hst_data.Integral()/hst_bkg.Integral():.5f} | exp: {hst_bkg.Integral():.0f}")
+            ratioleg.SetHeader(f"obs/exp={hst_data.Integral()/hst_bkg.Integral():.5f} | exp: {hst_bkg.Integral():.0f}")
 
             # create pairs of samples and corresponding integrals
             file_integral_pairs = zip(MC_files, hstMC_integral)
@@ -303,14 +326,14 @@ def main():
             # sort based on the integral values (using the second element of each pair)
             sorted_file_integral_pairs = sorted(file_integral_pairs, key=lambda x: x[1], reverse=True)
             
-            legend.AddEntry(hst_data,f"Data[{hst_data.Integral():.0f}]",'ep')
+            #legend.AddEntry(hst_data,f"Data[{hst_data.Integral():.0f}]",'ep')
             
             for filename, integral in sorted_file_integral_pairs:
                 fileleg = filename.split('.',1)[0]
                 legend.AddEntry(histograms[MC_files.index(filename)], f"{fileleg}[{integral:.0f}]", "lf")
                 
 
-            SetLegendStyle(ratioleg)
+            #SetLegendStyle(ratioleg)
             SetLegendStyle(legend)
 
             
@@ -325,12 +348,13 @@ def main():
             canvas = TCanvas("c", "canvas", 800, 600)
             gStyle.SetOptStat(0)
 
-            ratioPadSize = 0.3
+            ratioPadSize = 0
             mainPad  = TPad("pad","pad",0,ratioPadSize,1,1)
-            ratioPad = TPad("pad2","pad2",0,0,1.0,ratioPadSize)
-            PadStyling(mainPad, ratioPad)
+            #mainPad.SetBottomMargin(0.1)
+            #ratioPad = TPad("pad2","pad2",0,0,1.0,ratioPadSize)
+            PadStyling(mainPad)
             mainPad.Draw()
-            ratioPad.Draw()
+            #ratioPad.Draw()
 
            
 
@@ -339,26 +363,35 @@ def main():
                             #happens in the mainPad
             mainPad.SetLogy(1)
             
+
             hst_stack.Draw("HIST")
               
             decorate_hstack(hst_stack)
-      
-            #hst_stack.GetXaxis().SetTitle(xtitle)
+
+            
+           
+            hst_stack.GetXaxis().SetTitle(xtitle)
+            hst_stack.GetXaxis().SetRangeUser(0,1)
             #hst_stack.GetXaxis().CenterTitle()          
             hst_stack.GetYaxis().SetTitle('Events')
             hst_stack.GetYaxis().CenterTitle()
             hst_stack.SetMinimum(0.001)
-            hst_stack.SetMaximum(1e10)
-            hst_data.Draw('ep same')        
+            hst_stack.SetMaximum(1e10)        
+           
+            #h_stack.GetXaxis().CenterTitle()
+            
+            #hst_data.Draw('ep same')
+
+           
 
             mainPad.SetTickx(1)
             
             legend.Draw()
-            ratioleg.Draw()
+            #ratioleg.Draw()
 
             #plotting ratioPad
 
-            
+            '''
             decorate_hratio(hst_ratio)
            
             ratioPad.cd()  #subsequent plotting will happen in the ratioPad
@@ -369,7 +402,7 @@ def main():
 
             hst_ratio.SetTitle('')
             hst_ratio.Draw("ep")
-            
+            '''
 
             # display the plot
             canvas.Draw()

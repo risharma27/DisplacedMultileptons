@@ -47,7 +47,7 @@ def SetLegendStyle(legend):
 def main():
     
     # Read the file from the disk    
-    inputDir = "../finalhaddOutput/nov23/"
+    inputDir = "../finalhaddOutput/jan20/"
     
     file_DY     =  TFile.Open(inputDir + "DY.root",     "READ")
     file_ttbar  =  TFile.Open(inputDir + "TTBar.root",  "READ")

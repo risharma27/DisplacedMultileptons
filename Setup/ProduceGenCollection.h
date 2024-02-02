@@ -10,7 +10,7 @@ void disp_ml::GenLeptonArray(){
       temp.ind=i;
       temp.pdgid=GenPart_pdgId[i];
       temp.momid=MotherID(i,GenPart_genPartIdxMother[i]);
-      
+     
       int lepcharge=0;
       if(GenPart_pdgId[i]>0) lepcharge=-1;
       else lepcharge=1;
@@ -20,10 +20,12 @@ void disp_ml::GenLeptonArray(){
       bool passcutel = abs(temp.pdgid)==11 && temp.v.Pt()>10 && abs(temp.v.Eta())<2.4;
       if(passcutmu){
 	genMuon.push_back(temp);
+	genLightlep.push_back(temp);
       }
 
       if(passcutel){
 	genElectron.push_back(temp);
+	genLightlep.push_back(temp);
       }
     }
   }

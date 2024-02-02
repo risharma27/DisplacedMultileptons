@@ -1866,11 +1866,17 @@ public :
   float delta_phi(float phi1, float phi2);
   float transv_mass(float E_lep, float MET, float dphi);
   int MotherID(int partindex, int momindex);
+  
 
   void RecoLeptonArray();
   void RecoJetArray();
   void GenLeptonArray();
+  void EventSelection();
+  float GetEvtWeight();
+  void dispml_evsel_plots(float wt);
+  void other_evsel_plots(float wt);
 
+  
   //--------------------------------------------------------------------------
   //Correction functions:
   double LeptonIDSF(int id, float pt, float eta);;
@@ -1963,23 +1969,23 @@ public :
   struct Hists {
     //Histograms are declared here.
     TH1F *nevt;
+    TH1F *dxy[6];
+    TH1F *dz[6];
+    TH1F *ip3d[3];
+    TH1F *sip3d[3];
     TH1F *mediumlep_iso[2];
-    TH1F *elBitmap;
-    TH1F *zcr[5];
-    TH1F *lld[5];
+    TH1F *_2LonZ[5];;
+    TH1F *_3L[15];
     TH1F *mumud[5];
     TH1F *eed[5];
-    TH1F *_2l[6];
-    TH1F *_2liso[6];
-    TH1F *_2lnoiso[6];
     TH1F *nevsel;
-    TH1F *evtweight[3];
+    TH1F *evtweight[3][3];
     TH1F *dispml_h[3][45];
     TH1F *flavor[3];
     TH1F *_2l1d[30];
   
   };
-  
+
   struct Lepton {//The struct 'Lepton' can store the following variables:
     TLorentzVector v;
     int id;  int ind;
@@ -2010,12 +2016,17 @@ private:
   const char *_SumFileName;
   int _verbosity,_exclude;
   int _data, _lep, _year, _sample;
-  float evtwt;
   bool GoodEvt,GoodEvt2016,GoodEvt2017,GoodEvt2018,triggerRes,trigger2016,trigger2017,trigger2018; //Flags
   TString _era;
+  int evsel;
+  float metpt, metphi, evtwt;
  
   //Event Counters:
   int nEvtTotal,nEvtGood,nEvtTrigger,nEvtPass;
+
+  //event selections:
+  bool _2l1d, _1l2d, _3d, evt_dispml, evt_mumud, evt_eed, evt_2LonZ, evt_3L;
+  
   
   //######################
   // Declare arrays here:
@@ -2025,6 +2036,7 @@ private:
   vector<Lepton> genMuon;
   vector<Lepton> recoElectron;
   vector<Lepton> genElectron;
+  vector<Lepton> genLightlep;
   vector<Lepton> recoLepton;
   vector<Lepton> Muon;
   vector<Lepton> Electron;
@@ -2037,11 +2049,11 @@ private:
   vector<Lepton> displacedLepton;
   vector<Lepton> recoJet;
   vector<Lepton> bJet;
-  vector<float> SV2D;
-  vector<float> Delta2D;
+  vector<float>  SV2D;
+  vector<float>  Delta2D;
   vector<Lepton> myLep[3];
-  vector<int> vec_evsel;
-  vector<int> evt_2l1d, evt_1l2d, evt_3d;
+  vector<int>    vec_evsel;
+  vector<int>    evt_2l1d, evt_1l2d, evt_3d;
 
   ClassDef(disp_ml,0);
   

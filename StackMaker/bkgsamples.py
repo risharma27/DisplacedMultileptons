@@ -23,27 +23,113 @@ bkg_samples = {
 	},
 	"DYJetsToLL_M50_postVFP": {
 	    "filename": "DYJetsToLL_M50_postVFP.root",
-            "nevents": 71839442,
+            "nevents": 69905044,
 	    "xsec": 6.423e+03,
 	    "year": 2016,
             "data": 0,
 	}
     },
     "WJets": {
-        "HTbinnedWJets_Inclusive_preVFP": {
-	    "filename": "HTbinnedWJets_Inclusive_preVFP.root",
-            "nevents": 74060701,
-	    "xsec": 5.371e+04,
+       	"HTbinnedWJets_100to200_preVFP": {
+	    "filename": "HTbinnedWJets_100to200_preVFP.root",
+            "nevents": 21734530,
+	    "xsec": 1.248e+03,
+	    
 	    "year": 2016,
             "data": 0,
 	},
-	"HTbinnedWJets_Inclusive_postVFP": {
-	    "filename": "HTbinnedWJets_Inclusive_postVFP.root",
-            "nevents": 80958227,
-	    "xsec": 5.397e+04,
+	"HTbinnedWJets_200to400_preVFP": {
+	    "filename": "HTbinnedWJets_200to400_preVFP.root",
+            "nevents": 17870845,
+	    "xsec": 3.343e+02,
 	    "year": 2016,
             "data": 0,
-	}    
+	},
+	"HTbinnedWJets_400to600_preVFP": {
+	    "filename": "HTbinnedWJets_400to600_preVFP.root",
+            "nevents": 2467498,
+	    "xsec": 4.530e+01,
+	    "year": 2016,
+            "data": 0,
+	},
+	"HTbinnedWJets_600to800_preVFP": {
+	    "filename": "HTbinnedWJets_600to800_preVFP.root",
+            "nevents": 2344130,
+	    "xsec": 1.095e+01,
+	    "year": 2016,
+            "data": 0,
+	},
+	"HTbinnedWJets_70to100_preVFP": {
+	    "filename": "HTbinnedWJets_70to100_preVFP.root",
+            "nevents": 16931765,
+	    "xsec": 1.278e+03,
+	    "year": 2016,
+            "data": 0,
+	},
+	"HTbinnedWJets_800to1200_preVFP": {
+	    "filename": "HTbinnedWJets_800to1200_preVFP.root",
+            "nevents": 2510487,
+	    "xsec": 4.928e+00,
+	    "year": 2016,
+            "data": 0,
+	},
+	
+	"HTbinnedWJets_100to200_postVFP": {
+	    "filename": "HTbinnedWJets_100to200_postVFP.root",
+            "nevents": 19753958,
+	    "xsec": 1.254e+03,
+	    "year": 2016,
+            "data": 0,
+	},
+	"HTbinnedWJets_1200to2500_postVFP": {
+	    "filename": "HTbinnedWJets_1200to2500_postVFP.root",
+            "nevents": 2090561,
+	    "xsec": 1.162e+00,
+	    "year": 2016,
+            "data": 0,
+	},
+	"HTbinnedWJets_200to400_postVFP": {
+	    "filename": "HTbinnedWJets_200to400_postVFP.root",
+            "nevents": 15067621,
+	    "xsec": 3.358e+02,
+	    "year": 2016,
+            "data": 0,
+	},
+	"HTbinnedWJets_2500toInf_postVFP": {
+	    "filename": "HTbinnedWJets_2500toInf_postVFP.root",
+            "nevents": 709514,
+	    "xsec": 2.616e-02,
+	    "year": 2016,
+            "data": 0,
+	},
+	"HTbinnedWJets_400to600_postVFP": {
+	    "filename": "HTbinnedWJets_400to600_postVFP.root",
+            "nevents": 2115509,
+	    "xsec": 4.546e+01,
+	    "year": 2016,
+            "data": 0,
+	},
+	"HTbinnedWJets_600to800_postVFP": {
+	    "filename": "HTbinnedWJets_600to800_postVFP.root",
+            "nevents": 2251807,
+	    "xsec": 1.100e+01,
+	    "year": 2016,
+            "data": 0,
+	},
+	"HTbinnedWJets_70to100_postVFP": {
+	    "filename": "HTbinnedWJets_70to100_postVFP.root",
+            "nevents": 19439931,
+	    "xsec": 1.263e+03,
+	    "year": 2016,
+            "data": 0,
+	},
+	"HTbinnedWJets_800to1200_postVFP": {
+	    "filename": "HTbinnedWJets_800to1200_postVFP.root",
+            "nevents": 2132228,
+	    "xsec": 4.920e+00,
+	    "year": 2016,
+            "data": 0,
+	}
     },
     "QCD":{
         "QCD_MuEnriched_120to170_preVFP": {
@@ -76,7 +162,7 @@ bkg_samples = {
 	},
 	"QCD_MuEnriched_300to470_preVFP": {
 	    "filename": "QCD_MuEnriched_300to470_preVFP.root",
-            "nevents": 28465385,
+            "nevents": 28008400,
 	    "xsec": 6.197e+02,
 	    "year": 2016,
             "data": 0,
@@ -104,7 +190,7 @@ bkg_samples = {
 	},
 	"QCD_MuEnriched_600to800_preVFP": {
 	    "filename": "QCD_MuEnriched_600to800_preVFP.root",
-            "nevents": 19598815,
+            "nevents": 18472304,
 	    "xsec": 1.807e+01,
 	    "year": 2016,
             "data": 0,
@@ -160,7 +246,7 @@ bkg_samples = {
 	},
 	"QCD_MuEnriched_300to470_postVFP": {
 	    "filename": "QCD_MuEnriched_300to470_postVFP.root",
-            "nevents": 29824712,
+            "nevents": 26063956,
 	    "xsec": 6.177e+02,
 	    "year": 2016,
             "data": 0,
@@ -219,7 +305,7 @@ bkg_samples = {
 	},
 	"TTBar_TTToSemiLeptonic_preVFP": {
             "filename": "TTBar_TTToSemiLeptonic_preVFP.root",
-            "nevents": 132178000,
+            "nevents": 130818000,
 	    "xsec": 365.34,
 	    "year": 2016,
             "data": 0,
@@ -316,7 +402,7 @@ bkg_samples = {
 	},
         "SingleMuonGpostVFP":{
             "filename": "SingleMuon_SingleMuon_G.root",
-            "nevents": 149916849,
+            "nevents": 147001643,
 	    "xsec": 1,
 	    "year": 2016,
             "data": 1,
@@ -344,7 +430,7 @@ bkg_samples = {
 	},
         "SingleElectronDpreVFP":{
             "filename": "SingleElectron_SingleElectron_D.root",
-            "nevents": 148167727,
+            "nevents": 145692594,
 	    "xsec": 1,
 	    "year": 2016,
             "data": 1,

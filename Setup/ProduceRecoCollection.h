@@ -48,9 +48,6 @@ void disp_ml::RecoLeptonArray(){
     //bool passcut_mediumel = ptetacut && Electron_mvaFall17V2noIso_WP80[i];
     bool passcut_mediumel = ptetacut && Electron_cutBased[i]>1;
     
-    //bool promptelectron = passcut_mediumel && fabs(Electron_dxy[i])<0.05 && fabs(Electron_dz[i])<0.1;
-    //bool displacedelectron = passcut_mediumel && fabs(Electron_dxy[i])>0.05;
-    
     if(passcut_mediumel){
       recoElectron.push_back(temp);
       recoLepton.push_back(temp);
