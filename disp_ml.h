@@ -1872,9 +1872,8 @@ public :
   void RecoJetArray();
   void GenLeptonArray();
   void EventSelection();
-  float GetEvtWeight();
-  void dispml_evsel_plots(float wt);
-  void other_evsel_plots(float wt);
+  void dispml_evsel_plots();
+  void other_evsel_plots();
 
   
   //--------------------------------------------------------------------------
@@ -2019,7 +2018,7 @@ private:
   bool GoodEvt,GoodEvt2016,GoodEvt2017,GoodEvt2018,triggerRes,trigger2016,trigger2017,trigger2018; //Flags
   TString _era;
   int evsel;
-  float metpt, metphi, evtwt;
+  float metpt, metphi, scalefactor, triggeff, evtwt;
  
   //Event Counters:
   int nEvtTotal,nEvtGood,nEvtTrigger,nEvtPass;
@@ -2049,8 +2048,6 @@ private:
   vector<Lepton> displacedLepton;
   vector<Lepton> recoJet;
   vector<Lepton> bJet;
-  vector<float>  SV2D;
-  vector<float>  Delta2D;
   vector<Lepton> myLep[3];
   vector<int>    vec_evsel;
   vector<int>    evt_2l1d, evt_1l2d, evt_3d;

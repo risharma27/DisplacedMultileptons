@@ -15,7 +15,6 @@ using namespace std;
 #include "Setup/EventSelection.h"
 #include "Setup/dispml_evsel_plots.h"
 #include "Setup/other_evsel_plots.h"
-#include "Setup/GetEvtWeight.h"
 #include "Setup/CustomFunctions.h"
 #include "Setup/ProduceGenCollection.h"
 #include "Setup/ProduceRecoCollection.h"
@@ -223,14 +222,11 @@ Bool_t disp_ml::Process(Long64_t entry)
 	Sortpt(genMuon);
 	Sortpt(genElectron);
 	Sortpt(genLightlep);
-
       
 	/*
 
 	//####################### MC genmatching #############################//
 
-	if(_data==0){
-    
 	std::pair<vector<int>, vector<float>> mu_result = dR_matching(recoMuon, genMuon, 0.05);
 	vector<int> mu_matchto_genmu = mu_result.first;
 	vector<float> mu_delRmin_genmu = mu_result.second;
@@ -341,15 +337,21 @@ Bool_t disp_ml::Process(Long64_t entry)
       Sortpt(displacedLepton);
        	  
       metpt  = *MET_pt;
-      metphi = *MET_phi; 
+      metphi = *MET_phi;
+      
+      scalefactor = 1.0;
+      triggeff = 1.0;
+      evtwt = 1.0; //default value
 
       //----------------------------------------------------------------
       //Event-selection is done right after creating the object arrays.
       //evt_wt is also calculated alongwith.
       //This is done before any plotting.
+      
       EventSelection();
-      evtwt = GetEvtWeight();
 
+      //cout<<scalefactor<<" "<<triggeff<<" "<<evtwt<<endl;
+           
       //Applying trigger to MC  
       bool single_muon = false;
       bool single_electron = false;
@@ -370,6 +372,8 @@ Bool_t disp_ml::Process(Long64_t entry)
 
     
       if(triggered_events){
+
+	h.nevsel->Fill(0);
 
 	for(int i=0; i<(int)Muon.size(); i++){
 	  h.dxy[0]->Fill(Muon.at(i).dxy);
@@ -397,25 +401,12 @@ Bool_t disp_ml::Process(Long64_t entry)
 	  h.ip3d[2]->Fill(lightLep.at(i).ip3d);
 	  h.sip3d[2]->Fill(lightLep.at(i).sip3d);
 	}
-
-	for(int i=0; i<(int)Electron.size(); i++){
-	  h.mediumlep_iso[0]->Fill(Electron.at(i).reliso03);
-	}
-	for(int i=0; i<(int)Muon.size(); i++){
-	  h.mediumlep_iso[1]->Fill(Muon.at(i).reliso03);
-	}
-
-      
     
 	//##################### ANALYSIS BLOCK  ####################//
-
-      
-	if(evt_dispml){
-		
-	  dispml_evsel_plots(evtwt);
+	  
+	dispml_evsel_plots();
+	other_evsel_plots();
 	
-	}//evt_dispml
-    
       }//triggered_events
 
     }//triggerRes
@@ -428,9 +419,6 @@ Bool_t disp_ml::Process(Long64_t entry)
 //######################################
 //        USER DEFINED FUNCTIONS
 //######################################
-
-
-
 
 void disp_ml::BookHistograms()
 {
@@ -457,10 +445,6 @@ void disp_ml::BookHistograms()
   h.dz[5]    = new TH1F("lep_|dz|", "lep_|dz|", 1000, 0, 100);
   h.ip3d[2]  = new TH1F("lep_ip3d", "lep_ip3d", 1000, 0, 100);
   h.sip3d[2] = new TH1F("lep_sip3d", "lep_sip3d", 1000, 0, 100);
-  
-  h.mediumlep_iso[0] = new TH1F("iso_mvamedium_el", "", 150, 0, 15);
-  h.mediumlep_iso[1] = new TH1F("iso_medium_mu", "", 150, 0, 15);
-  //h.elBitmap = new TH1F("el_bitmap", "", 10, 0, 10);
 
   /*
     h.evtweight[0][0] = new TH1F("2l1d_sf", "2l1d_sf", 50, 0, 5);
@@ -473,7 +457,8 @@ void disp_ml::BookHistograms()
     h.evtweight[2][1] = new TH1F("3d_trigeff", "3d_trigeff", 10, 0, 1);
     h.evtweight[2][2] = new TH1F("3d_evtwt", "3d_evtwt", 100, 0, 100);
   */
- 
+
+  
   h._2LonZ[0] = new TH1F("zcr_invmass", "zcr_invmass", 200, 0, 200);
   h._2LonZ[1] = new TH1F("zcr_met", "zcr_met", 200, 0, 200);
 
@@ -490,6 +475,7 @@ void disp_ml::BookHistograms()
   h._3L[10] = new TH1F("3L_ht", "3L_ht", 500, 0, 500);
   h._3L[11] = new TH1F("3L_st", "3L_st", 500, 0, 500);
 
+  /*
   h.mumud[0] = new TH1F("mumud_invmass_ll", "mumud_invmass_ll", 200, 0, 200);
   h.mumud[1] = new TH1F("mumud_invmass_3l", "mumud_invmass_3l", 500, 0, 500);
   h.mumud[2] = new TH1F("mumud_met", "mumud_met", 200, 0, 200);
@@ -497,8 +483,11 @@ void disp_ml::BookHistograms()
   h.eed[0] = new TH1F("eed_invmass_ll", "eed_invmass_ll", 200, 0, 200);
   h.eed[1] = new TH1F("eed_invmass_3l", "eed_invmass_3l", 500, 0, 500);
   h.eed[2] = new TH1F("eed_met", "eed_met", 200, 0, 200);
- 
+  */
+
+  
   h.nevsel = new TH1F("nEvSel", "1: 2l1d, 2: 1l2d, 3: 3d", 5,0,5);
+  
   TString evsel_name[3] = {"2l1d_", "1l2d_", "3d_"};
   TString plotname[45] = {"met","pt_3l","imass_3l","pt0","pt1","pt2","pt_l0l1","delR_l0l1","delPhi_l0l1","delPhi_l0met","imass_l0l1","mt0","pt_l1l2","delR_l1l2","delPhi_l1l2","delPhi_l1met","imass_l1l2","mt1","pt_l2l0","delR_l2l0","delPhi_l2l0","delPhi_l2met","imass_l2l0","mt2","HT","njet","dRmin_l0j","dRmin_l1j","dRmin_l2j","l0_dxy","l0_dz","l0_ip3d","l0_sip3d","l0_reliso03","l1_dxy","l1_dz","l1_ip3d","l1_sip3d","l1_reliso03","l2_dxy","l2_dz","l2_ip3d","l2_sip3d","l2_reliso03","bjets"};
   int nbins[45] = {200,500,500,200,200,200,500,100,32,32,500,200,500,100,32,32,500,200,500,100,32,32,500,200,200,10,100,100,100,2000,2000,200,500,1500,2000,2000,200,500,1500,2000,2000,200,1000,1500,20};

@@ -1,10 +1,48 @@
-void disp_ml::dispml_evsel_plots(float wt){
+void disp_ml::dispml_evsel_plots(){
 
-  for(int ev=0; ev<=(int)vec_evsel.size(); ev++){
+  for(int ev=0; ev<(int)vec_evsel.size(); ev++){
     evsel = vec_evsel.at(ev);
+
+    //********************************* Get Event Weight *********************************************************//
+    //corrections are only applied on MC
+    if(_data==0){
+      float lep0SF = LeptonIDSF(myLep[evsel].at(0).id, myLep[evsel].at(0).v.Pt(), myLep[evsel].at(0).v.Eta());
+      float lep1SF = LeptonIDSF(myLep[evsel].at(1).id, myLep[evsel].at(1).v.Pt(), myLep[evsel].at(1).v.Eta());
+      float lep2SF = LeptonIDSF(myLep[evsel].at(2).id, myLep[evsel].at(2).v.Pt(), myLep[evsel].at(2).v.Eta());
+      scalefactor = lep0SF * lep1SF * lep2SF;
+	
+      float e1=SingleLepTrigger_eff(myLep[evsel].at(0).id, myLep[evsel].at(0).v.Pt(), myLep[evsel].at(0).v.Eta());
+      float e2=SingleLepTrigger_eff(myLep[evsel].at(1).id, myLep[evsel].at(1).v.Pt(), myLep[evsel].at(1).v.Eta());
+      float e3=SingleLepTrigger_eff(myLep[evsel].at(2).id, myLep[evsel].at(2).v.Pt(), myLep[evsel].at(2).v.Eta());	  
+      triggeff=1-((1-e1)*(1-e2)*(1-e3));
+      
+      evtwt = scalefactor * triggeff;
+     
+    }
+    
+    //************************************************************************************************************//
+
+    //************************************* Flavor Classification *******************************************//
+
+    if(abs(myLep[evsel].at(0).id)==13){
+      if(abs(myLep[evsel].at(1).id)==13 && abs(myLep[evsel].at(2).id)==13)                  h.flavor[evsel]->Fill(0.0, evtwt);       //mumumu
+      else if(abs(myLep[evsel].at(1).id)==13 && abs(myLep[evsel].at(2).id)==11)             h.flavor[evsel]->Fill(1.0, evtwt);       //mumue
+      else if(abs(myLep[evsel].at(1).id)==11 && abs(myLep[evsel].at(2).id)==13)             h.flavor[evsel]->Fill(2.0, evtwt);       //muemu
+      else if(abs(myLep[evsel].at(1).id)==11 && abs(myLep[evsel].at(2).id)==11)             h.flavor[evsel]->Fill(3.0, evtwt);       //muee
+    }	
+
+    else if(abs(myLep[evsel].at(0).id)==11){
+      if(abs(myLep[evsel].at(1).id)==11 && abs(myLep[evsel].at(2).id)==11)                  h.flavor[evsel]->Fill(4.0, evtwt);       //eee
+      else if(abs(myLep[evsel].at(1).id)==13 && abs(myLep[evsel].at(2).id)==11)             h.flavor[evsel]->Fill(5.0, evtwt);       //emue
+      else if(abs(myLep[evsel].at(1).id)==11 && abs(myLep[evsel].at(2).id)==13)             h.flavor[evsel]->Fill(6.0, evtwt);       //eemu
+      else if(abs(myLep[evsel].at(1).id)==13 && abs(myLep[evsel].at(2).id)==13)             h.flavor[evsel]->Fill(7.0, evtwt);       //emumu	
+    }
+
+    //*******************************************************************************************************//
+
     
     float invmassl0l1 = (myLep[evsel].at(0).v+myLep[evsel].at(1).v).M();
-	
+    
     if((evsel==0 && invmassl0l1>12) || evsel==1 || evsel==2){
       h.dispml_h[evsel][0]->Fill(metpt, evtwt);
       float sum_pt = 0.0;
