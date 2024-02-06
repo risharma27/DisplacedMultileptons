@@ -459,32 +459,26 @@ void disp_ml::BookHistograms()
   */
 
   
-  h._2LonZ[0] = new TH1F("zcr_invmass", "zcr_invmass", 200, 0, 200);
-  h._2LonZ[1] = new TH1F("zcr_met", "zcr_met", 200, 0, 200);
-
-  h._3L[0]  = new TH1F("3L_invmass_3l", "3L_invmass_3l", 500, 0, 500);
-  h._3L[1]  = new TH1F("3L_invmass_l0l1", "3L_invmass_l0l1", 200, 0, 200);
-  h._3L[2]  = new TH1F("3L_invmass_l1l2", "3L_invmass_l1l2", 200, 0, 200);
-  h._3L[3]  = new TH1F("3L_invmass_l2l0", "3L_invmass_l2l0", 200, 0, 200);
-  h._3L[4]  = new TH1F("3L_met", "3L_met", 200, 0, 200);
-  h._3L[5]  = new TH1F("3L_pt0", "3L_pt0", 200, 0, 200);
-  h._3L[6]  = new TH1F("3L_pt1", "3L_pt1", 200, 0, 200);
-  h._3L[7]  = new TH1F("3L_pt2", "3L_pt2", 200, 0, 200);
-  h._3L[8]  = new TH1F("3L_lt", "3L_lt", 500, 0, 500);
-  h._3L[9]  = new TH1F("3L_njet", "3L_njet", 10, 0, 10);
-  h._3L[10] = new TH1F("3L_ht", "3L_ht", 500, 0, 500);
-  h._3L[11] = new TH1F("3L_st", "3L_st", 500, 0, 500);
-
-  /*
-  h.mumud[0] = new TH1F("mumud_invmass_ll", "mumud_invmass_ll", 200, 0, 200);
-  h.mumud[1] = new TH1F("mumud_invmass_3l", "mumud_invmass_3l", 500, 0, 500);
-  h.mumud[2] = new TH1F("mumud_met", "mumud_met", 200, 0, 200);
-
-  h.eed[0] = new TH1F("eed_invmass_ll", "eed_invmass_ll", 200, 0, 200);
-  h.eed[1] = new TH1F("eed_invmass_3l", "eed_invmass_3l", 500, 0, 500);
-  h.eed[2] = new TH1F("eed_met", "eed_met", 200, 0, 200);
-  */
-
+    h._2LonZ[0] = new TH1F("2LonZ_invmass", "2LonZ_invmass", 200, 0, 200);
+    h._2LonZ[1] = new TH1F("2LonZ_met", "2LonZ_met", 200, 0, 200);
+    
+    h._2LSS[0] = new TH1F("2LSS_flavor", "0: all 2LSS, 1: ee, 2: mumu", 5, 0, 5);
+    h._2LSS[1] = new TH1F("2LSS_invmass_ll", "2LSS M_{ll}", 200, 0, 200);
+    h._2LSS[2] = new TH1F("2LSS_met", "2LSS_met", 200, 0, 200);
+ 
+    h._3L[0]  = new TH1F("3L_invmass_3l", "3L_invmass_3l", 500, 0, 500);
+    h._3L[1]  = new TH1F("3L_invmass_l0l1", "3L_invmass_l0l1", 200, 0, 200);
+    h._3L[2]  = new TH1F("3L_invmass_l1l2", "3L_invmass_l1l2", 200, 0, 200);
+    h._3L[3]  = new TH1F("3L_invmass_l2l0", "3L_invmass_l2l0", 200, 0, 200);
+    h._3L[4]  = new TH1F("3L_met", "3L_met", 200, 0, 200);
+    h._3L[5]  = new TH1F("3L_pt0", "3L_pt0", 200, 0, 200);
+    h._3L[6]  = new TH1F("3L_pt1", "3L_pt1", 200, 0, 200);
+    h._3L[7]  = new TH1F("3L_pt2", "3L_pt2", 200, 0, 200);
+    h._3L[8]  = new TH1F("3L_lt", "3L_lt", 500, 0, 500);
+    h._3L[9]  = new TH1F("3L_njet", "3L_njet", 10, 0, 10);
+    h._3L[10] = new TH1F("3L_ht", "3L_ht", 500, 0, 500);
+    h._3L[11] = new TH1F("3L_st", "3L_st", 500, 0, 500);
+  
   
   h.nevsel = new TH1F("nEvSel", "1: 2l1d, 2: 1l2d, 3: 3d", 5,0,5);
   
@@ -506,18 +500,20 @@ void disp_ml::BookHistograms()
     }
   }
 
+  //2l1d flavor classified plots
   int n_bins[15] = {500,200,200,100,200,200,64,20,500,64,20,500,64,20,500};
   float b_lo[15] = {0,0,-10.0,0.0,0.0,0.0,-3.2,0,0,-3.2,0,0,-3.2,0,0};
   float b_hi[15] = {500,200,10.0,10.0,200.0,200,3.2,10,500,3.2,10,500,3.2,10,500};
   TString flav_type[2] = {"e", "mu"};
   TString plotnames[15] = {"M_3l", "met", "l2_dxy", "l2_ip3d", "l2_sip3d", "mt2", "dphi_l0l1", "dR_l0l1", "M_l0l1", "dphi_l1l2", "dR_l1l2", "M_l1l2", "dphi_l2l0", "dR_l2l0", "M_l2l0"};
-  int p=0;
+  int p=0; int q=0;
   for(int flav=0; flav<2; flav++){
     for(int plot=0; plot<15; plot++){
+      p=45;
       TString name = "2l1d_" + flav_type[flav] + "_" + plotnames[plot];
-      h._2l1d[plot+p] = new TH1F(name,name,n_bins[plot],b_lo[plot],b_hi[plot]);
+      h.dispml_h[0][plot+p+q] = new TH1F(name,name,n_bins[plot],b_lo[plot],b_hi[plot]);
     }
-    p=15;
+    q=15;
   }
 
  

@@ -3,6 +3,8 @@ void disp_ml::other_evsel_plots(){
   //2LonZ
   float invmass_ll = -1.0;
   if(evt_2LonZ){
+    invmass_ll = (promptLepton.at(0).v+promptLepton.at(1).v).M();
+    
     //********************************* Get Event Weight *********************************************************//
     //corrections are only applied on MC
     if(_data==0){
@@ -15,39 +17,44 @@ void disp_ml::other_evsel_plots(){
       triggeff=1-((1-e1)*(1-e2));
       
       evtwt = scalefactor * triggeff;
-     
+      //**********************************************************************************************************//
     }
+    
     h._2LonZ[0]->Fill(invmass_ll, evtwt);
     h._2LonZ[1]->Fill(metpt, evtwt);
-  }//if(evt_2LonZ)
     
-   /* 
-  //mumu+d selection
-  if((int)promptLepton.size()>1 && (int)displacedLepton.size()>0){
-    if(fabs(promptLepton.at(0).id)==13 && fabs(promptLepton.at(1).id)==13){
-      invmass_ll = (promptLepton.at(0).v+promptLepton.at(1).v).M();
-      invmass_lll = (promptLepton.at(0).v+promptLepton.at(1).v+displacedLepton.at(0).v).M();
-      h.mumud[0]->Fill(invmass_ll);
-      h.mumud[1]->Fill(invmass_lll);
-      h.mumud[2]->Fill(metpt);
-    }
-  }
+  }//if(evt_2LonZ)
 
-  //ee+d
-  if((int)promptLepton.size()>1 && (int)displacedLepton.size()>0){
-    if(fabs(promptLepton.at(0).id)==11 && fabs(promptLepton.at(1).id)==11){
-      invmass_ll = (promptLepton.at(0).v+promptLepton.at(1).v).M();
-      invmass_lll = (promptLepton.at(0).v+promptLepton.at(1).v+displacedLepton.at(0).v).M();
-      h.eed[0]->Fill(invmass_ll);
-      h.eed[1]->Fill(invmass_lll);
-      h.eed[2]->Fill(metpt);
+  
+  //2LSS
+  if(evt_2LSS){
+    h._2LSS[0]->Fill(0);
+    invmass_ll = (promptLepton.at(0).v+promptLepton.at(1).v).M();
+    if(fabs(promptLepton.at(0).id)==13 && fabs(promptLepton.at(1).id)==13) h._2LSS[0]->Fill(1);
+    if(fabs(promptLepton.at(0).id)==11 && fabs(promptLepton.at(1).id)==11) h._2LSS[0]->Fill(2);
+    
+    if(_data==0){
+      float lep0SF = LeptonIDSF(promptLepton.at(0).id, promptLepton.at(0).v.Pt(), promptLepton.at(0).v.Eta());
+      float lep1SF = LeptonIDSF(promptLepton.at(1).id, promptLepton.at(1).v.Pt(), promptLepton.at(1).v.Eta());
+      scalefactor = lep0SF * lep1SF;
+	
+      float e1=SingleLepTrigger_eff(promptLepton.at(0).id, promptLepton.at(0).v.Pt(), promptLepton.at(0).v.Eta());
+      float e2=SingleLepTrigger_eff(promptLepton.at(1).id, promptLepton.at(1).v.Pt(), promptLepton.at(1).v.Eta());	  
+      triggeff=1-((1-e1)*(1-e2));
+      
+      evtwt = scalefactor * triggeff;
     }
-  }
-   */
+    
+    h._2LSS[1]->Fill(invmass_ll, evtwt);
+    h._2LSS[2]->Fill(metpt, evtwt);
+    
+  }//if(evt_2LSS)
+  
   
   //3L
   float _3L_invmass_lll = -1.0, _3L_invmass_l0l1 = -1.0, _3L_invmass_l1l2 = -1.0,  _3L_invmass_l2l0 = -1.0, _3L_ht = 0.0, _3L_lt = 0.0, _3L_st = 0.0;
-  if(evt_3L){   
+  if(evt_3L){
+    //*************************************************************************************************************
     if(_data==0){
       float lep0SF = LeptonIDSF(promptLepton.at(0).id, promptLepton.at(0).v.Pt(), promptLepton.at(0).v.Eta());
       float lep1SF = LeptonIDSF(promptLepton.at(1).id, promptLepton.at(1).v.Pt(), promptLepton.at(1).v.Eta());
@@ -60,7 +67,7 @@ void disp_ml::other_evsel_plots(){
       triggeff=1-((1-e1)*(1-e2)*(1-e3));
       
       evtwt = scalefactor * triggeff;
-     
+    //*************************************************************************************************************//
     }
      
     _3L_invmass_lll = (promptLepton.at(0).v+promptLepton.at(1).v+promptLepton.at(2).v).M();

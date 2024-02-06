@@ -18,27 +18,27 @@ void disp_ml::dispml_evsel_plots(){
       
       evtwt = scalefactor * triggeff;
      
-    }
-    
+    }    
     //************************************************************************************************************//
+    
 
-    //************************************* Flavor Classification *******************************************//
+    //************** Flavor Classification *************//
 
     if(abs(myLep[evsel].at(0).id)==13){
-      if(abs(myLep[evsel].at(1).id)==13 && abs(myLep[evsel].at(2).id)==13)                  h.flavor[evsel]->Fill(0.0, evtwt);       //mumumu
-      else if(abs(myLep[evsel].at(1).id)==13 && abs(myLep[evsel].at(2).id)==11)             h.flavor[evsel]->Fill(1.0, evtwt);       //mumue
-      else if(abs(myLep[evsel].at(1).id)==11 && abs(myLep[evsel].at(2).id)==13)             h.flavor[evsel]->Fill(2.0, evtwt);       //muemu
-      else if(abs(myLep[evsel].at(1).id)==11 && abs(myLep[evsel].at(2).id)==11)             h.flavor[evsel]->Fill(3.0, evtwt);       //muee
+      if(abs(myLep[evsel].at(1).id)==13 && abs(myLep[evsel].at(2).id)==13)             h.flavor[evsel]->Fill(0.0, evtwt);       //mumumu
+      else if(abs(myLep[evsel].at(1).id)==13 && abs(myLep[evsel].at(2).id)==11)        h.flavor[evsel]->Fill(1.0, evtwt);       //mumue
+      else if(abs(myLep[evsel].at(1).id)==11 && abs(myLep[evsel].at(2).id)==13)        h.flavor[evsel]->Fill(2.0, evtwt);       //muemu
+      else if(abs(myLep[evsel].at(1).id)==11 && abs(myLep[evsel].at(2).id)==11)        h.flavor[evsel]->Fill(3.0, evtwt);       //muee
     }	
 
     else if(abs(myLep[evsel].at(0).id)==11){
-      if(abs(myLep[evsel].at(1).id)==11 && abs(myLep[evsel].at(2).id)==11)                  h.flavor[evsel]->Fill(4.0, evtwt);       //eee
-      else if(abs(myLep[evsel].at(1).id)==13 && abs(myLep[evsel].at(2).id)==11)             h.flavor[evsel]->Fill(5.0, evtwt);       //emue
-      else if(abs(myLep[evsel].at(1).id)==11 && abs(myLep[evsel].at(2).id)==13)             h.flavor[evsel]->Fill(6.0, evtwt);       //eemu
-      else if(abs(myLep[evsel].at(1).id)==13 && abs(myLep[evsel].at(2).id)==13)             h.flavor[evsel]->Fill(7.0, evtwt);       //emumu	
+      if(abs(myLep[evsel].at(1).id)==11 && abs(myLep[evsel].at(2).id)==11)             h.flavor[evsel]->Fill(4.0, evtwt);       //eee
+      else if(abs(myLep[evsel].at(1).id)==13 && abs(myLep[evsel].at(2).id)==11)        h.flavor[evsel]->Fill(5.0, evtwt);       //emue
+      else if(abs(myLep[evsel].at(1).id)==11 && abs(myLep[evsel].at(2).id)==13)        h.flavor[evsel]->Fill(6.0, evtwt);       //eemu
+      else if(abs(myLep[evsel].at(1).id)==13 && abs(myLep[evsel].at(2).id)==13)        h.flavor[evsel]->Fill(7.0, evtwt);       //emumu	
     }
 
-    //*******************************************************************************************************//
+    //***************************************************//
 
     
     float invmassl0l1 = (myLep[evsel].at(0).v+myLep[evsel].at(1).v).M();
@@ -124,59 +124,55 @@ void disp_ml::dispml_evsel_plots(){
 
       h.dispml_h[evsel][44]->Fill((int)bJet.size(), evtwt);
 	  
-    }//if((evsel==0 && invmassl0l1>12) || evsel==1 || evsel==2)	
 
-    //******************************* 2l1d analysis *******************************//
-	
-	
-    if(evsel==0 && abs(myLep[0].at(2).id)==11){ //2l+(d=mu) selection
-      if((myLep[0].at(0).v+myLep[0].at(1).v).M()>12){
-	h._2l1d[0]->Fill((myLep[0].at(0).v+myLep[0].at(1).v+myLep[0].at(2).v).M());
-	metpt = *MET_pt;
-	h._2l1d[1]->Fill(metpt);
-	h._2l1d[2]->Fill(myLep[0].at(2).dxy);
-	h._2l1d[3]->Fill(myLep[0].at(2).ip3d);
-	h._2l1d[4]->Fill(myLep[0].at(2).sip3d);
+      //******************************* 2l1d "flavor classified" analysis *******************************//
+		
+      if(evt_llmu){ //llmu selection
+	h.dispml_h[0][45]->Fill((myLep[0].at(0).v+myLep[0].at(1).v+myLep[0].at(2).v).M());
+	h.dispml_h[0][46]->Fill(metpt, evtwt);
+	h.dispml_h[0][47]->Fill(myLep[0].at(2).dxy, evtwt);
+	h.dispml_h[0][48]->Fill(myLep[0].at(2).ip3d, evtwt);
+	h.dispml_h[0][49]->Fill(myLep[0].at(2).sip3d, evtwt);
 	float delphi_l2met = delta_phi(metphi, myLep[0].at(2).v.Phi());
-	h._2l1d[5]->Fill(transv_mass(myLep[0].at(2).v.Pt(), metpt, delphi_l2met));
-	h._2l1d[6]->Fill(myLep[0].at(0).v.DeltaPhi(myLep[0].at(1).v));
-	h._2l1d[7]->Fill(myLep[0].at(0).v.DeltaR(myLep[0].at(1).v));
-	h._2l1d[8]->Fill((myLep[0].at(0).v+myLep[0].at(1).v).M());
-	h._2l1d[9]->Fill(myLep[0].at(1).v.DeltaPhi(myLep[0].at(2).v));
-	h._2l1d[10]->Fill(myLep[0].at(1).v.DeltaR(myLep[0].at(2).v));
-	h._2l1d[11]->Fill((myLep[0].at(1).v+myLep[0].at(2).v).M());
-	h._2l1d[12]->Fill(myLep[0].at(2).v.DeltaPhi(myLep[0].at(0).v));
-	h._2l1d[13]->Fill(myLep[0].at(2).v.DeltaR(myLep[0].at(0).v));
-	h._2l1d[14]->Fill((myLep[0].at(2).v+myLep[0].at(0).v).M());
-      }	
-    }
-
-    else if(evsel==0 && abs(myLep[0].at(2).id)==13){ //2l+(d=e) selection
-      if((myLep[0].at(0).v+myLep[0].at(1).v).M()>12){
-	h._2l1d[15]->Fill((myLep[0].at(0).v+myLep[0].at(1).v+myLep[0].at(2).v).M());
-	h._2l1d[16]->Fill(metpt);
-	h._2l1d[17]->Fill(myLep[0].at(2).dxy);
-	h._2l1d[18]->Fill(myLep[0].at(2).ip3d);
-	h._2l1d[19]->Fill(myLep[0].at(2).sip3d);
-	float delphi_l2met = delta_phi(metphi, myLep[0].at(2).v.Phi());
-	h._2l1d[20]->Fill(transv_mass(myLep[0].at(2).v.Pt(), metpt, delphi_l2met));
-	h._2l1d[21]->Fill(myLep[0].at(0).v.DeltaPhi(myLep[0].at(1).v));
-	h._2l1d[22]->Fill(myLep[0].at(0).v.DeltaR(myLep[0].at(1).v));
-	h._2l1d[23]->Fill((myLep[0].at(0).v+myLep[0].at(1).v).M());
-	h._2l1d[24]->Fill(myLep[0].at(1).v.DeltaPhi(myLep[0].at(2).v));
-	h._2l1d[25]->Fill(myLep[0].at(1).v.DeltaR(myLep[0].at(2).v));
-	h._2l1d[26]->Fill((myLep[0].at(1).v+myLep[0].at(2).v).M());
-	h._2l1d[27]->Fill(myLep[0].at(2).v.DeltaPhi(myLep[0].at(0).v));
-	h._2l1d[28]->Fill(myLep[0].at(2).v.DeltaR(myLep[0].at(0).v));
-	h._2l1d[29]->Fill((myLep[0].at(2).v+myLep[0].at(0).v).M());
+	h.dispml_h[0][50]->Fill(transv_mass(myLep[0].at(2).v.Pt(), metpt, delphi_l2met), evtwt);
+	h.dispml_h[0][51]->Fill(myLep[0].at(0).v.DeltaPhi(myLep[0].at(1).v), evtwt);
+	h.dispml_h[0][52]->Fill(myLep[0].at(0).v.DeltaR(myLep[0].at(1).v), evtwt);
+	h.dispml_h[0][53]->Fill((myLep[0].at(0).v+myLep[0].at(1).v).M(), evtwt);
+	h.dispml_h[0][54]->Fill(myLep[0].at(1).v.DeltaPhi(myLep[0].at(2).v), evtwt);
+	h.dispml_h[0][55]->Fill(myLep[0].at(1).v.DeltaR(myLep[0].at(2).v), evtwt);
+	h.dispml_h[0][56]->Fill((myLep[0].at(1).v+myLep[0].at(2).v).M(), evtwt);
+	h.dispml_h[0][57]->Fill(myLep[0].at(2).v.DeltaPhi(myLep[0].at(0).v), evtwt);
+	h.dispml_h[0][58]->Fill(myLep[0].at(2).v.DeltaR(myLep[0].at(0).v), evtwt);
+	h.dispml_h[0][59]->Fill((myLep[0].at(2).v+myLep[0].at(0).v).M(), evtwt);	
       }
-    }
-      
-  }//for ev<=vec_evsel.size()
-	  
 
-  //*******************************************************************************//
-      
+      else if(evt_lle){ //lle selection
+	h.dispml_h[0][60]->Fill((myLep[0].at(0).v+myLep[0].at(1).v+myLep[0].at(2).v).M(), evtwt);
+	h.dispml_h[0][61]->Fill(metpt, evtwt);
+	h.dispml_h[0][62]->Fill(myLep[0].at(2).dxy, evtwt);
+	h.dispml_h[0][63]->Fill(myLep[0].at(2).ip3d, evtwt);
+	h.dispml_h[0][64]->Fill(myLep[0].at(2).sip3d, evtwt);
+	float delphi_l2met = delta_phi(metphi, myLep[0].at(2).v.Phi());
+	h.dispml_h[0][65]->Fill(transv_mass(myLep[0].at(2).v.Pt(), metpt, delphi_l2met), evtwt);
+	h.dispml_h[0][66]->Fill(myLep[0].at(0).v.DeltaPhi(myLep[0].at(1).v), evtwt);
+	h.dispml_h[0][67]->Fill(myLep[0].at(0).v.DeltaR(myLep[0].at(1).v), evtwt);
+	h.dispml_h[0][68]->Fill((myLep[0].at(0).v+myLep[0].at(1).v).M(), evtwt);
+	h.dispml_h[0][69]->Fill(myLep[0].at(1).v.DeltaPhi(myLep[0].at(2).v), evtwt);
+	h.dispml_h[0][70]->Fill(myLep[0].at(1).v.DeltaR(myLep[0].at(2).v), evtwt);
+	h.dispml_h[0][71]->Fill((myLep[0].at(1).v+myLep[0].at(2).v).M(), evtwt);
+	h.dispml_h[0][72]->Fill(myLep[0].at(2).v.DeltaPhi(myLep[0].at(0).v), evtwt);
+	h.dispml_h[0][73]->Fill(myLep[0].at(2).v.DeltaR(myLep[0].at(0).v), evtwt);
+	h.dispml_h[0][74]->Fill((myLep[0].at(2).v+myLep[0].at(0).v).M(), evtwt);
+      }
 
+      //if(evt_mumud)  //mumud selection
+      //if(evt_eed)    //eed selection
+
+
+      //***************************************************************************************************//
+
+    }//if((evsel==0 && invmassl0l1>12) || evsel==1 || evsel==2)
+    
+  }//for ev<vec_evsel.size()
 	
 }//dispml_evsel_plots

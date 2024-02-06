@@ -1972,22 +1972,19 @@ public :
     TH1F *dz[6];
     TH1F *ip3d[3];
     TH1F *sip3d[3];
-    TH1F *mediumlep_iso[2];
-    TH1F *_2LonZ[5];;
+    TH1F *_2LonZ[5];
+    TH1F *_2LSS[5];
     TH1F *_3L[15];
-    TH1F *mumud[5];
-    TH1F *eed[5];
     TH1F *nevsel;
     TH1F *evtweight[3][3];
-    TH1F *dispml_h[3][45];
+    TH1F *dispml_h[3][100];
     TH1F *flavor[3];
-    TH1F *_2l1d[30];
   
   };
 
   struct Lepton {//The struct 'Lepton' can store the following variables:
     TLorentzVector v;
-    int id;  int ind;
+    int id; int ind;
     float wt;
     int status;
     int pdgid;
@@ -2024,7 +2021,7 @@ private:
   int nEvtTotal,nEvtGood,nEvtTrigger,nEvtPass;
 
   //event selections:
-  bool _2l1d, _1l2d, _3d, evt_dispml, evt_mumud, evt_eed, evt_2LonZ, evt_3L;
+  bool _2l1d, _1l2d, _3d, evt_dispml, evt_mumud, evt_eed, evt_emud, evt_llmu, evt_lle, evt_2LonZ, evt_2LSS, evt_3L;
   
   
   //######################
