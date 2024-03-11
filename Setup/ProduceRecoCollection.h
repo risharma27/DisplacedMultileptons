@@ -8,6 +8,8 @@ void disp_ml::RecoLeptonArray(){
   for(unsigned int i=0; i<(*nMuon); i++){
     Lepton temp;                      
     temp.v.SetPtEtaPhiM(Muon_pt[i],Muon_eta[i],Muon_phi[i],0.105); //the muon mass in GeV is 0.105
+    temp.charge = Muon_charge[i];
+    //h.charge[0]->Fill(Muon_charge[i]);
     temp.id = -13*Muon_charge[i];    //pdgID for mu- = 13, pdgID for mu+ = -13  
     temp.ind = i;
     temp.ip3d = Muon_ip3d[i];
@@ -31,10 +33,11 @@ void disp_ml::RecoLeptonArray(){
 
   //Electrons
   int nel=0;
-  for (unsigned int i = 0; i < (*nElectron); i++) {
-    
+  for (unsigned int i = 0; i < (*nElectron); i++){   
     Lepton temp;
     temp.v.SetPtEtaPhiM(Electron_pt[i],Electron_eta[i],Electron_phi[i],Electron_mass[i]);
+    temp.charge = Electron_charge[i];
+    //h.charge[1]->Fill(Electron_charge[i]);
     temp.id = -11*Electron_charge[i];
     temp.ind = i;
     temp.ip3d = Electron_ip3d[i];

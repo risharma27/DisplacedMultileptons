@@ -18,6 +18,7 @@ using namespace std;
 #include "Setup/CustomFunctions.h"
 #include "Setup/ProduceGenCollection.h"
 #include "Setup/ProduceRecoCollection.h"
+#include "Setup/BookHistograms.h"
 
 //Corrections
 #include "Setup/Corrections/ApplyCorrections.h"
@@ -416,107 +417,4 @@ Bool_t disp_ml::Process(Long64_t entry)
   return kTRUE;
 }
 
-//######################################
-//        USER DEFINED FUNCTIONS
-//######################################
-
-void disp_ml::BookHistograms()
-{
-
-  h.nevt = new TH1F("nEvents", "0-nEvtTotal, 1-nEvtGood, 2-nEvtTrigger, 3-nEvtPass",5,0,5);
-
-  h.dxy[0]   = new TH1F("mu_dxy", "mu_dxy", 1000, -50, 50);
-  h.dz[0]    = new TH1F("mu_dz", "mu_dz", 1000, -50, 50);
-  h.dxy[1]   = new TH1F("mu_|dxy|", "mu_|dxy|", 5000, 0, 50);
-  h.dz[1]    = new TH1F("mu_|dz|", "mu_|dz|", 1000, 0, 100);
-  h.ip3d[0]  = new TH1F("mu_ip3d", "mu_ip3d", 1000, 0, 100);
-  h.sip3d[0] = new TH1F("mu_sip3d", "mu_sip3d", 1000, 0, 100);
-
-  h.dxy[2]   = new TH1F("el_dxy", "el_dxy", 1000, -50, 50);
-  h.dz[2]    = new TH1F("el_dz", "el_dz", 1000, -50, 50);
-  h.dxy[3]   = new TH1F("el_|dxy|", "el_|dxy|", 5000, 0, 50);
-  h.dz[3]    = new TH1F("el_|dz|", "el_|dz|", 1000, 0, 100);
-  h.ip3d[1]  = new TH1F("el_ip3d", "el_ip3d", 1000, 0, 100);
-  h.sip3d[1] = new TH1F("el_sip3d", "el_sip3d", 1000, 0, 100);
-
-  h.dxy[4]   = new TH1F("lep_dxy", "lep_dxy", 1000, -50, 50);
-  h.dz[4]    = new TH1F("lep_dz", "lep_dz", 1000, -50, 50);
-  h.dxy[5]   = new TH1F("lep_|dxy|", "lep_|dxy|", 5000, 0, 50);
-  h.dz[5]    = new TH1F("lep_|dz|", "lep_|dz|", 1000, 0, 100);
-  h.ip3d[2]  = new TH1F("lep_ip3d", "lep_ip3d", 1000, 0, 100);
-  h.sip3d[2] = new TH1F("lep_sip3d", "lep_sip3d", 1000, 0, 100);
-
-  /*
-    h.evtweight[0][0] = new TH1F("2l1d_sf", "2l1d_sf", 50, 0, 5);
-    h.evtweight[0][1] = new TH1F("2l1d_trigeff", "2l1d_trigeff", 10, 0, 1);
-    h.evtweight[0][2] = new TH1F("2l1d_evtwt", "2l1d_evtwt", 50, 0, 5);
-    h.evtweight[1][0] = new TH1F("1l2d_sf", "1l2d_sf", 100, 0, 100);
-    h.evtweight[1][1] = new TH1F("1l2d_trigeff", "1l2d_trigeff", 10, 0, 1);
-    h.evtweight[1][2] = new TH1F("1l2d_evtwt", "1l2d_evtwt", 100, 0, 100);
-    h.evtweight[2][0] = new TH1F("3d_sf", "3d_sf", 100, 0, 100);
-    h.evtweight[2][1] = new TH1F("3d_trigeff", "3d_trigeff", 10, 0, 1);
-    h.evtweight[2][2] = new TH1F("3d_evtwt", "3d_evtwt", 100, 0, 100);
-  */
-
-  
-    h._2LonZ[0] = new TH1F("2LonZ_invmass", "2LonZ_invmass", 200, 0, 200);
-    h._2LonZ[1] = new TH1F("2LonZ_met", "2LonZ_met", 200, 0, 200);
-    
-    h._2LSS[0] = new TH1F("2LSS_flavor", "0: all 2LSS, 1: ee, 2: mumu", 5, 0, 5);
-    h._2LSS[1] = new TH1F("2LSS_invmass_ll", "2LSS M_{ll}", 200, 0, 200);
-    h._2LSS[2] = new TH1F("2LSS_met", "2LSS_met", 200, 0, 200);
  
-    h._3L[0]  = new TH1F("3L_invmass_3l", "3L_invmass_3l", 500, 0, 500);
-    h._3L[1]  = new TH1F("3L_invmass_l0l1", "3L_invmass_l0l1", 200, 0, 200);
-    h._3L[2]  = new TH1F("3L_invmass_l1l2", "3L_invmass_l1l2", 200, 0, 200);
-    h._3L[3]  = new TH1F("3L_invmass_l2l0", "3L_invmass_l2l0", 200, 0, 200);
-    h._3L[4]  = new TH1F("3L_met", "3L_met", 200, 0, 200);
-    h._3L[5]  = new TH1F("3L_pt0", "3L_pt0", 200, 0, 200);
-    h._3L[6]  = new TH1F("3L_pt1", "3L_pt1", 200, 0, 200);
-    h._3L[7]  = new TH1F("3L_pt2", "3L_pt2", 200, 0, 200);
-    h._3L[8]  = new TH1F("3L_lt", "3L_lt", 500, 0, 500);
-    h._3L[9]  = new TH1F("3L_njet", "3L_njet", 10, 0, 10);
-    h._3L[10] = new TH1F("3L_ht", "3L_ht", 500, 0, 500);
-    h._3L[11] = new TH1F("3L_st", "3L_st", 500, 0, 500);
-  
-  
-  h.nevsel = new TH1F("nEvSel", "1: 2l1d, 2: 1l2d, 3: 3d", 5,0,5);
-  
-  TString evsel_name[3] = {"2l1d_", "1l2d_", "3d_"};
-  TString plotname[45] = {"met","pt_3l","imass_3l","pt0","pt1","pt2","pt_l0l1","delR_l0l1","delPhi_l0l1","delPhi_l0met","imass_l0l1","mt0","pt_l1l2","delR_l1l2","delPhi_l1l2","delPhi_l1met","imass_l1l2","mt1","pt_l2l0","delR_l2l0","delPhi_l2l0","delPhi_l2met","imass_l2l0","mt2","HT","njet","dRmin_l0j","dRmin_l1j","dRmin_l2j","l0_dxy","l0_dz","l0_ip3d","l0_sip3d","l0_reliso03","l1_dxy","l1_dz","l1_ip3d","l1_sip3d","l1_reliso03","l2_dxy","l2_dz","l2_ip3d","l2_sip3d","l2_reliso03","bjets"};
-  int nbins[45] = {200,500,500,200,200,200,500,100,32,32,500,200,500,100,32,32,500,200,500,100,32,32,500,200,200,10,100,100,100,2000,2000,200,500,1500,2000,2000,200,500,1500,2000,2000,200,1000,1500,20};
-  float blo[45] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-10,-10,0,0,0,-10,-10,0,0,0,-10,-10,0,0,0,0};
-  float bhi[45] = {200,500,500,200,200,200,500,10,3.2,3.2,500,200,500,10,3.2,3.2,500,200,500,10,3.2,3.2,500,200,200,10,100,100,100,10,10,10,50,15.0,10,10,10,50,15.0,10,10,10,100,15.0,20};
-  for(int ievsel=0; ievsel<3; ievsel++){
-    TString name1 = evsel_name[ievsel] + "flavor";
-    h.flavor[ievsel] = new TH1F(name1,"0:#mu#mu#mu, 1:#mu#mue, 2:#mue#mu, 3:#muee, 4:eee, 5:e#mue, 6:ee#mu, 7:e#mu#mu",10,0.0,10.0);
-    for(int iplot=0; iplot<45; iplot++){      
-      TString name2 = evsel_name[ievsel] + plotname[iplot];
-      //cout << "Creating histogram " << name2 << " with nbins = " << nbins[iplot] << ", blo = " << blo[iplot] << ", bhi = " << bhi[iplot] << endl;
-      h.dispml_h[ievsel][iplot] = new TH1F(name2,name2,nbins[iplot],blo[iplot],bhi[iplot]);
-     
-      //h.bb_h[icr][iplot]->Sumw2();
-    
-    }
-  }
-
-  //2l1d flavor classified plots
-  int n_bins[15] = {500,200,200,100,200,200,64,20,500,64,20,500,64,20,500};
-  float b_lo[15] = {0,0,-10.0,0.0,0.0,0.0,-3.2,0,0,-3.2,0,0,-3.2,0,0};
-  float b_hi[15] = {500,200,10.0,10.0,200.0,200,3.2,10,500,3.2,10,500,3.2,10,500};
-  TString flav_type[2] = {"e", "mu"};
-  TString plotnames[15] = {"M_3l", "met", "l2_dxy", "l2_ip3d", "l2_sip3d", "mt2", "dphi_l0l1", "dR_l0l1", "M_l0l1", "dphi_l1l2", "dR_l1l2", "M_l1l2", "dphi_l2l0", "dR_l2l0", "M_l2l0"};
-  int p=0; int q=0;
-  for(int flav=0; flav<2; flav++){
-    for(int plot=0; plot<15; plot++){
-      p=45;
-      TString name = "2l1d_" + flav_type[flav] + "_" + plotnames[plot];
-      h.dispml_h[0][plot+p+q] = new TH1F(name,name,n_bins[plot],b_lo[plot],b_hi[plot]);
-    }
-    q=15;
-  }
-
- 
-  //############################################################################################################################
-  
-}//BookHistograms()

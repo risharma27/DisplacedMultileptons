@@ -91,7 +91,7 @@ def DrawText(X,Y,txt):
     return text
     
 def decorate(h,color):
-    h.SetLineColor(color)
+    h.SetLineColor(kGray+2)
     h.SetFillColor(color)
     SetOverflowBin(h) ## overflow bin is must
 
@@ -157,7 +157,7 @@ def SetLegendStyle(legend):
     legend.SetTextFont(62)
     legend.SetFillStyle(0)
     legend.SetBorderSize(0)
-    legend.SetTextSize(0.024)    
+    legend.SetTextSize(0.027)    
            
             
 ####################################################################################
@@ -176,9 +176,9 @@ def main():
     gROOT.ProcessLine("gErrorIgnoreLevel = 1001;")  # suppress info messages
     gROOT.ProcessLine("gErrorIgnoreLevel = 3001;")  # suppress warning messages
 
-    inputDir = "../cluster_hst_output/jan20/"
-    outputDir = "finalhaddOutput/jan22/"
-    stackDir = "stackoutput/jan22/"
+    inputDir = "../cluster_hst_output/mar08/"
+    outputDir = "finalhaddOutput/mar08/"
+    stackDir = "stackoutput/mar08/"
     
     preVFP_lumi  = 19.3 * 1000
     postVFP_lumi = 17 * 1000
@@ -196,23 +196,27 @@ def main():
     ###########################
 
     
-    MC_files = ["DY.root","TTBar.root","WJets.root","QCD.root","WGamma.root","ZGamma.root"]    
-    hist_colors = [kBlue-9, kGreen-9, kRed-9, kYellow-9, kMagenta-9, kCyan-9]
+    MC_files = ["DY.root","TTBar.root","WJets.root","QCD.root","WGamma.root","ZGamma.root","ZZ.root","WZ.root","WW.root","SingleTop.root"]
+    #MC_files = ["DY.root"]
+    hist_colors = [kBlue-7,kTeal+9,kOrange+1,kYellow-7,kMagenta-10,kViolet+1,kAzure,kMagenta-7,kPink+1,kCyan-3]
     files_mc = [TFile.Open(outputDir + file_name, "READ") for file_name in MC_files] #storing the MC root files in a list
     file_data = TFile.Open(outputDir + "Data.root", "READ")
 
     print("\nFiles opened in ROOT successfully..") 
     
-    hist_names = [ "flavor", "met", "imass_3l", "delR_l0l1", "delPhi_l0l1", "delPhi_l0met", "imass_l0l1", "mt0", "delR_l1l2", "delPhi_l1l2", "delPhi_l1met", "imass_l1l2", "mt1", "delR_l2l0", "delPhi_l2l0", "delPhi_l2met", "imass_l2l0", "mt2", "njet", "l0_reliso03", "l1_reliso03", "l2_reliso03", "l2_dxy", "l2_dz", "l2_ip3d", "l2_sip3d"]
-    
-    #hist_2l = ["2l_l0iso", "2l_l1iso", "2l_Ml0l1", "2liso_l0iso", "2liso_l1iso", "2liso_Ml0l1", "2lnoiso_l0iso", "2lnoiso_l1iso", "2lnoiso_Ml0l1"]
-    hist_2l = ["2l_l0iso", "2l_l1iso", "2l_Ml0l1", "2liso_l0iso", "2liso_l1iso", "2liso_Ml0l1"]
+    hist_names = ["flavor", "met", "l0_dxy", "l0_ip3d", "l0_sip3d", "l1_dxy", "l1_ip3d", "l1_sip3d", "l2_dxy", "l2_ip3d", "l2_sip3d", "imass_3l", "delR_l0l1", "delPhi_l0l1", "delPhi_l0met", "imass_l0l1", "mt0", "delR_l1l2", "delPhi_l1l2", "delPhi_l1met", "imass_l1l2", "mt1", "delR_l2l0", "delPhi_l2l0", "delPhi_l2met", "imass_l2l0", "mt2", "njet", "bjets", "l0_reliso03", "l1_reliso03", "l2_reliso03", "l2_dxy", "l2_dz", "l2_ip3d", "l2_sip3d"]
 
-    hist_zcr = ["zcr_invmass", "zcr_met", "zcr_invmass", "lep_|dxy|"]
+    hist_2LSS = ["2LSS_flavor", "2LSS_invmass_ll", "2LSS_met", "mumu_invmass_ll", "ee_invmass_ll", "emu_or_mue_invmass_ll", "2LSS_ht"]
 
-    hist_lld = ["lld_invmass_ll", "lld_invmass_3l", "lld_met"]
-    hist_mumud = ["mumud_invmass_ll", "mumud_invmass_3l", "mumud_met"]
-    hist_eed = ["eed_invmass_ll", "eed_invmass_3l", "eed_met"]
+    hist_3L = ["3L_invmass_3l", "3L_invmass_l0l1", "3L_met", "3L_lt", "3L_njet", "3L_ht"]
+
+    hist_cr_ttbar = ["cr_ttbar_met", "cr_ttbar_pt0", "cr_ttbar_pt1", "cr_ttbar_lt", "cr_ttbar_njet", "cr_ttbar_bjet", "cr_ttbar_ht", "cr_ttbar_mt0", "cr_ttbar_mt1","cr_ttbar_l0iso", "cr_ttbar_l1iso", "cr_ttbar_dphil0l1", "cr_ttbar_invmassl0l1", "cr_ttbar_invmassj0j1"]
+
+    hist_cr_ttbar_2l1d = ["cr_ttbar_2l1d_met", "cr_ttbar_2l1d_pt0", "cr_ttbar_2l1d_pt1", "cr_ttbar_2l1d_lt", "cr_ttbar_2l1d_njet", "cr_ttbar_2l1d_bjet", "cr_ttbar_2l1d_ht", "cr_ttbar_2l1d_mt0", "cr_ttbar_2l1d_mt1","cr_ttbar_2l1d_l0iso", "cr_ttbar_2l1d_l1iso", "cr_ttbar_2l1d_dphil0l1", "cr_ttbar_2l1d_invmassl0l1", "cr_ttbar_2l1d_invmassj0j1"]
+
+    hist_cr_wjets = ["cr_wjets_met", "cr_wjets_pt0", "cr_wjets_lt", "cr_wjets_njets", "cr_wjets_ht", "cr_wjets_mt0", "cr_wjets_l0iso", "cr_wjets_dphil0j0", "cr_wjets_j0pt"]
+
+    hist_cr_wjets_1l2d = ["cr_wjets_1l2d_met", "cr_wjets_1l2d_pt0", "cr_wjets_1l2d_lt", "cr_wjets_1l2d_njets", "cr_wjets_1l2d_ht", "cr_wjets_1l2d_mt0", "cr_wjets_1l2d_l0iso", "cr_wjets_1l2d_dphil0j0", "cr_wjets_1l2d_j0pt"]
 
     hist_prefix = ["2l1d_", "1l2d_", "3d_"]    
     hists = []   
@@ -220,16 +224,23 @@ def main():
         for hist in hist_names:
             hist_name = prefix + hist
             hists.append(hist_name)
-            
-    for hist in hist_2l:
+
+    for hist in hist_2LSS:
         hists.append(hist)
-    for hist in hist_zcr:
+
+    for hist in hist_3L:
         hists.append(hist)
-    for hist in hist_lld:
+
+    for hist in hist_cr_ttbar:
         hists.append(hist)
-    for hist in hist_mumud:
+
+    for hist in hist_cr_ttbar_2l1d:
         hists.append(hist)
-    for hist in hist_eed:
+
+    for hist in hist_cr_wjets:
+        hists.append(hist)
+
+    for hist in hist_cr_wjets_1l2d:
         hists.append(hist)
 
     for plotname in hists:
@@ -238,14 +249,12 @@ def main():
         hst_data.SetMarkerSize(0.6)
         hst_data.SetLineColor(kBlack)
         #if plotname != "nEvents" and plotname != "nEvSel":
-        if "flavor" in plotname or "reliso03" in plotname or "njet" in plotname or plotname == "2liso_l1iso":
+        if "flavor" in plotname or "njet" in plotname:
             rebin = 1
         elif "dxy" in plotname or "dz" in plotname or "lep" in plotname:
-            rebin = 100
-        elif plotname == "zcr_invmass":
-            rebin = 2
+            rebin = 10
         else:
-            rebin = 5
+            rebin = 25
         hst_data.Rebin(rebin)
         SetOverflowBin(hst_data)
             
@@ -295,7 +304,7 @@ def main():
             legend   = TLegend(0.95,0.50,0.80,0.86)
             ratioleg = TLegend(0.90,0.90,0.81,0.87)
             print(hst_bkg , hst_bkg.Integral())
-            #ratioleg.SetHeader(f"obs/exp={hst_data.Integral()/hst_bkg.Integral():.5f} | exp: {hst_bkg.Integral():.0f}")
+            ratioleg.SetHeader(f"obs/exp={hst_data.Integral()/hst_bkg.Integral():.5f} | exp: {hst_bkg.Integral():.0f}")
 
             # create pairs of samples and corresponding integrals
             file_integral_pairs = zip(MC_files, hstMC_integral)
@@ -307,7 +316,7 @@ def main():
             
             for filename, integral in sorted_file_integral_pairs:
                 fileleg = filename.split('.',1)[0]
-                legend.AddEntry(histograms[MC_files.index(filename)], f"{fileleg}[{integral:.0f}]", "lf")
+                legend.AddEntry(histograms[MC_files.index(filename)], f"{fileleg}[{integral:.0f}]", "f")
                 
 
             SetLegendStyle(ratioleg)
@@ -348,7 +357,7 @@ def main():
             hst_stack.GetYaxis().SetTitle('Events')
             hst_stack.GetYaxis().CenterTitle()
             hst_stack.SetMinimum(0.001)
-            hst_stack.SetMaximum(1e10)
+            hst_stack.SetMaximum(1e7)
             hst_data.Draw('ep same')        
 
             mainPad.SetTickx(1)
@@ -384,6 +393,14 @@ def main():
                 canvas.SaveAs(output_filename)
             elif plotname.startswith("3d_"):
                 output_filename = os.path.join(stackDir, "evsel_3d", f"{plotname}.png")
+                canvas.SaveAs(output_filename)
+            elif plotname.startswith("cr_ttbar_"):
+                output_filename = os.path.join(stackDir, "cr_ttbar", f"{plotname}.png")
+            elif plotname.startswith("cr_wjets_"):
+                output_filename = os.path.join(stackDir, "cr_wjets", f"{plotname}.png")
+                canvas.SaveAs(output_filename)
+            elif plotname.startswith("3L_"):
+                output_filename = os.path.join(stackDir, "3L", f"{plotname}.png")
                 canvas.SaveAs(output_filename)
             else:
                 output_filename = os.path.join(stackDir, f"{plotname}.png")

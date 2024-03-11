@@ -1968,17 +1968,24 @@ public :
   struct Hists {
     //Histograms are declared here.
     TH1F *nevt;
+    TH1F *charge[2];
     TH1F *dxy[6];
     TH1F *dz[6];
     TH1F *ip3d[3];
     TH1F *sip3d[3];
     TH1F *_2LonZ[5];
-    TH1F *_2LSS[5];
+    TH1F *_2LSS[10];
     TH1F *_3L[15];
     TH1F *nevsel;
     TH1F *evtweight[3][3];
     TH1F *dispml_h[3][100];
     TH1F *flavor[3];
+    TH1F *cr_ttbar[16];
+    TH1F *cr_ttbar_2l1d[16];
+    TH1F *vr_ttbar[16];
+    TH1F *vr_ttbar_2l1d[16];
+    TH1F *cr_wjets[10];
+    TH1F *cr_wjets_1l2d[10];
   
   };
 
@@ -2021,7 +2028,11 @@ private:
   int nEvtTotal,nEvtGood,nEvtTrigger,nEvtPass;
 
   //event selections:
-  bool _2l1d, _1l2d, _3d, evt_dispml, evt_mumud, evt_eed, evt_emud, evt_llmu, evt_lle, evt_2LonZ, evt_2LSS, evt_3L;
+  bool _2l1d, _1l2d, _3d, evt_dispml, evt_mumud, evt_eed, evt_emud, evt_llmu, evt_lle, evt_2LonZ, evt_2LSS, evt_mumu, evt_ee, evt_mue, evt_emu, evt_3L;
+
+  //control regions:
+  bool cr_ttbar, cr_ttbar_2l1d, cr_wjets, cr_wjets_1l2d;
+  bool vr_ttbar, vr_ttbar_2l1d;
   
   
   //######################

@@ -13,7 +13,7 @@ using namespace std;
 
 //Including the header files
 #include "../Setup/CustomFunctions.h"
-#include "../Setup/ProduceGenCollection.h"
+//#include "../Setup/ProduceGenCollection.h"
 #include "../Setup/ProduceRecoCollection.h"
 
 //Corrections
@@ -24,7 +24,7 @@ using namespace std;
 #include "../Setup/Corrections/ScaleFactors/ScaleFactors_2017UL.h"
 #include "../Setup/Corrections/ScaleFactors/ScaleFactors_2018UL.h"
 
-#include "/home/work/risharma/work/git/DisplacedMultileptons/Skimmer/skimmerHelper.h"
+//#include "/home/work/risharma/work/git/DisplacedMultileptons/Skimmer/skimmerHelper.h"
 
 void disp_ml::Begin(TTree * /*tree*/)
 {
@@ -369,11 +369,21 @@ Bool_t disp_ml::Process(Long64_t entry)
 
 	//bool is_2l_event = false;
 	//if((int)lightLep.size()>1) is_2l_event = true;
-      
+
+	/*
 	if((int)lightLep.size()>1){
 	  nEvtSkim++;
 	  skimTree->Fill();
 	}
+	*/
+
+	if((int)Muon.size()==2 && (int)Electron.size()==0){
+	  if(Muon.at(0).charge==Muon.at(1).charge){
+	    nEvtSkim++;
+	    
+	  }
+	}
+	skimTree->Fill();
       
       }//triggered_events
 
@@ -385,7 +395,7 @@ Bool_t disp_ml::Process(Long64_t entry)
 }
 
 void disp_ml::BookHistograms(){
-  
+ 
 }
 
 

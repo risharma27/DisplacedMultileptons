@@ -10,8 +10,15 @@ void disp_ml::EventSelection(){
   evt_emud   = false;
   evt_2LonZ  = false;
   evt_2LSS   = false;
+  evt_mumu = false, evt_ee = false, evt_emu = false, evt_mue = false;
   evt_3L     = false;
 
+  //Control Regions
+  cr_ttbar      = false;  vr_ttbar      = false;
+  cr_ttbar_2l1d = false;  vr_ttbar_2l1d = false;
+  cr_wjets      = false;  
+  cr_wjets_1l2d = false;
+  
   bool all_lep_isolated = true;
   for(int i=0; i<(int)lightLep.size(); i++){
     if(lightLep.at(i).reliso03>0.15) all_lep_isolated = false;
@@ -30,7 +37,14 @@ void disp_ml::EventSelection(){
     for(int i=0; i<(int)recoJet.size(); i++){
       ht_2LSS = ht_2LSS + recoJet.at(i).v.Pt();
     }
-    if((promptLepton.at(0).id == promptLepton.at(1).id) && ht_2LSS<500.0) evt_2LSS = true;
+    if((promptLepton.at(0).charge == promptLepton.at(1).charge) && ht_2LSS<500.0){
+      h._2LSS[6]->Fill(ht_2LSS);
+      evt_2LSS = true;
+      if(abs(promptLepton.at(0).id)==13 && abs(promptLepton.at(1).id)==13)       {evt_mumu = true;}
+      else if(abs(promptLepton.at(0).id)==11 && abs(promptLepton.at(1).id)==11)  {evt_ee   = true;}
+      else if(abs(promptLepton.at(0).id)==11 && abs(promptLepton.at(1).id)==13)  {evt_emu  = true;}
+      else if(abs(promptLepton.at(0).id)==13 && abs(promptLepton.at(1).id)==11)  {evt_mue  = true;}
+    }
   }
 
   
@@ -75,8 +89,7 @@ void disp_ml::EventSelection(){
     myLep[2].push_back(displacedLepton.at(0));
     myLep[2].push_back(displacedLepton.at(1));
     myLep[2].push_back(displacedLepton.at(2));
-  }
-  
+  }  
   if((int)vec_evsel.size()>0){
     evt_dispml = true;
     nEvtPass++;
@@ -93,6 +106,104 @@ void disp_ml::EventSelection(){
     if(fabs(displacedLepton.at(0).id)==13) evt_llmu = true;
     if(fabs(displacedLepton.at(0).id)==11) evt_lle = true;
   }
+
+
+  //TTBar Control Region
+
+  //targetting TTBarToDileptonic final state
+  if((int)promptLepton.size()>1 && (int)recoJet.size()>1 && metpt>30.0){
+    if(promptLepton.at(0).v.Pt()>25 && promptLepton.at(1).v.Pt()>20 && (promptLepton.at(0).charge == -promptLepton.at(1).charge) && (int)bJet.size()==1){
+      float invmass_l0l1 = (promptLepton.at(0).v+promptLepton.at(1).v).M();
+      if(invmass_l0l1>20.0){
+	//cout<<promptLepton.at(0).id<<" "<<promptLepton.at(1).id<<endl;
+	if(abs(promptLepton.at(0).id) == abs(promptLepton.at(1).id)){
+	  if(invmass_l0l1<76.0 || invmass_l0l1>106.0) cr_ttbar = true;  //rejecting Drell-Yan background
+	}
+	else cr_ttbar = true;
+      }
+    }
+  }
+
+  //TTBar Validation Region
+
+  if((int)promptLepton.size()>1 && (int)recoJet.size()>1 && metpt>30.0){
+    if(promptLepton.at(0).v.Pt()>25 && promptLepton.at(1).v.Pt()>20 && (promptLepton.at(0).charge == -promptLepton.at(1).charge) && (int)bJet.size()>1){
+      float invmass_l0l1 = (promptLepton.at(0).v+promptLepton.at(1).v).M();
+      if(invmass_l0l1>20.0){
+	//cout<<promptLepton.at(0).id<<" "<<promptLepton.at(1).id<<endl;
+	if(abs(promptLepton.at(0).id) == abs(promptLepton.at(1).id)){
+	  if(invmass_l0l1<76.0 || invmass_l0l1>106.0) vr_ttbar = true;  //rejecting Drell-Yan background
+	}
+	else vr_ttbar = true;
+      }
+    }
+  }
+
+  //TTBar Control Region for 2l1d event selection
+
+  //targeting TTBarToDileptonic final state
+  if(_2l1d){
+    if((int)recoJet.size()>1 && metpt>30.0){
+      if(promptLepton.at(0).v.Pt()>25 && promptLepton.at(1).v.Pt()>20 && (promptLepton.at(0).charge == -promptLepton.at(1).charge) && (int)bJet.size()==1){
+	float invmass_l0l1 = (promptLepton.at(0).v+promptLepton.at(1).v).M();
+	if(invmass_l0l1>20.0){
+	  //cout<<promptLepton.at(0).id<<" "<<promptLepton.at(1).id<<endl;
+	  if(abs(promptLepton.at(0).id) == abs(promptLepton.at(1).id)){
+	    if(invmass_l0l1<76.0 || invmass_l0l1>106.0) cr_ttbar_2l1d = true;  //rejecting Drell-Yan background
+	  }
+	  else cr_ttbar_2l1d = true;
+	}
+      }
+    }
+  }//if(_2l1d)
   
+
+  //TTBar Validation Region
+  if(_2l1d){ 
+    if((int)recoJet.size()>1 && metpt>30.0){
+      if(promptLepton.at(0).v.Pt()>25 && promptLepton.at(1).v.Pt()>20 && (promptLepton.at(0).charge == -promptLepton.at(1).charge) && (int)bJet.size()>1){
+	float invmass_l0l1 = (promptLepton.at(0).v+promptLepton.at(1).v).M();
+	if(invmass_l0l1>20.0){
+	  //cout<<promptLepton.at(0).id<<" "<<promptLepton.at(1).id<<endl;
+	  if(abs(promptLepton.at(0).id) == abs(promptLepton.at(1).id)){
+	    if(invmass_l0l1<76.0 || invmass_l0l1>106.0) vr_ttbar_2l1d = true;  //rejecting Drell-Yan background
+	  }
+	  else vr_ttbar_2l1d = true;
+	}
+      }
+    }
+  }//if(_2l1d)
   
+
+
+
+
+
+
+
+
+
+  
+  //WJets Control Region
+
+  //targetting W(->lv)+jets final state
+  if((int)promptLepton.size()>0 && all_lep_isolated && metpt>30.0 && (int)recoJet.size()>0){
+    float dphi_l0met = delta_phi(promptLepton.at(0).v.Phi(), metphi);
+    if(promptLepton.at(0).v.Pt()>25.0 && (int)bJet.size()==0 && transv_mass(promptLepton.at(0).v.Pt(), metpt, dphi_l0met)>50.0){
+      cr_wjets = true;
+    }
+  }
+
+  //WJets Control Region in 1L2D selection
+
+  //targetting W(->lv)+jets final state
+  if(_1l2d){
+    if((int)promptLepton.size()>0 && all_lep_isolated && metpt>30.0 && (int)recoJet.size()>0){
+      float dphi_l0met = delta_phi(promptLepton.at(0).v.Phi(), metphi);
+      if(promptLepton.at(0).v.Pt()>25.0 && (int)bJet.size()==0 && transv_mass(promptLepton.at(0).v.Pt(), metpt, dphi_l0met)>50.0){
+	cr_wjets_1l2d = true;
+      }
+    }
+  }//if(_1l2d)
+
 }//EventSelection()
