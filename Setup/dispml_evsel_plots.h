@@ -165,6 +165,11 @@ void disp_ml::dispml_evsel_plots(){
 	h.dispml_h[0][74]->Fill((myLep[0].at(2).v+myLep[0].at(0).v).M(), evtwt);
       }
 
+      //fabs(dxy) plots for each of the 3 leptons in each final state
+      h.dispml_h[evsel][75]->Fill(fabs(myLep[evsel].at(0).dxy), evtwt);
+      h.dispml_h[evsel][76]->Fill(fabs(myLep[evsel].at(1).dxy), evtwt);
+      h.dispml_h[evsel][77]->Fill(fabs(myLep[evsel].at(2).dxy), evtwt);
+                      
       //if(evt_mumud)  //mumud selection
       //if(evt_eed)    //eed selection
 

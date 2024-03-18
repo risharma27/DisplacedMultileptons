@@ -188,6 +188,14 @@ void disp_ml::BookHistograms(){
     q=15;
   }
 
+  TString evsel_type[3] = {"2l1d_", "1l2d_", "3d_"};
+  TString prefix[3] = {"l0_", "l1_", "l2_"};
+  for(int ievsel=0; ievsel<3; ievsel++){
+    for(int iplot = 0; iplot<3; iplot++){
+      TString name = evsel_type[ievsel] + prefix[iplot] + "|dxy|";
+      h.dispml_h[ievsel][75+iplot] = new TH1F(name,name,100,0,10);
+    }
+  }
   
 }//BookHistograms()
 

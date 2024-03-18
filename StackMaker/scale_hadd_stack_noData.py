@@ -6,7 +6,7 @@ import subprocess
 import warnings
 warnings.filterwarnings('ignore')
 
-from bkgsamples_correct import bkg_samples
+from bkgsamples import bkg_samples
 
 ####################################################################################
 #                    User Defined functions                                        #
@@ -81,17 +81,17 @@ def SetOverflowBin(histo):
     histo.SetBinContent(nbins, histo.GetBinContent(nbins) + histo.GetBinContent(nbins+1)); ## Overflow
     histo.SetBinContent(1, histo.GetBinContent(1)+ histo.GetBinContent(0));                ## Underflow
 
-def DrawText(X,Y,txt):
+def DrawText(X,Y,txt,style):
     text = ROOT.TLatex()
     text.SetNDC(True)
-    text.SetTextFont(42)
+    text.SetTextFont(style)
     text.SetTextSize(0.04)
     text.DrawLatex(X,Y,txt)
 
     return text
     
 def decorate(h,color):
-    h.SetLineColor(color)
+    h.SetLineColor(kGray+2)
     h.SetFillColor(color)
     SetOverflowBin(h) ## overflow bin is must
 
@@ -142,7 +142,6 @@ def PadStyling(pad,rpad):
     rpad.SetTickx(1)
     rpad.SetTicky(1)
     rpad.SetGrid(1)
-
 '''
 
 def PadStyling(pad):
@@ -153,15 +152,15 @@ def PadStyling(pad):
     pad.SetTickx(1)
     pad.SetTicky(1)
 
+
 def SetLegendStyle(legend):
     legend.SetTextFont(62)
     legend.SetFillStyle(0)
     legend.SetBorderSize(0)
-    legend.SetTextSize(0.024)    
+    legend.SetTextSize(0.027)    
            
             
-####################################################################################
-#                                                                                  #
+####################################################################################                                                                             
 ####################################################################################
 
 
@@ -176,9 +175,9 @@ def main():
     gROOT.ProcessLine("gErrorIgnoreLevel = 1001;")  # suppress info messages
     gROOT.ProcessLine("gErrorIgnoreLevel = 3001;")  # suppress warning messages
 
-    inputDir = "../cluster_hst_output/jan20/"
-    outputDir = "finalhaddOutput/jan22/"
-    stackDir = "stackoutput/jan22/"
+    inputDir = "../cluster_hst_output/mar15/"
+    outputDir = "finalhaddOutput/mar15/"
+    stackDir = "stackoutput/mar15/"
     
     preVFP_lumi  = 19.3 * 1000
     postVFP_lumi = 17 * 1000
@@ -196,23 +195,32 @@ def main():
     ###########################
 
     
-    MC_files = ["DY.root","TTBar.root","WJets.root","QCD.root","WGamma.root","ZGamma.root"]    
-    hist_colors = [kBlue-9, kGreen-9, kRed-9, kYellow-9, kMagenta-9, kCyan-9]
+    MC_files = ["DY.root","TTBar.root","WJets.root","QCD.root","WGamma.root","ZGamma.root","ZZ.root","WZ.root","WW.root","SingleTop.root"]
+    #MC_files = ["DY.root"]
+    hist_colors = [kBlue-7,kTeal+9,kOrange+1,kYellow-7,kMagenta-10,kViolet+1,kAzure,kMagenta-7,kPink+1,kCyan-3]
+    #hist_colors = [kBlue-7,kTeal+9,kOrange+1,kYellow-7,kViolet+6,kAzure-4,kAzure,kMagenta-7,kPink+1,kCyan-3]
     files_mc = [TFile.Open(outputDir + file_name, "READ") for file_name in MC_files] #storing the MC root files in a list
     file_data = TFile.Open(outputDir + "Data.root", "READ")
 
     print("\nFiles opened in ROOT successfully..") 
     
-    hist_names = [ "flavor", "met", "imass_3l", "delR_l0l1", "delPhi_l0l1", "delPhi_l0met", "imass_l0l1", "mt0", "delR_l1l2", "delPhi_l1l2", "delPhi_l1met", "imass_l1l2", "mt1", "delR_l2l0", "delPhi_l2l0", "delPhi_l2met", "imass_l2l0", "mt2", "njet", "l0_reliso03", "l1_reliso03", "l2_reliso03", "l2_dxy", "l2_dz", "l2_ip3d", "l2_sip3d"]
-    
-    #hist_2l = ["2l_l0iso", "2l_l1iso", "2l_Ml0l1", "2liso_l0iso", "2liso_l1iso", "2liso_Ml0l1", "2lnoiso_l0iso", "2lnoiso_l1iso", "2lnoiso_Ml0l1"]
-    hist_2l = ["2l_l0iso", "2l_l1iso", "2l_Ml0l1", "2liso_l0iso", "2liso_l1iso", "2liso_Ml0l1"]
+    hist_names = ["flavor", "met", "l0_dxy", "l0_ip3d", "l0_sip3d", "l1_dxy", "l1_ip3d", "l1_sip3d", "l2_dxy", "l2_ip3d", "l2_sip3d", "imass_3l", "delR_l0l1", "delPhi_l0l1", "delPhi_l0met", "imass_l0l1", "mt0", "delR_l1l2", "delPhi_l1l2", "delPhi_l1met", "imass_l1l2", "mt1", "delR_l2l0", "delPhi_l2l0", "delPhi_l2met", "imass_l2l0", "mt2", "njet", "bjets", "l0_reliso03", "l1_reliso03", "l2_reliso03", "l2_dxy", "l2_dz", "l2_ip3d", "l2_sip3d", "l0_|dxy|", "l1_|dxy|", "l2_|dxy|"]
 
-    hist_zcr = ["zcr_invmass", "zcr_met", "zcr_invmass", "lep_|dxy|"]
+    #hist_2LSS = ["2LSS_flavor", "2LSS_invmass_ll", "2LSS_met", "mumu_invmass_ll", "ee_invmass_ll", "emu_or_mue_invmass_ll", "2LSS_ht"]
 
-    hist_lld = ["lld_invmass_ll", "lld_invmass_3l", "lld_met"]
-    hist_mumud = ["mumud_invmass_ll", "mumud_invmass_3l", "mumud_met"]
-    hist_eed = ["eed_invmass_ll", "eed_invmass_3l", "eed_met"]
+    #hist_3L = ["3L_invmass_3l", "3L_invmass_l0l1", "3L_met", "3L_lt", "3L_njet", "3L_ht"]
+
+    hist_cr_ttbar = ["cr_ttbar_met", "cr_ttbar_pt0", "cr_ttbar_pt1", "cr_ttbar_lt", "cr_ttbar_njet", "cr_ttbar_bjet", "cr_ttbar_ht", "cr_ttbar_mt0", "cr_ttbar_mt1","cr_ttbar_l0iso", "cr_ttbar_l1iso", "cr_ttbar_dphil0l1", "cr_ttbar_invmassl0l1", "cr_ttbar_invmassj0j1"]
+
+    hist_cr_ttbar_2l1d = ["cr_ttbar_2l1d_met", "cr_ttbar_2l1d_pt0", "cr_ttbar_2l1d_pt1", "cr_ttbar_2l1d_lt", "cr_ttbar_2l1d_njet", "cr_ttbar_2l1d_bjet", "cr_ttbar_2l1d_ht", "cr_ttbar_2l1d_mt0", "cr_ttbar_2l1d_mt1","cr_ttbar_2l1d_l0iso", "cr_ttbar_2l1d_l1iso", "cr_ttbar_2l1d_dphil0l1", "cr_ttbar_2l1d_invmassl0l1", "cr_ttbar_2l1d_invmassj0j1"]
+
+    hist_vr_ttbar = ["vr_ttbar_met", "vr_ttbar_pt0", "vr_ttbar_pt1", "vr_ttbar_lt", "vr_ttbar_njet", "vr_ttbar_bjet", "vr_ttbar_ht", "vr_ttbar_mt0", "vr_ttbar_mt1","vr_ttbar_l0iso", "vr_ttbar_l1iso", "vr_ttbar_dphil0l1", "vr_ttbar_invmassl0l1", "vr_ttbar_invmassj0j1"]
+
+    hist_vr_ttbar_2l1d = ["vr_ttbar_2l1d_met", "vr_ttbar_2l1d_pt0", "vr_ttbar_2l1d_pt1", "vr_ttbar_2l1d_lt", "vr_ttbar_2l1d_njet", "vr_ttbar_2l1d_bjet", "vr_ttbar_2l1d_ht", "vr_ttbar_2l1d_mt0", "vr_ttbar_2l1d_mt1","vr_ttbar_2l1d_l0iso", "vr_ttbar_2l1d_l1iso", "vr_ttbar_2l1d_dphil0l1", "vr_ttbar_2l1d_invmassl0l1", "vr_ttbar_2l1d_invmassj0j1"]
+
+    hist_cr_wjets = ["cr_wjets_met", "cr_wjets_pt0", "cr_wjets_lt", "cr_wjets_njets", "cr_wjets_ht", "cr_wjets_mt0", "cr_wjets_l0iso", "cr_wjets_dphil0j0", "cr_wjets_j0pt"]
+
+    hist_cr_wjets_1l2d = ["cr_wjets_1l2d_met", "cr_wjets_1l2d_pt0", "cr_wjets_1l2d_lt", "cr_wjets_1l2d_njets", "cr_wjets_1l2d_ht", "cr_wjets_1l2d_mt0", "cr_wjets_1l2d_l0iso", "cr_wjets_1l2d_dphil0j0", "cr_wjets_1l2d_j0pt"]
 
     hist_prefix = ["2l1d_", "1l2d_", "3d_"]    
     hists = []   
@@ -220,17 +228,32 @@ def main():
         for hist in hist_names:
             hist_name = prefix + hist
             hists.append(hist_name)
-            
-    for hist in hist_2l:
+
+    '''
+    for hist in hist_2LSS:
         hists.append(hist)
-    for hist in hist_zcr:
+
+    for hist in hist_3L:
         hists.append(hist)
-    for hist in hist_lld:
+
+    for hist in hist_cr_ttbar:
         hists.append(hist)
-    for hist in hist_mumud:
+
+    for hist in hist_vr_ttbar:
         hists.append(hist)
-    for hist in hist_eed:
+
+    for hist in hist_cr_wjets:
+        hists.append(hist)   
+
+    for hist in hist_cr_ttbar_2l1d:
         hists.append(hist)
+
+    for hist in hist_vr_ttbar_2l1d:
+        hists.append(hist)  
+
+    for hist in hist_cr_wjets_1l2d:
+        hists.append(hist)
+    '''
 
     for plotname in hists:
         hst_data = file_data.Get(plotname)
@@ -238,22 +261,17 @@ def main():
         hst_data.SetMarkerSize(0.6)
         hst_data.SetLineColor(kBlack)
         #if plotname != "nEvents" and plotname != "nEvSel":
-        if "flavor" in plotname or "reliso03" in plotname or "njet" in plotname or plotname == "2liso_l1iso":
+        if "flavor" in plotname or "njet" in plotname:
             rebin = 1
-        elif "dxy" in plotname or "dz" in plotname or "lep" in plotname:
+        elif "dxy" in plotname or "dz" in plotname:
             rebin = 10
-        elif plotname == "zcr_invmass":
-            rebin = 2
-        elif "imass" in plotname:
-            rebin = 25
-        else:
+        elif "ip3d" in plotname:
             rebin = 5
+        else:
+            rebin = 25
         hst_data.Rebin(rebin)
         SetOverflowBin(hst_data)
-
-        if "lep" in plotname:
-            hst_data.GetXaxis().SetRangeUser(0, 5)
-            
+          
         # initialize a list to store the same histograms from all files
         histograms = []
         hstMC_integral = []
@@ -261,14 +279,12 @@ def main():
         for i, file_mc in enumerate(files_mc):
             hst_MC = file_mc.Get(plotname)
             if hst_MC:
-                if "lep" in plotname:
-                    hst_MC.GetXaxis().SetRangeUser(0, 5)
-                hstMC_integral.append(hst_MC.Integral())
-                color = hist_colors[i] 
-                decorate(hst_MC, color)  
-                hst_MC.Rebin(rebin)
-                SetOverflowBin(hst_MC)
-                histograms.append(hst_MC)
+               hstMC_integral.append(hst_MC.Integral())
+               color = hist_colors[i] 
+               decorate(hst_MC, color)  
+               hst_MC.Rebin(rebin)
+               SetOverflowBin(hst_MC)
+               histograms.append(hst_MC)
 
         sorted_histograms = sorted(histograms, key=lambda x: x.Integral())
                 
@@ -277,29 +293,14 @@ def main():
             
             hst_title = plotname.split('_',1)
             if len(hst_title)>1:
-                xtitle = hst_title[1]
+               xtitle = hst_title[1]
             else:
-                xtitle = plotname
-            if plotname == "2l1d_imass_3l":
-                xtitle = "M_{lld}"
-            if plotname == "1l2d_imass_3l":
-                xtitle = "M_{ldd}"
-            if plotname == "3d_imass_3l":
-                xtitle = "M_{ddd}"
+               xtitle = plotname
             
             # Create a THStack to stack the histograms
             hst_stack = THStack()
-            if plotname == "2l1d_imass_3l":
-                plottitle = "2L1D M_{lld}"
-            elif plotname == "1l2d_imass_3l":
-                plottitle = "1L2D M_{ldd}"
-            elif plotname == "3d_imass_3l":
-                plottitle = "3D M_{ddd}"
-            else:
-                plottitle = plotname
-                
-            hst_stack.SetTitle(plottitle)
-            
+            #hst_stack.SetTitle(plotname)
+            hst_stack.SetTitle(" ")
           
             # Add histograms with the same name to the THStack
             for histogram in sorted_histograms:  
@@ -317,7 +318,7 @@ def main():
             
             legend   = TLegend(0.95,0.50,0.80,0.86)
             ratioleg = TLegend(0.90,0.90,0.81,0.87)
-            print(hst_bkg , hst_bkg.Integral())
+            #print(hst_bkg , hst_bkg.Integral())
             ratioleg.SetHeader(f"obs/exp={hst_data.Integral()/hst_bkg.Integral():.5f} | exp: {hst_bkg.Integral():.0f}")
 
             # create pairs of samples and corresponding integrals
@@ -330,10 +331,10 @@ def main():
             
             for filename, integral in sorted_file_integral_pairs:
                 fileleg = filename.split('.',1)[0]
-                legend.AddEntry(histograms[MC_files.index(filename)], f"{fileleg}[{integral:.0f}]", "lf")
+                legend.AddEntry(histograms[MC_files.index(filename)], f"{fileleg}[{integral:.0f}]", "f")
                 
 
-            #SetLegendStyle(ratioleg)
+            SetLegendStyle(ratioleg)
             SetLegendStyle(legend)
 
             
@@ -350,7 +351,6 @@ def main():
 
             ratioPadSize = 0
             mainPad  = TPad("pad","pad",0,ratioPadSize,1,1)
-            #mainPad.SetBottomMargin(0.1)
             #ratioPad = TPad("pad2","pad2",0,0,1.0,ratioPadSize)
             PadStyling(mainPad)
             mainPad.Draw()
@@ -363,31 +363,41 @@ def main():
                             #happens in the mainPad
             mainPad.SetLogy(1)
             
-
             hst_stack.Draw("HIST")
               
             decorate_hstack(hst_stack)
-
-            
-           
-            hst_stack.GetXaxis().SetTitle(xtitle)
-            hst_stack.GetXaxis().SetRangeUser(0,1)
+      
+            #hst_stack.GetXaxis().SetTitle(xtitle)
             #hst_stack.GetXaxis().CenterTitle()          
             hst_stack.GetYaxis().SetTitle('Events')
             hst_stack.GetYaxis().CenterTitle()
+            hst_stack.GetXaxis().SetTitle(xtitle)
+            hst_stack.GetXaxis().CenterTitle()
+            #hst_stack.GetXaxis().SetRangeUser(0.05, 10)
             hst_stack.SetMinimum(0.001)
-            hst_stack.SetMaximum(1e10)        
-           
-            #h_stack.GetXaxis().CenterTitle()
-            
-            #hst_data.Draw('ep same')
-
-           
+            hst_stack.SetMaximum(1e5)
+            #hst_data.Draw('ep same')        
 
             mainPad.SetTickx(1)
             
             legend.Draw()
             #ratioleg.Draw()
+
+            ## A few text
+            #text1 = DrawText(0.15,0.92,"IISER Pune Analysis")
+            text2 = DrawText(0.64,0.92,"13 TeV(2016)",52)
+
+            DrawText(0.15,0.92,"CMS",62)
+            DrawText(0.22,0.92,"preliminary",52)
+
+            if "2l1d_" in plotname:
+                DrawText(0.45,0.92,"2L1D",62)
+
+            if "1l2d_" in plotname:
+                DrawText(0.45,0.92,"1L2D",62)
+
+            if "3d_" in plotname:
+                DrawText(0.45,0.92,"0L3D",62)
 
             #plotting ratioPad
 
@@ -417,6 +427,18 @@ def main():
                 canvas.SaveAs(output_filename)
             elif plotname.startswith("3d_"):
                 output_filename = os.path.join(stackDir, "evsel_3d", f"{plotname}.png")
+                canvas.SaveAs(output_filename)
+            elif plotname.startswith("cr_ttbar_"):
+                output_filename = os.path.join(stackDir, "cr_ttbar", f"{plotname}.png")
+                canvas.SaveAs(output_filename)
+            elif plotname.startswith("vr_ttbar_"):
+                output_filename = os.path.join(stackDir, "vr_ttbar", f"{plotname}.png")
+                canvas.SaveAs(output_filename)
+            elif plotname.startswith("cr_wjets_"):
+                output_filename = os.path.join(stackDir, "cr_wjets", f"{plotname}.png")
+                canvas.SaveAs(output_filename)
+            elif plotname.startswith("3L_"):
+                output_filename = os.path.join(stackDir, "3L", f"{plotname}.png")
                 canvas.SaveAs(output_filename)
             else:
                 output_filename = os.path.join(stackDir, f"{plotname}.png")

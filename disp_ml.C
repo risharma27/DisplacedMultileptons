@@ -406,7 +406,7 @@ Bool_t disp_ml::Process(Long64_t entry)
 	//##################### ANALYSIS BLOCK  ####################//
 	  
 	dispml_evsel_plots();
-	other_evsel_plots();
+	//other_evsel_plots();
 	
       }//triggered_events
 
