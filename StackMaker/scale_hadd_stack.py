@@ -176,9 +176,9 @@ def main():
     gROOT.ProcessLine("gErrorIgnoreLevel = 1001;")  # suppress info messages
     gROOT.ProcessLine("gErrorIgnoreLevel = 3001;")  # suppress warning messages
 
-    inputDir = "../cluster_hst_output/mar15/"
-    outputDir = "finalhaddOutput/mar15/"
-    stackDir = "stackoutput/mar15/"
+    inputDir = "../cluster_hst_output/mar11/"
+    outputDir = "finalhaddOutput/mar11/"
+    stackDir = "stackoutput/mar11/"
     
     preVFP_lumi  = 19.3 * 1000
     postVFP_lumi = 17 * 1000
@@ -199,17 +199,21 @@ def main():
     MC_files = ["DY.root","TTBar.root","WJets.root","QCD.root","WGamma.root","ZGamma.root","ZZ.root","WZ.root","WW.root","SingleTop.root"]
     #MC_files = ["DY.root"]
     #hist_colors = [kBlue-7,kTeal+9,kOrange+1,kYellow-7,kMagenta-10,kViolet+1,kAzure,kMagenta-7,kPink+1,kCyan-3]
-    hist_colors = [kBlue-7,kTeal+9,kOrange+1,kYellow-7,kCyan-8,kAzure-7,kAzure,kMagenta-7,kPink+1,kCyan-3]
+    #hist_colors = [kBlue-7,kTeal+9,kOrange+1,kYellow-7,kCyan-8,kAzure-7,kAzure,kMagenta-7,kPink+1,kCyan-3]
+    #hist_colors = [kBlue-10,kGreen+3,kOrange+1,kYellow-7,kPink+1,kAzure+10,kBlue+0,kViolet+1,kRed+2,kGreen-7]
+    hist_colors = [kBlue-7,kGreen-2,kOrange+1,kYellow-7,kRed-10,kAzure-9,kAzure-3,kViolet-9,kRed-9,kTeal-8]
     files_mc = [TFile.Open(outputDir + file_name, "READ") for file_name in MC_files] #storing the MC root files in a list
     file_data = TFile.Open(outputDir + "Data.root", "READ")
 
     print("\nFiles opened in ROOT successfully..") 
     
-    hist_names = ["flavor", "met", "l0_dxy", "l0_ip3d", "l0_sip3d", "l1_dxy", "l1_ip3d", "l1_sip3d", "l2_dxy", "l2_ip3d", "l2_sip3d", "imass_3l", "delR_l0l1", "delPhi_l0l1", "delPhi_l0met", "imass_l0l1", "mt0", "delR_l1l2", "delPhi_l1l2", "delPhi_l1met", "imass_l1l2", "mt1", "delR_l2l0", "delPhi_l2l0", "delPhi_l2met", "imass_l2l0", "mt2", "njet", "bjets", "l0_reliso03", "l1_reliso03", "l2_reliso03", "l2_dxy", "l2_dz", "l2_ip3d", "l2_sip3d", "l0_|dxy|", "l1_|dxy|", "l2_|dxy|"]
+    #hist_names = ["flavor", "met", "l0_dxy", "l0_ip3d", "l0_sip3d", "l1_dxy", "l1_ip3d", "l1_sip3d", "l2_dxy", "l2_ip3d", "l2_sip3d", "imass_3l", "delR_l0l1", "delPhi_l0l1", "delPhi_l0met", "imass_l0l1", "mt0", "delR_l1l2", "delPhi_l1l2", "delPhi_l1met", "imass_l1l2", "mt1", "delR_l2l0", "delPhi_l2l0", "delPhi_l2met", "imass_l2l0", "mt2", "njet", "bjets", "l0_reliso03", "l1_reliso03", "l2_reliso03", "l2_dxy", "l2_dz", "l2_ip3d", "l2_sip3d", "l0_|dxy|", "l1_|dxy|", "l2_|dxy|"]
 
-    #hist_2LSS = ["2LSS_flavor", "2LSS_invmass_ll", "2LSS_met", "mumu_invmass_ll", "ee_invmass_ll", "emu_or_mue_invmass_ll", "2LSS_ht"]
+    hist_names = ["flavor", "met", "l0_dxy", "l0_ip3d", "l0_sip3d", "l1_dxy", "l1_ip3d", "l1_sip3d", "l2_dxy", "l2_ip3d", "l2_sip3d", "imass_3l", "delR_l0l1", "delPhi_l0l1", "delPhi_l0met", "imass_l0l1", "mt0", "delR_l1l2", "delPhi_l1l2", "delPhi_l1met", "imass_l1l2", "mt1", "delR_l2l0", "delPhi_l2l0", "delPhi_l2met", "imass_l2l0", "mt2", "njet", "bjets", "l0_reliso03", "l1_reliso03", "l2_reliso03", "l2_dxy", "l2_dz", "l2_ip3d", "l2_sip3d"]
 
-    #hist_3L = ["3L_invmass_3l", "3L_invmass_l0l1", "3L_met", "3L_lt", "3L_njet", "3L_ht"]
+    hist_2LSS = ["2LSS_flavor", "2LSS_invmass_ll", "2LSS_met", "mumu_invmass_ll", "ee_invmass_ll", "emu_or_mue_invmass_ll", "2LSS_ht"]
+
+    hist_3L = ["3L_invmass_3l", "3L_invmass_l0l1", "3L_met", "3L_lt", "3L_njet", "3L_ht"]
 
     hist_cr_ttbar = ["cr_ttbar_met", "cr_ttbar_pt0", "cr_ttbar_pt1", "cr_ttbar_lt", "cr_ttbar_njet", "cr_ttbar_bjet", "cr_ttbar_ht", "cr_ttbar_mt0", "cr_ttbar_mt1","cr_ttbar_l0iso", "cr_ttbar_l1iso", "cr_ttbar_dphil0l1", "cr_ttbar_invmassl0l1", "cr_ttbar_invmassj0j1"]
 
@@ -230,7 +234,6 @@ def main():
             hist_name = prefix + hist
             hists.append(hist_name)
 
-    '''
     for hist in hist_2LSS:
         hists.append(hist)
 
@@ -254,7 +257,6 @@ def main():
 
     for hist in hist_cr_wjets_1l2d:
         hists.append(hist)
-    '''
 
     for plotname in hists:
         hst_data = file_data.Get(plotname)

@@ -1,16 +1,19 @@
 import ROOT
 from ROOT import *
+import datetime
 
+# Get the current date and time
+current_date = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
 
 def SetOverflowBin(histo):
     nbins = histo.GetNbinsX()
     histo.SetBinContent(nbins, histo.GetBinContent(nbins) + histo.GetBinContent(nbins+1)); ## Overflow
     histo.SetBinContent(1, histo.GetBinContent(1)+ histo.GetBinContent(0));                ## Underflow
 
-def DrawText(X,Y,txt):
+def DrawText(X,Y,txt,style):
     text = ROOT.TLatex()
     text.SetNDC(True)
-    text.SetTextFont(42)
+    text.SetTextFont(style)
     text.SetTextSize(0.04)
     text.DrawLatex(X,Y,txt)
 
@@ -47,42 +50,53 @@ def SetLegendStyle(legend):
 def main():
     
     # Read the file from the disk    
-    inputDir = "../finalhaddOutput/jan20/"
+    inputDir = "../finalhaddOutput/mar11/"
     
-    file_DY     =  TFile.Open(inputDir + "DY.root",     "READ")
-    file_ttbar  =  TFile.Open(inputDir + "TTBar.root",  "READ")
-    file_QCD    =  TFile.Open(inputDir + "QCD.root",    "READ")
-    file_WJets  =  TFile.Open(inputDir + "WJets.root",  "READ")
-    file_ZGamma =  TFile.Open(inputDir + "ZGamma.root", "READ")
-    file_WGamma =  TFile.Open(inputDir + "WGamma.root", "READ")
-    file_Data   =  TFile.Open(inputDir + "Data.root",   "READ")
+    file_dy     =  TFile.Open(inputDir + "DY.root",        "READ")
+    file_tt     =  TFile.Open(inputDir + "TTBar.root",     "READ")
+    file_wjets  =  TFile.Open(inputDir + "WJets.root",     "READ")
+    file_qcd    =  TFile.Open(inputDir + "QCD.root",       "READ")
+    file_wgamma =  TFile.Open(inputDir + "WGamma.root",    "READ")
+    file_zgamma =  TFile.Open(inputDir + "ZGamma.root",    "READ")
+    file_zz     =  TFile.Open(inputDir + "ZZ.root",        "READ")
+    file_wz     =  TFile.Open(inputDir + "WZ.root",        "READ")
+    file_ww     =  TFile.Open(inputDir + "WW.root",        "READ")
+    file_st     =  TFile.Open(inputDir + "SingleTop.root", "READ")
+    file_data   =  TFile.Open(inputDir + "Data.root",      "READ")
     
     print(" \n file opened in ROOT successfully..")
     
     
     ## Get the histograms
 
-    plotname = "2lnoiso_l1iso"
-    h_dy     = file_DY.Get(plotname);      decorate(h_dy,     kBlue-9);
-    h_tt     = file_ttbar.Get(plotname);   decorate(h_tt,     kGreen-9); 
-    h_qcd    = file_QCD.Get(plotname);     decorate(h_qcd,    kYellow-9);
-    h_wjets  = file_WJets.Get(plotname);   decorate(h_wjets,  kRed-9);
-    h_zgamma = file_ZGamma.Get(plotname);  decorate(h_zgamma, kCyan-9);
-    h_wgamma = file_WGamma.Get(plotname);  decorate(h_wgamma, kMagenta-9);
-
+    plotname = "cr_ttbar_2l1d_ht"
+    h_dy     = file_dy.Get(plotname);      decorate(h_dy,     kBlue-7);
+    h_tt     = file_tt.Get(plotname);      decorate(h_tt,     kGreen-2);
+    h_wjets  = file_wjets.Get(plotname);   decorate(h_wjets,  kOrange+1);
+    h_qcd    = file_qcd.Get(plotname);     decorate(h_qcd,    kYellow-7);
+    h_wgamma = file_wgamma.Get(plotname);  decorate(h_wgamma, kRed-10);
+    h_zgamma = file_zgamma.Get(plotname);  decorate(h_zgamma, kAzure-9);
+    h_zz     = file_zz.Get(plotname);      decorate(h_zz,     kAzure-3);
+    h_wz     = file_wz.Get(plotname);      decorate(h_wz,     kViolet-9);
+    h_ww     = file_ww.Get(plotname);      decorate(h_ww,     kRed-9);
+    h_st     = file_st.Get(plotname);      decorate(h_st,     kTeal-8);
     print(h_wgamma)
     
-    h_data = file_Data.Get(plotname);
+    h_data = file_data.Get(plotname)
     h_data.SetMarkerStyle(20)
     h_data.SetMarkerSize(0.6)
     h_data.SetLineColor(kBlack)
 
     SetOverflowBin(h_dy)
     SetOverflowBin(h_tt)
-    SetOverflowBin(h_qcd)
     SetOverflowBin(h_wjets)
-    SetOverflowBin(h_zgamma)
+    SetOverflowBin(h_qcd)
     SetOverflowBin(h_wgamma)
+    SetOverflowBin(h_zgamma)
+    SetOverflowBin(h_zz)
+    SetOverflowBin(h_wz)
+    SetOverflowBin(h_ww)
+    SetOverflowBin(h_st)
     SetOverflowBin(h_data)
    
     print("Histograms are ready...")
@@ -99,29 +113,40 @@ def main():
     h_wz.Scale(dtlumi/wzlumi)
     '''
 
+    #scaling to luminosity not needed here
+    #b/c that has already been done using
+    #the scale_hadd_stack.py file and the
+    #output files are saved in the finalhaddOutput dir
     
     ##Rebining
-    rebin = 5
+    rebin = 25
     h_dy.Rebin(rebin)
     h_tt.Rebin(rebin)
-    h_qcd.Rebin(rebin)
     h_wjets.Rebin(rebin)
+    h_qcd.Rebin(rebin)
+    h_wgamma.Rebin(rebin)
     h_zgamma.Rebin(rebin)
-    h_wgamma.Rebin(rebin)   
-    
+    h_zz.Rebin(rebin)
+    h_wz.Rebin(rebin)
+    h_ww.Rebin(rebin)
+    h_st.Rebin(rebin)    
     h_data.Rebin(rebin)
 
     # Create a list of tuples with histograms and their integrals
     
     histograms = [(h_dy,     h_dy.Integral(),     "DY"),
                   (h_tt,     h_tt.Integral(),     "TTbar"),
-                  (h_qcd,    h_qcd.Integral(),    "QCD"),
                   (h_wjets,  h_wjets.Integral(),  "WJets"),
+                  (h_qcd,    h_qcd.Integral(),    "QCD"),
+                  (h_wgamma, h_wgamma.Integral(), "WGamma"),
                   (h_zgamma, h_zgamma.Integral(), "ZGamma"),
-                  (h_wgamma, h_wgamma.Integral(), "WGamma")]
+                  (h_zz,     h_zz.Integral(),     "ZZ"),
+                  (h_wz,     h_wz.Integral(),     "WZ"),
+                  (h_ww,     h_ww.Integral(),     "WW"),
+                  (h_st,     h_st.Integral(),     "SingleTop")]
     
     # Sort the list in descending order based on integrals
-    histograms.sort(key=lambda x: x[1], reverse=True)
+    histograms.sort(key=lambda x: x[1], reverse=False)
 
     #Scaling
 
@@ -153,14 +178,23 @@ def main():
     
     # Create THStack 
     h_stack = THStack()
+    
+    '''
     h_stack.Add(h_dy)
     h_stack.Add(h_tt)
     h_stack.Add(h_wjets)
     h_stack.Add(h_qcd)
-    h_stack.Add(h_zgamma)
     h_stack.Add(h_wgamma)
-    #for hist, integral, name in histograms:
-     #   h_stack.Add(hist)
+    h_stack.Add(h_zgamma)
+    h_stack.Add(h_zz)
+    h_stack.Add(h_wz)
+    h_stack.Add(h_ww) 
+    h_stack.Add(h_st)
+    '''
+
+    
+    for hist, integral, name in histograms:
+        h_stack.Add(hist)
         
     h_bkg = histograms[0][0].Clone()
     for hist, integral, name in histograms[1:]:
@@ -178,7 +212,7 @@ def main():
     ratioleg.SetHeader(f"obs/exp={h_data.Integral()/h_bkg.Integral():.2f}   exp: {h_bkg.Integral():.0f}")
 
     legend.AddEntry(h_data, f"Data[{h_data.Integral():.0f}]", 'ep')
-    for hist, integral, name in histograms:
+    for hist, integral, name in reversed(histograms):
         legend.AddEntry(hist, f"{name}[{integral:.0f}]", 'lf')
                 
     SetLegendStyle(ratioleg)
@@ -201,11 +235,11 @@ def main():
     mainPad.cd()
     mainPad.SetLogy(1)
     h_stack.SetMinimum(0.001)
-    h_stack.SetMaximum(1e8)
+    h_stack.SetMaximum(1e5)
     
    
    
-   # h_stack.GetYaxis().SetRangeUser(0,100)
+    #h_stack.GetYaxis().SetRangeUser(0,100)
     
     #h_data.GetYaxis().SetRangeUser(0.001,1e8)
     
@@ -226,6 +260,10 @@ def main():
     
     ratioleg.Draw()
     legend.Draw()
+
+    DrawText(0.64,0.92,"13 TeV(2016)",52)
+    DrawText(0.15,0.92,"CMS",62)
+    DrawText(0.22,0.92,"preliminary",52)
     
     h_stack.GetYaxis().SetTitle('Events')
     #h_stack.GetXaxis().SetTitle("Invariant Mass(M_{12})")
@@ -252,7 +290,7 @@ def main():
 
     ##plot ratiopad
     ratioPad.cd()
-    h_ratio.GetXaxis().SetTitle("M_l0l1")
+    h_ratio.GetXaxis().SetTitle(plotname)
     h_ratio.GetYaxis().SetTitle("obs/exp")
     h_ratio.GetXaxis().CenterTitle()
     h_ratio.GetYaxis().CenterTitle()
@@ -279,7 +317,7 @@ def main():
 
     canvas.Draw()
 
-    canvas.SaveAs('stackoneoutput/stackplot.pdf')
+    canvas.SaveAs(f'stackoneplot_{current_date}.pdf')
     #canvas.SaveAs('qcdscaled_plots/qcdscaled_stackplot.pdf')
     
 

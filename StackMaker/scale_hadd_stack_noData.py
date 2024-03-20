@@ -91,7 +91,7 @@ def DrawText(X,Y,txt,style):
     return text
     
 def decorate(h,color):
-    h.SetLineColor(kGray+2)
+    h.SetLineColor(kGray+3)
     h.SetFillColor(color)
     SetOverflowBin(h) ## overflow bin is must
 
@@ -197,8 +197,9 @@ def main():
     
     MC_files = ["DY.root","TTBar.root","WJets.root","QCD.root","WGamma.root","ZGamma.root","ZZ.root","WZ.root","WW.root","SingleTop.root"]
     #MC_files = ["DY.root"]
-    hist_colors = [kBlue-7,kTeal+9,kOrange+1,kYellow-7,kMagenta-10,kViolet+1,kAzure,kMagenta-7,kPink+1,kCyan-3]
+    #hist_colors = [kBlue-7,kTeal+9,kOrange+1,kYellow-7,kMagenta-10,kViolet+1,kAzure,kMagenta-7,kPink+1,kCyan-3]
     #hist_colors = [kBlue-7,kTeal+9,kOrange+1,kYellow-7,kViolet+6,kAzure-4,kAzure,kMagenta-7,kPink+1,kCyan-3]
+    hist_colors = [kBlue-7,kGreen-2,kOrange+1,kYellow-7,kRed-10,kAzure-9,kAzure-3,kViolet-9,kRed-9,kTeal-8]
     files_mc = [TFile.Open(outputDir + file_name, "READ") for file_name in MC_files] #storing the MC root files in a list
     file_data = TFile.Open(outputDir + "Data.root", "READ")
 
