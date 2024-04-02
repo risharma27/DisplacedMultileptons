@@ -1986,6 +1986,8 @@ public :
     TH1F *vr_ttbar_2l1d[16];
     TH1F *cr_wjets[10];
     TH1F *cr_wjets_1l2d[10];
+    TH1F *cr_ttbar_ht_rebinned;
+    TH1F *cr_ttbar_2l1d_ht_rebinned;
   
   };
 

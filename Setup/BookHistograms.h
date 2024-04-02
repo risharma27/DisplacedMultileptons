@@ -5,6 +5,10 @@ void disp_ml::BookHistograms(){
   h.charge[0] = new TH1F("muon_charge", "Muon charge", 10, -5, 5);
   h.charge[1] = new TH1F("electron_charge", "Electron charge", 10, -5, 5);
 
+  //double xbins1[7] = {-50, -10, -5, 0, 5, 10, 50};
+  //h.hnew1 = (TH1F*)h.dxy[0]->Rebin(4,"hnew1",xbins1);
+  // h.dxy[0]   = new TH1F("mu_dxy", "mu_dxy", 6, xbins1);
+
   h.dxy[0]   = new TH1F("mu_dxy", "mu_dxy", 1000, -50, 50);
   h.dz[0]    = new TH1F("mu_dz", "mu_dz", 1000, -50, 50);
   h.dxy[1]   = new TH1F("mu_|dxy|", "mu_|dxy|", 5000, 0, 50);
@@ -70,6 +74,10 @@ void disp_ml::BookHistograms(){
   h.cr_ttbar[4]  = new TH1F("cr_ttbar_njet", "njet", 10, 0, 10);
   h.cr_ttbar[5]  = new TH1F("cr_ttbar_bjet", "bjet", 10, 0, 10);
   h.cr_ttbar[6]  = new TH1F("cr_ttbar_ht", "ht", 500, 0, 500);
+
+  double xbins1[6] = {0, 50, 150, 250, 350, 500};
+  h.cr_ttbar_ht_rebinned = new TH1F("cr_ttbar_ht_rebinned", "cr_ttbar_ht_rebinned", 5, xbins1);
+  
   h.cr_ttbar[7]  = new TH1F("cr_ttbar_mt0", "mt0", 200, 0, 200);
   h.cr_ttbar[8]  = new TH1F("cr_ttbar_mt1", "mt1", 200, 0, 200);
   h.cr_ttbar[9]  = new TH1F("cr_ttbar_l0iso", "l0iso", 150, 0, 0.15);
@@ -104,6 +112,10 @@ void disp_ml::BookHistograms(){
   h.cr_ttbar_2l1d[4]  = new TH1F("cr_ttbar_2l1d_njet", "njet", 10, 0, 10);
   h.cr_ttbar_2l1d[5]  = new TH1F("cr_ttbar_2l1d_bjet", "bjet", 10, 0, 10);
   h.cr_ttbar_2l1d[6]  = new TH1F("cr_ttbar_2l1d_ht", "ht", 500, 0, 500);
+
+  double xbins2[6] = {0, 50, 150, 250, 350, 500};
+  h.cr_ttbar_2l1d_ht_rebinned = new TH1F("cr_ttbar_2l1d_ht_rebinned", "cr_ttbar_2l1d_ht_rebinned", 5, xbins2);
+
   h.cr_ttbar_2l1d[7]  = new TH1F("cr_ttbar_2l1d_mt0", "mt0", 200, 0, 200);
   h.cr_ttbar_2l1d[8]  = new TH1F("cr_ttbar_2l1d_mt1", "mt1", 200, 0, 200);
   h.cr_ttbar_2l1d[9]  = new TH1F("cr_ttbar_2l1d_l0iso", "l0iso", 150, 0, 0.15);

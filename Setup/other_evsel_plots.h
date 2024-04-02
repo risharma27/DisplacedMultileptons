@@ -120,6 +120,7 @@ void disp_ml::other_evsel_plots(){
       cr_ttbar_ht = cr_ttbar_ht + recoJet.at(i).v.Pt();
     }
     h.cr_ttbar[6]->Fill(cr_ttbar_ht);
+    h.cr_ttbar_ht_rebinned->Fill(cr_ttbar_ht, evtwt);
     h.cr_ttbar[7]->Fill(transv_mass(promptLepton.at(0).v.Pt(), metpt, delta_phi(promptLepton.at(0).v.Phi(), metphi)));
     h.cr_ttbar[8]->Fill(transv_mass(promptLepton.at(1).v.Pt(), metpt, delta_phi(promptLepton.at(1).v.Phi(), metphi)));
     h.cr_ttbar[9]->Fill(promptLepton.at(0).reliso03);
@@ -164,56 +165,91 @@ void disp_ml::other_evsel_plots(){
   //cr_ttbar_2l1d
   float cr_ttbar_2l1d_lt = 0.0, cr_ttbar_2l1d_ht = 0.0;
   if(cr_ttbar_2l1d){
-    h.cr_ttbar_2l1d[0]->Fill(metpt);
-    h.cr_ttbar_2l1d[1]->Fill(promptLepton.at(0).v.Pt());
-    h.cr_ttbar_2l1d[2]->Fill(promptLepton.at(1).v.Pt());
+
+    //*************************************************************************************************************
+    if(_data==0){
+      float lep0SF = LeptonIDSF(promptLepton.at(0).id, promptLepton.at(0).v.Pt(), promptLepton.at(0).v.Eta());
+      float lep1SF = LeptonIDSF(promptLepton.at(1).id, promptLepton.at(1).v.Pt(), promptLepton.at(1).v.Eta());
+      float lep2SF = LeptonIDSF(displacedLepton.at(0).id, displacedLepton.at(0).v.Pt(), displacedLepton.at(0).v.Eta());
+      scalefactor = lep0SF * lep1SF * lep2SF;
+	
+      float e1=SingleLepTrigger_eff(promptLepton.at(0).id, promptLepton.at(0).v.Pt(), promptLepton.at(0).v.Eta());
+      float e2=SingleLepTrigger_eff(promptLepton.at(1).id, promptLepton.at(1).v.Pt(), promptLepton.at(1).v.Eta());
+      float e3=SingleLepTrigger_eff(displacedLepton.at(0).id, displacedLepton.at(0).v.Pt(), displacedLepton.at(0).v.Eta());
+      triggeff=1-((1-e1)*(1-e2)*(1-e3));
+      
+      evtwt = scalefactor * triggeff;
+    }
+    //*************************************************************************************************************//
+    
+    h.cr_ttbar_2l1d[0]->Fill(metpt, evtwt);
+    h.cr_ttbar_2l1d[1]->Fill(promptLepton.at(0).v.Pt(), evtwt);
+    h.cr_ttbar_2l1d[2]->Fill(promptLepton.at(1).v.Pt(), evtwt);
     for(int i=0; i<(int)lightLep.size(); i++){
       cr_ttbar_2l1d_lt = cr_ttbar_2l1d_lt + lightLep.at(i).v.Pt();
     }
-    h.cr_ttbar_2l1d[3]->Fill(cr_ttbar_2l1d_lt);
-    h.cr_ttbar_2l1d[4]->Fill((int)recoJet.size());
-    h.cr_ttbar_2l1d[5]->Fill((int)bJet.size());  
+    h.cr_ttbar_2l1d[3]->Fill(cr_ttbar_2l1d_lt, evtwt);
+    h.cr_ttbar_2l1d[4]->Fill((int)recoJet.size(), evtwt);
+    h.cr_ttbar_2l1d[5]->Fill((int)bJet.size(), evtwt);  
     for(int i=0; i<(int)recoJet.size(); i++){
       cr_ttbar_2l1d_ht = cr_ttbar_2l1d_ht + recoJet.at(i).v.Pt();
     }
-    h.cr_ttbar_2l1d[6]->Fill(cr_ttbar_2l1d_ht);
-    h.cr_ttbar_2l1d[7]->Fill(transv_mass(promptLepton.at(0).v.Pt(), metpt, delta_phi(promptLepton.at(0).v.Phi(), metphi)));
-    h.cr_ttbar_2l1d[8]->Fill(transv_mass(promptLepton.at(1).v.Pt(), metpt, delta_phi(promptLepton.at(1).v.Phi(), metphi)));
-    h.cr_ttbar_2l1d[9]->Fill(promptLepton.at(0).reliso03);
-    h.cr_ttbar_2l1d[10]->Fill(promptLepton.at(1).reliso03);
-    h.cr_ttbar_2l1d[11]->Fill(delta_phi(promptLepton.at(0).v.Phi(), promptLepton.at(1).v.Phi()));
-    h.cr_ttbar_2l1d[12]->Fill((promptLepton.at(0).v+promptLepton.at(1).v).M());
-    h.cr_ttbar_2l1d[13]->Fill((recoJet.at(0).v+recoJet.at(1).v).M());
-    h.cr_ttbar_2l1d[14]->Fill(recoJet.at(0).v.Pt());
-    h.cr_ttbar_2l1d[15]->Fill(recoJet.at(1).v.Pt());   
+    h.cr_ttbar_2l1d[6]->Fill(cr_ttbar_2l1d_ht, evtwt);
+    h.cr_ttbar_2l1d_ht_rebinned->Fill(cr_ttbar_2l1d_ht, evtwt);
+    h.cr_ttbar_2l1d[7]->Fill(transv_mass(promptLepton.at(0).v.Pt(), metpt, delta_phi(promptLepton.at(0).v.Phi(), metphi)), evtwt);
+    h.cr_ttbar_2l1d[8]->Fill(transv_mass(promptLepton.at(1).v.Pt(), metpt, delta_phi(promptLepton.at(1).v.Phi(), metphi)), evtwt);
+    h.cr_ttbar_2l1d[9]->Fill(promptLepton.at(0).reliso03, evtwt);
+    h.cr_ttbar_2l1d[10]->Fill(promptLepton.at(1).reliso03, evtwt);
+    h.cr_ttbar_2l1d[11]->Fill(delta_phi(promptLepton.at(0).v.Phi(), promptLepton.at(1).v.Phi()), evtwt);
+    h.cr_ttbar_2l1d[12]->Fill((promptLepton.at(0).v+promptLepton.at(1).v).M(), evtwt);
+    h.cr_ttbar_2l1d[13]->Fill((recoJet.at(0).v+recoJet.at(1).v).M(), evtwt);
+    h.cr_ttbar_2l1d[14]->Fill(recoJet.at(0).v.Pt(), evtwt);
+    h.cr_ttbar_2l1d[15]->Fill(recoJet.at(1).v.Pt(), evtwt);   
 			      
   }//if(cr_ttbar_2l1d)
 
    //vr_ttbar_2l1d
   float vr_ttbar_2l1d_lt = 0.0, vr_ttbar_2l1d_ht = 0.0;
   if(vr_ttbar_2l1d){
-    h.vr_ttbar_2l1d[0]->Fill(metpt);
-    h.vr_ttbar_2l1d[1]->Fill(promptLepton.at(0).v.Pt());
-    h.vr_ttbar_2l1d[2]->Fill(promptLepton.at(1).v.Pt());
+    
+    //*************************************************************************************************************
+    if(_data==0){
+      float lep0SF = LeptonIDSF(promptLepton.at(0).id, promptLepton.at(0).v.Pt(), promptLepton.at(0).v.Eta());
+      float lep1SF = LeptonIDSF(promptLepton.at(1).id, promptLepton.at(1).v.Pt(), promptLepton.at(1).v.Eta());
+      float lep2SF = LeptonIDSF(displacedLepton.at(0).id, displacedLepton.at(0).v.Pt(), displacedLepton.at(0).v.Eta());
+      scalefactor = lep0SF * lep1SF * lep2SF;
+	
+      float e1=SingleLepTrigger_eff(promptLepton.at(0).id, promptLepton.at(0).v.Pt(), promptLepton.at(0).v.Eta());
+      float e2=SingleLepTrigger_eff(promptLepton.at(1).id, promptLepton.at(1).v.Pt(), promptLepton.at(1).v.Eta());
+      float e3=SingleLepTrigger_eff(displacedLepton.at(0).id, displacedLepton.at(0).v.Pt(), displacedLepton.at(0).v.Eta());
+      triggeff=1-((1-e1)*(1-e2)*(1-e3));
+      
+      evtwt = scalefactor * triggeff;
+    }
+    //*************************************************************************************************************//
+    
+    h.vr_ttbar_2l1d[0]->Fill(metpt, evtwt);
+    h.vr_ttbar_2l1d[1]->Fill(promptLepton.at(0).v.Pt(), evtwt);
+    h.vr_ttbar_2l1d[2]->Fill(promptLepton.at(1).v.Pt(), evtwt);
     for(int i=0; i<(int)lightLep.size(); i++){
       vr_ttbar_2l1d_lt = vr_ttbar_2l1d_lt + lightLep.at(i).v.Pt();
     }
-    h.vr_ttbar_2l1d[3]->Fill(vr_ttbar_2l1d_lt);
-    h.vr_ttbar_2l1d[4]->Fill((int)recoJet.size());
-    h.vr_ttbar_2l1d[5]->Fill((int)bJet.size());  
+    h.vr_ttbar_2l1d[3]->Fill(vr_ttbar_2l1d_lt, evtwt);
+    h.vr_ttbar_2l1d[4]->Fill((int)recoJet.size(), evtwt);
+    h.vr_ttbar_2l1d[5]->Fill((int)bJet.size(), evtwt);  
     for(int i=0; i<(int)recoJet.size(); i++){
       vr_ttbar_2l1d_ht = vr_ttbar_2l1d_ht + recoJet.at(i).v.Pt();
     }
-    h.vr_ttbar_2l1d[6]->Fill(vr_ttbar_2l1d_ht);
-    h.vr_ttbar_2l1d[7]->Fill(transv_mass(promptLepton.at(0).v.Pt(), metpt, delta_phi(promptLepton.at(0).v.Phi(), metphi)));
-    h.vr_ttbar_2l1d[8]->Fill(transv_mass(promptLepton.at(1).v.Pt(), metpt, delta_phi(promptLepton.at(1).v.Phi(), metphi)));
-    h.vr_ttbar_2l1d[9]->Fill(promptLepton.at(0).reliso03);
-    h.vr_ttbar_2l1d[10]->Fill(promptLepton.at(1).reliso03);
-    h.vr_ttbar_2l1d[11]->Fill(delta_phi(promptLepton.at(0).v.Phi(), promptLepton.at(1).v.Phi()));
-    h.vr_ttbar_2l1d[12]->Fill((promptLepton.at(0).v+promptLepton.at(1).v).M());
-    h.vr_ttbar_2l1d[13]->Fill((recoJet.at(0).v+recoJet.at(1).v).M());
-    h.vr_ttbar_2l1d[14]->Fill(recoJet.at(0).v.Pt());
-    h.vr_ttbar_2l1d[15]->Fill(recoJet.at(1).v.Pt());   
+    h.vr_ttbar_2l1d[6]->Fill(vr_ttbar_2l1d_ht, evtwt);
+    h.vr_ttbar_2l1d[7]->Fill(transv_mass(promptLepton.at(0).v.Pt(), metpt, delta_phi(promptLepton.at(0).v.Phi(), metphi)), evtwt);
+    h.vr_ttbar_2l1d[8]->Fill(transv_mass(promptLepton.at(1).v.Pt(), metpt, delta_phi(promptLepton.at(1).v.Phi(), metphi)), evtwt);
+    h.vr_ttbar_2l1d[9]->Fill(promptLepton.at(0).reliso03, evtwt);
+    h.vr_ttbar_2l1d[10]->Fill(promptLepton.at(1).reliso03, evtwt);
+    h.vr_ttbar_2l1d[11]->Fill(delta_phi(promptLepton.at(0).v.Phi(), promptLepton.at(1).v.Phi()), evtwt);
+    h.vr_ttbar_2l1d[12]->Fill((promptLepton.at(0).v+promptLepton.at(1).v).M(), evtwt);
+    h.vr_ttbar_2l1d[13]->Fill((recoJet.at(0).v+recoJet.at(1).v).M(), evtwt);
+    h.vr_ttbar_2l1d[14]->Fill(recoJet.at(0).v.Pt(), evtwt);
+    h.vr_ttbar_2l1d[15]->Fill(recoJet.at(1).v.Pt(), evtwt);   
 			      
   }//if(vr_ttbar_2l1d)
 

@@ -23,11 +23,6 @@ void disp_ml::EventSelection(){
   for(int i=0; i<(int)lightLep.size(); i++){
     if(lightLep.at(i).reliso03>0.15) all_lep_isolated = false;
   }
-
-  float global_ht = 0.0;
-  for(int i=0; i<(int)recoJet.size(); i++){
-    global_ht = global_ht + recoJet.at(i).v.Pt();
-  }
   
  
   //2LonZ

@@ -119,6 +119,7 @@ def main():
     #output files are saved in the finalhaddOutput dir
     
     ##Rebining
+    '''
     rebin = 25
     h_dy.Rebin(rebin)
     h_tt.Rebin(rebin)
@@ -131,6 +132,26 @@ def main():
     h_ww.Rebin(rebin)
     h_st.Rebin(rebin)    
     h_data.Rebin(rebin)
+    '''
+
+    bins_list = [0, 1, 3, 6, 10, 15]
+    
+    # Convert the Python list to a C-style array
+    bins = ROOT.array('d', bins_list)
+
+
+    #Rebin each histogram using variable binning
+    h_dy = h_dy.Rebin(5, "h_dy", bins);
+    h_tt = h_tt.Rebin(5, "h_tt", bins);
+    h_wjets = h_wjets.Rebin(5, "h_wjets", bins);
+    h_qcd = h_qcd.Rebin(5, "h_qcd_rebinned", bins);
+    h_wgamma = h_wgamma.Rebin(5, "h_wgamma", bins);
+    h_zgamma = h_zgamma.Rebin(5, "h_zgamma", bins);
+    h_zz = h_zz.Rebin(5, "h_zz", bins);
+    h_wz = h_wz.Rebin(5, "h_wz", bins);
+    h_ww = h_ww.Rebin(5, "h_ww", bins);
+    h_st = h_st.Rebin(5, "h_st", bins);
+    h_data = h_data.Rebin(5, "h_data", bins);
 
     # Create a list of tuples with histograms and their integrals
     
