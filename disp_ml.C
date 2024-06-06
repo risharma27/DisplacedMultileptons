@@ -83,9 +83,12 @@ void disp_ml::SlaveTerminate()
 
   //The following lines are written on the sum_<process name>.txt file
   ofstream fout(_SumFileName);
+  
   fout<<"Total events ran = "<<nEvtTotal<<endl;
   fout<<"Total good events  = "<<nEvtGood<<endl;
   fout<<" "<<endl;
+
+  /*
   fout<<"2l1d event list"<<endl;
   for(int i=0; i<(int)evt_2l1d.size(); i++){
     fout<<evt_2l1d.at(i)<<" ";
@@ -100,6 +103,14 @@ void disp_ml::SlaveTerminate()
   for(int i=0; i<(int)evt_3d.size(); i++){
     fout<<evt_3d.at(i)<<" ";
   }
+  fout<<"\n \n";
+    
+  //fout<<"2LonZ_triggeff"<<endl;
+  for(int i=0; i<(int)singlemuon_triggeff.size(); i++){
+    fout<<singlemuon_mu0pt.at(i)<<" "<<singlemuon_triggeff.at(i)<<endl;    
+  }
+  */
+  
 }
 
 void disp_ml::Terminate()
@@ -170,6 +181,8 @@ Bool_t disp_ml::Process(Long64_t entry)
       
       triggerRes = muon_trigger || (!muon_trigger && electron_trigger);
       //triggerRes = electron_trigger || (!electron_trigger && muon_trigger);
+      if(_flag == "electron_dataset" && muon_trigger) triggerRes = false;
+      
     }
 
 
@@ -343,36 +356,24 @@ Bool_t disp_ml::Process(Long64_t entry)
       scalefactor = 1.0;
       triggeff = 1.0;
       evtwt = 1.0; //default value
-
-      //----------------------------------------------------------------
-      //Event-selection is done right after creating the object arrays.
-      //evt_wt is also calculated alongwith.
-      //This is done before any plotting.
+      ttcr_sf = 1.0; //default value
       
-      EventSelection();
-
       //cout<<scalefactor<<" "<<triggeff<<" "<<evtwt<<endl;
            
-      //Applying trigger to MC  
-      bool single_muon = false;
-      bool single_electron = false;
- 
-      if((int)Muon.size()>0 && Muon.at(0).v.Pt()>24)            single_muon = true;
-      if((int)Electron.size()>0 && Electron.at(0).v.Pt()>27)    single_electron = true;
-       
+      //Applying trigger to MC
+      
       bool triggered_events = false;
-      //If the event has a single muon passing the trigger, keep it.
-      if(single_muon) triggered_events=true;
-      //If the event does not pass the single muon trigger then check for the single electron trigger, if it does then keep the event.
-      else if(!single_muon && single_electron) triggered_events=true;    
-
-      /*
-	if(single_electron) triggered_events=true;
-	else if(!single_electron && single_muon) triggered_events=true;
-      */
-
+      if(abs(recoLepton.at(0).id)==11 && recoLepton.at(0).v.Pt()>27) triggered_events = true;
+      if(abs(recoLepton.at(0).id)==13 && recoLepton.at(0).v.Pt()>24) triggered_events = true;	
     
       if(triggered_events){
+
+	//----------------------------------------------------------------
+	//Event-selection is done right after creating the object arrays.
+	//evt_wt is also calculated alongwith.
+	//This is done before any plotting.
+	
+	EventSelection();
 
 	h.nevsel->Fill(0);
 

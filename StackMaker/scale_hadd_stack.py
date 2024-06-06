@@ -6,7 +6,7 @@ import subprocess
 import warnings
 warnings.filterwarnings('ignore')
 
-from bkgsamples import bkg_samples
+from bkgsamples_noQCD import bkg_samples
 
 ####################################################################################
 #                    User Defined functions                                        #
@@ -60,11 +60,17 @@ def process_samples(samples, input_dir, output_dir, datalumi_pre, datalumi_post)
             
             if sub_sample_info["data"]==0:
                 if "preVFP" in sub_sample_info['filename']:
-                    print(sub_sample_info['filename'])
+                    #print(sub_sample_info['filename'])
                     scale_factor = datalumi_pre / (sub_sample_info["nevents"] / sub_sample_info["xsec"])  # calculating the scale factor
+                    #if "QCD" in sub_sample_info['filename']:
+                        #scale_factor = scale_factor * 0.01759 
+                        
                 elif "postVFP" in sub_sample_info['filename']:
-                    print(sub_sample_info['filename'])
-                    scale_factor = datalumi_post / (sub_sample_info["nevents"] / sub_sample_info["xsec"])  
+                    #print(sub_sample_info['filename'])
+                    scale_factor = datalumi_post / (sub_sample_info["nevents"] / sub_sample_info["xsec"])
+                    #if "QCD" in sub_sample_info['filename']:
+                        #scale_factor = scale_factor * 0.01759
+                        
             elif sub_sample_info["data"]==1:
                 scale_factor = 1
                     
@@ -176,9 +182,9 @@ def main():
     gROOT.ProcessLine("gErrorIgnoreLevel = 1001;")  # suppress info messages
     gROOT.ProcessLine("gErrorIgnoreLevel = 3001;")  # suppress warning messages
 
-    inputDir = "../cluster_hst_output/mar11/"
-    outputDir = "finalhaddOutput/mar11/"
-    stackDir = "stackoutput/mar11/"
+    inputDir = "../cluster_hst_output/may01/"
+    outputDir = "finalhaddOutput/may01/"
+    stackDir = "stackoutput/may01/"
     
     preVFP_lumi  = 19.3 * 1000
     postVFP_lumi = 17 * 1000
@@ -196,12 +202,14 @@ def main():
     ###########################
 
     
-    MC_files = ["DY.root","TTBar.root","WJets.root","QCD.root","WGamma.root","ZGamma.root","ZZ.root","WZ.root","WW.root","SingleTop.root"]
+    #MC_files = ["DY.root","TTBar.root","WJets.root","QCD.root","WGamma.root","ZGamma.root","ZZ.root","WZ.root","WW.root","SingleTop.root"]
+    MC_files = ["DY.root","TTBar.root","WJets.root","WGamma.root","ZGamma.root","ZZ.root","WZ.root","WW.root","SingleTop.root"]
     #MC_files = ["DY.root"]
     #hist_colors = [kBlue-7,kTeal+9,kOrange+1,kYellow-7,kMagenta-10,kViolet+1,kAzure,kMagenta-7,kPink+1,kCyan-3]
     #hist_colors = [kBlue-7,kTeal+9,kOrange+1,kYellow-7,kCyan-8,kAzure-7,kAzure,kMagenta-7,kPink+1,kCyan-3]
     #hist_colors = [kBlue-10,kGreen+3,kOrange+1,kYellow-7,kPink+1,kAzure+10,kBlue+0,kViolet+1,kRed+2,kGreen-7]
-    hist_colors = [kBlue-7,kGreen-2,kOrange+1,kYellow-7,kRed-10,kAzure-9,kAzure-3,kViolet-9,kRed-9,kTeal-8]
+    #hist_colors = [kBlue-7,kGreen-2,kOrange+1,kYellow-7,kRed-10,kAzure-9,kAzure-3,kViolet-9,kRed-9,kTeal-8]
+    hist_colors = [kBlue-7,kGreen-2,kOrange+1,kRed-10,kAzure-9,kAzure-3,kViolet-9,kRed-9,kTeal-8]
     files_mc = [TFile.Open(outputDir + file_name, "READ") for file_name in MC_files] #storing the MC root files in a list
     file_data = TFile.Open(outputDir + "Data.root", "READ")
 
@@ -209,26 +217,30 @@ def main():
     
     #hist_names = ["flavor", "met", "l0_dxy", "l0_ip3d", "l0_sip3d", "l1_dxy", "l1_ip3d", "l1_sip3d", "l2_dxy", "l2_ip3d", "l2_sip3d", "imass_3l", "delR_l0l1", "delPhi_l0l1", "delPhi_l0met", "imass_l0l1", "mt0", "delR_l1l2", "delPhi_l1l2", "delPhi_l1met", "imass_l1l2", "mt1", "delR_l2l0", "delPhi_l2l0", "delPhi_l2met", "imass_l2l0", "mt2", "njet", "bjets", "l0_reliso03", "l1_reliso03", "l2_reliso03", "l2_dxy", "l2_dz", "l2_ip3d", "l2_sip3d", "l0_|dxy|", "l1_|dxy|", "l2_|dxy|"]
 
-    hist_names = ["flavor", "met", "l0_dxy", "l0_ip3d", "l0_sip3d", "l1_dxy", "l1_ip3d", "l1_sip3d", "l2_dxy", "l2_ip3d", "l2_sip3d", "imass_3l", "delR_l0l1", "delPhi_l0l1", "delPhi_l0met", "imass_l0l1", "mt0", "delR_l1l2", "delPhi_l1l2", "delPhi_l1met", "imass_l1l2", "mt1", "delR_l2l0", "delPhi_l2l0", "delPhi_l2met", "imass_l2l0", "mt2", "njet", "bjets", "l0_reliso03", "l1_reliso03", "l2_reliso03", "l2_dxy", "l2_dz", "l2_ip3d", "l2_sip3d"]
+    hist_names = ["flavor", "met", "l0_reliso03", "l0_dxy", "l0_ip3d", "l0_sip3d", "l1_reliso03", "l1_dxy", "l1_ip3d", "l1_sip3d", "l2_reliso03", "l2_dxy", "l2_ip3d", "l2_sip3d", "imass_3l", "delR_l0l1", "delPhi_l0l1", "delPhi_l0met", "imass_l0l1", "mt0", "delR_l1l2", "delPhi_l1l2", "delPhi_l1met", "imass_l1l2", "mt1", "delR_l2l0", "delPhi_l2l0", "delPhi_l2met", "imass_l2l0", "mt2", "njet", "bjets", "pt0", "pt1", "pt2", "pt_l0l1", "pt_3l", "HT"]
 
     hist_2LSS = ["2LSS_flavor", "2LSS_invmass_ll", "2LSS_met", "mumu_invmass_ll", "ee_invmass_ll", "emu_or_mue_invmass_ll", "2LSS_ht"]
 
-    hist_3L = ["3L_invmass_3l", "3L_invmass_l0l1", "3L_met", "3L_lt", "3L_njet", "3L_ht"]
-
-    hist_cr_ttbar = ["cr_ttbar_met", "cr_ttbar_pt0", "cr_ttbar_pt1", "cr_ttbar_lt", "cr_ttbar_njet", "cr_ttbar_bjet", "cr_ttbar_ht", "cr_ttbar_mt0", "cr_ttbar_mt1","cr_ttbar_l0iso", "cr_ttbar_l1iso", "cr_ttbar_dphil0l1", "cr_ttbar_invmassl0l1", "cr_ttbar_invmassj0j1"]
+    hist_3L = ["3L_invmass_3l", "3L_invmass_l0l1", "3L_invmass_l1l2", "3L_invmass_l2l0", "3L_met", "3L_lt", "3L_njet", "3L_ht", "3L_pt0", "3L_pt1", "3L_pt2"]
 
     hist_cr_ttbar_2l1d = ["cr_ttbar_2l1d_met", "cr_ttbar_2l1d_pt0", "cr_ttbar_2l1d_pt1", "cr_ttbar_2l1d_lt", "cr_ttbar_2l1d_njet", "cr_ttbar_2l1d_bjet", "cr_ttbar_2l1d_ht", "cr_ttbar_2l1d_mt0", "cr_ttbar_2l1d_mt1","cr_ttbar_2l1d_l0iso", "cr_ttbar_2l1d_l1iso", "cr_ttbar_2l1d_dphil0l1", "cr_ttbar_2l1d_invmassl0l1", "cr_ttbar_2l1d_invmassj0j1"]
 
-    hist_vr_ttbar = ["vr_ttbar_met", "vr_ttbar_pt0", "vr_ttbar_pt1", "vr_ttbar_lt", "vr_ttbar_njet", "vr_ttbar_bjet", "vr_ttbar_ht", "vr_ttbar_mt0", "vr_ttbar_mt1","vr_ttbar_l0iso", "vr_ttbar_l1iso", "vr_ttbar_dphil0l1", "vr_ttbar_invmassl0l1", "vr_ttbar_invmassj0j1"]
-
     hist_vr_ttbar_2l1d = ["vr_ttbar_2l1d_met", "vr_ttbar_2l1d_pt0", "vr_ttbar_2l1d_pt1", "vr_ttbar_2l1d_lt", "vr_ttbar_2l1d_njet", "vr_ttbar_2l1d_bjet", "vr_ttbar_2l1d_ht", "vr_ttbar_2l1d_mt0", "vr_ttbar_2l1d_mt1","vr_ttbar_2l1d_l0iso", "vr_ttbar_2l1d_l1iso", "vr_ttbar_2l1d_dphil0l1", "vr_ttbar_2l1d_invmassl0l1", "vr_ttbar_2l1d_invmassj0j1"]
 
-    hist_cr_wjets = ["cr_wjets_met", "cr_wjets_pt0", "cr_wjets_lt", "cr_wjets_njets", "cr_wjets_ht", "cr_wjets_mt0", "cr_wjets_l0iso", "cr_wjets_dphil0j0", "cr_wjets_j0pt"]
+    hist_cr_qcd_2l1d = ["cr_qcd_2l1d_met", "cr_qcd_2l1d_pt0", "cr_qcd_2l1d_pt1", "cr_qcd_2l1d_pt2", "cr_qcd_2l1d_lt", "cr_qcd_2l1d_njets", "cr_qcd_2l1d_bjets", "cr_qcd_2l1d_ht", "cr_qcd_2l1d_mt0", "cr_qcd_2l1d_mt1", "cr_qcd_2l1d_mt2", "cr_qcd_2l1d_l0iso", "cr_qcd_2l1d_l1iso", "cr_qcd_2l1d_l2iso", "cr_qcd_2l1d_dPhil0l1", "cr_qcd_2l1d_imassl0l1", "cr_qcd_2l1d_l0sip3d", "cr_qcd_2l1d_l1sip3d", "cr_qcd_2l1d_l2sip3d"]
 
-    hist_cr_wjets_1l2d = ["cr_wjets_1l2d_met", "cr_wjets_1l2d_pt0", "cr_wjets_1l2d_lt", "cr_wjets_1l2d_njets", "cr_wjets_1l2d_ht", "cr_wjets_1l2d_mt0", "cr_wjets_1l2d_l0iso", "cr_wjets_1l2d_dphil0j0", "cr_wjets_1l2d_j0pt"]
+    hist_cr_qcd_1l2d = ["cr_qcd_1l2d_met", "cr_qcd_1l2d_pt0", "cr_qcd_1l2d_pt1", "cr_qcd_1l2d_pt2", "cr_qcd_1l2d_lt", "cr_qcd_1l2d_njets", "cr_qcd_1l2d_bjets", "cr_qcd_1l2d_ht", "cr_qcd_1l2d_mt0", "cr_qcd_1l2d_mt1", "cr_qcd_1l2d_mt2", "cr_qcd_1l2d_l0iso", "cr_qcd_1l2d_l1iso", "cr_qcd_1l2d_l2iso", "cr_qcd_1l2d_dPhil1l2", "cr_qcd_1l2d_imassl1l2", "cr_qcd_1l2d_l0sip3d", "cr_qcd_1l2d_l1sip3d", "cr_qcd_1l2d_l2sip3d"]
+   
+    hist_cr_wjets_1l2d = ["cr_wjets_1l2d_met", "cr_wjets_1l2d_pt0", "cr_wjets_1l2d_lt", "cr_wjets_1l2d_njets", "cr_wjets_1l2d_ht", "cr_wjets_1l2d_mt0", "cr_wjets_1l2d_l0iso"]
 
-    hist_prefix = ["2l1d_", "1l2d_", "3d_"]    
-    hists = []   
+    hist_2LonZ = ["2LonZ_invmass", "2LonZ_met"]
+
+    hists = [] 
+
+    
+    #hist_prefix = ["2l1d_", "1l2d_", "3d_"]
+    hist_prefix = ["2l1d_"]
+    
     for prefix in hist_prefix:
         for hist in hist_names:
             hist_name = prefix + hist
@@ -240,36 +252,42 @@ def main():
     for hist in hist_3L:
         hists.append(hist)
 
-    for hist in hist_cr_ttbar:
+    for hist in hist_2LonZ:
         hists.append(hist)
 
-    for hist in hist_vr_ttbar:
-        hists.append(hist)
-
-    for hist in hist_cr_wjets:
-        hists.append(hist)   
-
+    '''
     for hist in hist_cr_ttbar_2l1d:
         hists.append(hist)
 
     for hist in hist_vr_ttbar_2l1d:
-        hists.append(hist)  
+        hists.append(hist)
 
     for hist in hist_cr_wjets_1l2d:
         hists.append(hist)
 
+    for hist in hist_cr_qcd_2l1d:
+        hists.append(hist) 
+       
+    for hist in hist_cr_qcd_1l2d:
+        hists.append(hist) 
+    '''
+    
     for plotname in hists:
-        hst_data = file_data.Get(plotname)
+        hst_data = file_data.Get(plotname)        
         hst_data.SetMarkerStyle(20)
         hst_data.SetMarkerSize(0.6)
         hst_data.SetLineColor(kBlack)
         #if plotname != "nEvents" and plotname != "nEvSel":
-        if "flavor" in plotname or "njet" in plotname:
+        if "flavor" in plotname or "njet" in plotname or "bjet" in plotname or "dPhi" in plotname or "delPhi" in plotname:
             rebin = 1
-        elif "dxy" in plotname or "dz" in plotname or "lep" in plotname:
+        elif "reliso03" in plotname or "dxy" in plotname or "ip3d" in plotname:
+            rebin = 100
+        elif "ht" in plotname:
+            rebin = 50
+        elif "pt" in plotname or "lt" in plotname:
             rebin = 10
         else:
-            rebin = 25
+            rebin = 20
         hst_data.Rebin(rebin)
         SetOverflowBin(hst_data)
             
@@ -280,11 +298,11 @@ def main():
         for i, file_mc in enumerate(files_mc):
             hst_MC = file_mc.Get(plotname)
             if hst_MC:
+                color = hist_colors[i]
+                hst_MC.Rebin(rebin)                
+                decorate(hst_MC, color)  #the decorate function has SetOverflowBin function so do not add it again
+                #print(hst_MC ,hst_MC.Integral())
                 hstMC_integral.append(hst_MC.Integral())
-                color = hist_colors[i] 
-                decorate(hst_MC, color)  
-                hst_MC.Rebin(rebin)
-                SetOverflowBin(hst_MC)
                 histograms.append(hst_MC)
 
         sorted_histograms = sorted(histograms, key=lambda x: x.Integral())
@@ -319,7 +337,7 @@ def main():
             
             legend   = TLegend(0.95,0.50,0.80,0.86)
             ratioleg = TLegend(0.90,0.90,0.81,0.87)
-            print(hst_bkg , hst_bkg.Integral())
+            #print(hst_bkg , hst_bkg.Integral())
             ratioleg.SetHeader(f"obs/exp={hst_data.Integral()/hst_bkg.Integral():.5f} | exp: {hst_bkg.Integral():.0f}")
 
             # create pairs of samples and corresponding integrals
@@ -381,6 +399,10 @@ def main():
             legend.Draw()
             ratioleg.Draw()
 
+            DrawText(0.64,0.92,"13 TeV(2016)",52)
+            DrawText(0.15,0.92,"CMS",62)
+            DrawText(0.20,0.92,"preliminary",52)
+    
             #plotting ratioPad
 
             
@@ -394,10 +416,6 @@ def main():
 
             hst_ratio.SetTitle('')
             hst_ratio.Draw("ep")
-
-            DrawText(0.10,0.93,"CMS",62)
-            DrawText(0.18,0.93,"preliminary",52)
-            
 
             # display the plot
             canvas.Draw()
@@ -421,6 +439,15 @@ def main():
                 canvas.SaveAs(output_filename)
             elif plotname.startswith("cr_wjets_"):
                 output_filename = os.path.join(stackDir, "cr_wjets", f"{plotname}.png")
+                canvas.SaveAs(output_filename)
+            elif plotname.startswith("cr_qcd_2l1d"):
+                output_filename = os.path.join(stackDir, "cr_qcd_2l1d", f"{plotname}.png")
+                canvas.SaveAs(output_filename)
+            elif plotname.startswith("cr_qcd_1l2d"):
+                output_filename = os.path.join(stackDir, "cr_qcd_1l2d", f"{plotname}.png")
+                canvas.SaveAs(output_filename)
+            elif plotname.startswith("vr_qcd_"):
+                output_filename = os.path.join(stackDir, "vr_qcd", f"{plotname}.png")
                 canvas.SaveAs(output_filename)
             elif plotname.startswith("3L_"):
                 output_filename = os.path.join(stackDir, "3L", f"{plotname}.png")

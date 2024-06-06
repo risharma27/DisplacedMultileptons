@@ -1862,6 +1862,7 @@ public :
   void SetYear(int year){_year = year;}
   void SetEra(TString era){_era=era;}
   void SetLep(int lep){_lep=lep;}
+  void SetFlag(TString flag){_flag=flag;}
   void BookHistograms();
   float delta_phi(float phi1, float phi2);
   float transv_mass(float E_lep, float MET, float dphi);
@@ -1980,15 +1981,13 @@ public :
     TH1F *evtweight[3][3];
     TH1F *dispml_h[3][100];
     TH1F *flavor[3];
-    TH1F *cr_ttbar[16];
     TH1F *cr_ttbar_2l1d[16];
-    TH1F *vr_ttbar[16];
-    TH1F *vr_ttbar_2l1d[16];
-    TH1F *cr_wjets[10];
-    TH1F *cr_wjets_1l2d[10];
-    TH1F *cr_ttbar_ht_rebinned;
     TH1F *cr_ttbar_2l1d_ht_rebinned;
-  
+    TH1F *vr_ttbar_2l1d[16];
+    TH1F *cr_wjets_1l2d[10];
+    TH1F *cr_qcd_2l1d[20];
+    TH1F *cr_qcd_1l2d[20];
+    TH1F *count_1l2d;
   };
 
   struct Lepton {//The struct 'Lepton' can store the following variables:
@@ -2022,19 +2021,19 @@ private:
   int _verbosity,_exclude;
   int _data, _lep, _year, _sample;
   bool GoodEvt,GoodEvt2016,GoodEvt2017,GoodEvt2018,triggerRes,trigger2016,trigger2017,trigger2018; //Flags
-  TString _era;
+  TString _era, _flag;
   int evsel;
-  float metpt, metphi, scalefactor, triggeff, evtwt;
+  float metpt, metphi, scalefactor, triggeff, evtwt, ttcr_sf;
  
   //Event Counters:
   int nEvtTotal,nEvtGood,nEvtTrigger,nEvtPass;
 
   //event selections:
-  bool _2l1d, _1l2d, _3d, evt_dispml, evt_mumud, evt_eed, evt_emud, evt_llmu, evt_lle, evt_2LonZ, evt_2LSS, evt_mumu, evt_ee, evt_mue, evt_emu, evt_3L;
+  bool _2l1d, _1l2d, _3d, evt_dispml, evt_mumud, evt_eed, evt_emud, evt_llmu, evt_lle, evt_lee, evt_lmumu, evt_lemu, evt_2LonZ, evt_2LSS, evt_mumu, evt_ee, evt_mue, evt_emu, evt_3L;
 
   //control regions:
-  bool cr_ttbar, cr_ttbar_2l1d, cr_wjets, cr_wjets_1l2d;
-  bool vr_ttbar, vr_ttbar_2l1d;
+  bool cr_ttbar_2l1d, cr_wjets_1l2d, cr_qcd_2l1d, cr_qcd_1l2d;
+  bool vr_ttbar_2l1d;
   
   
   //######################
@@ -2061,6 +2060,8 @@ private:
   vector<Lepton> myLep[3];
   vector<int>    vec_evsel;
   vector<int>    evt_2l1d, evt_1l2d, evt_3d;
+  vector<float>  singlemuon_mu0pt;
+  vector<float>  singlemuon_triggeff;
 
   ClassDef(disp_ml,0);
   

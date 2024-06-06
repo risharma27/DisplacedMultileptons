@@ -33,7 +33,8 @@ bkg_samples = {
        	"HTbinnedWJets_100to200_preVFP": {
 	    "filename": "HTbinnedWJets_100to200_preVFP.root",
             "nevents": 21734530,
-	    "xsec": 1.248e+03,	    
+	    "xsec": 1.248e+03,
+	    
 	    "year": 2016,
             "data": 0,
 	},
@@ -138,7 +139,7 @@ bkg_samples = {
 	    "year": 2016,
             "data": 0,
 	},
-        "QCD_MuEnriched_15to20_preVFP": {
+	"QCD_MuEnriched_15to20_preVFP": {
 	    "filename": "QCD_MuEnriched_15to20_preVFP.root",
             "nevents": 4749558,
 	    "xsec": 2.822e+06,
@@ -152,7 +153,7 @@ bkg_samples = {
 	    "year": 2016,
             "data": 0,
 	},
-        "QCD_MuEnriched_20to30_preVFP": {
+	"QCD_MuEnriched_20to30_preVFP": {
 	    "filename": "QCD_MuEnriched_20to30_preVFP.root",
             "nevents": 31926643,
 	    "xsec": 2.530e+06,
@@ -166,7 +167,7 @@ bkg_samples = {
 	    "year": 2016,
             "data": 0,
 	},
-        "QCD_MuEnriched_30to50_preVFP": {
+	"QCD_MuEnriched_30to50_preVFP": {
 	    "filename": "QCD_MuEnriched_30to50_preVFP.root",
             "nevents": 28664840,
 	    "xsec": 1.366e+06,
@@ -222,7 +223,7 @@ bkg_samples = {
 	    "year": 2016,
             "data": 0,
 	},
-        "QCD_MuEnriched_15to20_postVFP": {
+	"QCD_MuEnriched_15to20_postVFP": {
 	    "filename": "QCD_MuEnriched_15to20_postVFP.root",
             "nevents": 4529975,
 	    "xsec": 2.798e+06,
@@ -236,7 +237,7 @@ bkg_samples = {
 	    "year": 2016,
             "data": 0,
 	},
-        "QCD_MuEnriched_20to30_postVFP": {
+	"QCD_MuEnriched_20to30_postVFP": {
 	    "filename": "QCD_MuEnriched_20to30_postVFP.root",
             "nevents": 30853571,
 	    "xsec": 2.532e+06,
@@ -250,7 +251,7 @@ bkg_samples = {
 	    "year": 2016,
             "data": 0,
 	},
-        "QCD_MuEnriched_30to50_postVFP": {
+	"QCD_MuEnriched_30to50_postVFP": {
 	    "filename": "QCD_MuEnriched_30to50_postVFP.root",
             "nevents": 35474172,
 	    "xsec": 1.367e+06,
@@ -289,118 +290,6 @@ bkg_samples = {
 	    "filename": "QCD_MuEnriched_80to120_postVFP.root",
             "nevents": 22005632,
 	    "xsec": 8.883e+04,
-	    "year": 2016,
-            "data": 0,
-        },
-        "QCD_EMEnriched_120to170_preVFP": {
-	    "filename": "QCD_EMEnriched_120to170_preVFP.root",
-            "nevents": 4852573,
-	    "xsec": 6.611e+04,
-	    "year": 2016,
-            "data": 0,
-	},
-        "QCD_EMEnriched_15to20_preVFP": {
-	    "filename": "QCD_EMEnriched_15to20_preVFP.root",
-            "nevents": 4062805,
-	    "xsec": 1.302e+06,
-	    "year": 2016,
-            "data": 0,
-	},
-	"QCD_EMEnriched_170to300_preVFP": {
-	    "filename": "QCD_EMEnriched_170to300_preVFP.root",
-            "nevents": 1855461,
-	    "xsec": 1.653e+04,
-	    "year": 2016,
-            "data": 0,
-	},
-        "QCD_EMEnriched_20to30_preVFP": {
-	    "filename": "QCD_EMEnriched_20to30_preVFP.root",
-            "nevents": 7156441,
-	    "xsec": 4.905e+06,
-	    "year": 2016,
-            "data": 0,
-	},
-	"QCD_EMEnriched_300toInf_preVFP": {
-	    "filename": "QCD_EMEnriched_300toInf_preVFP.root",
-            "nevents": 1142775,
-	    "xsec": 1.113e+03,
-	    "year": 2016,
-            "data": 0,
-	},
-        "QCD_EMEnriched_30to50_preVFP": {
-	    "filename": "QCD_EMEnriched_30to50_preVFP.root",
-            "nevents": 4361931,
-	    "xsec": 6.381e+06,
-	    "year": 2016,
-            "data": 0,
-	},
-	"QCD_EMEnriched_50to80_preVFP": {
-	    "filename": "QCD_EMEnriched_50to80_preVFP.root",
-            "nevents": 5440758,
-	    "xsec": 1.980e+06,
-	    "year": 2016,
-            "data": 0,
-	},
-	"QCD_EMEnriched_80to120_preVFP": {
-	    "filename": "QCD_EMEnriched_80to120_preVFP.root",
-            "nevents": 4847354,
-	    "xsec": 3.662e+05,
-	    "year": 2016,
-            "data": 0,
-	},
-	"QCD_EMEnriched_120to170_postVFP": {
-	    "filename": "QCD_EMEnriched_120to170_postVFP.root",
-            "nevents": 5007347,
-	    "xsec": 6.658e+04,
-	    "year": 2016,
-            "data": 0,
-	},
-        "QCD_EMEnriched_15to20_postVFP": {
-	    "filename": "QCD_EMEnriched_15to20_postVFP.root",
-            "nevents": 4026314,
-	    "xsec": 1.320e+06,
-	    "year": 2016,
-            "data": 0,
-	},
-	"QCD_EMEnriched_170to300_postVFP": {
-	    "filename": "QCD_EMEnriched_170to300_postVFP.root",
-            "nevents": 1861129,
-	    "xsec": 1.660e+04,
-	    "year": 2016,
-            "data": 0,
-	},
-        "QCD_EMEnriched_20to30_postVFP": {
-	    "filename": "QCD_EMEnriched_20to30_postVFP.root",
-            "nevents": 7134788,
-	    "xsec": 4.925e+06,
-	    "year": 2016,
-            "data": 0,
-	},
-	"QCD_EMEnriched_300toInf_postVFP": {
-	    "filename": "QCD_EMEnriched_300toInf_postVFP.root",
-            "nevents": 1138742,
-	    "xsec": 1.106e+03,
-	    "year": 2016,
-            "data": 0,
-	},
-        "QCD_EMEnriched_30to50_postVFP": {
-	    "filename": "QCD_EMEnriched_30to50_postVFP.root",
-            "nevents": 4351014,
-	    "xsec": 6.424e+06,
-	    "year": 2016,
-            "data": 0,
-	},
-	"QCD_EMEnriched_50to80_postVFP": {
-	    "filename": "QCD_EMEnriched_50to80_postVFP.root",
-            "nevents": 5443934,
-	    "xsec": 1.991e+06,
-	    "year": 2016,
-            "data": 0,
-	},
-	"QCD_EMEnriched_80to120_postVFP": {
-	    "filename": "QCD_EMEnriched_80to120_postVFP.root",
-            "nevents": 4804788,
-	    "xsec": 3.654e+05,
 	    "year": 2016,
             "data": 0,
         }

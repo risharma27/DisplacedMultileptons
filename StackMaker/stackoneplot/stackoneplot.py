@@ -50,7 +50,7 @@ def SetLegendStyle(legend):
 def main():
     
     # Read the file from the disk    
-    inputDir = "../finalhaddOutput/mar11/"
+    inputDir = "../finalhaddOutput/may09/"
     
     file_dy     =  TFile.Open(inputDir + "DY.root",        "READ")
     file_tt     =  TFile.Open(inputDir + "TTBar.root",     "READ")
@@ -69,7 +69,7 @@ def main():
     
     ## Get the histograms
 
-    plotname = "cr_ttbar_2l1d_ht"
+    plotname = "cr_qcd_2l1d_met"
     h_dy     = file_dy.Get(plotname);      decorate(h_dy,     kBlue-7);
     h_tt     = file_tt.Get(plotname);      decorate(h_tt,     kGreen-2);
     h_wjets  = file_wjets.Get(plotname);   decorate(h_wjets,  kOrange+1);
@@ -87,6 +87,9 @@ def main():
     h_data.SetMarkerSize(0.6)
     h_data.SetLineColor(kBlack)
 
+    #h_qcd.Scale(0.016182734783814417)
+
+    '''
     SetOverflowBin(h_dy)
     SetOverflowBin(h_tt)
     SetOverflowBin(h_wjets)
@@ -98,6 +101,7 @@ def main():
     SetOverflowBin(h_ww)
     SetOverflowBin(h_st)
     SetOverflowBin(h_data)
+    '''
    
     print("Histograms are ready...")
 
@@ -111,7 +115,7 @@ def main():
     h_dy.Scale(dtlumi/dylumi)
     h_tt.Scale(dtlumi/ttlumi)
     h_wz.Scale(dtlumi/wzlumi)
-    '''
+    '''   
 
     #scaling to luminosity not needed here
     #b/c that has already been done using
@@ -119,8 +123,7 @@ def main():
     #output files are saved in the finalhaddOutput dir
     
     ##Rebining
-    '''
-    rebin = 25
+    rebin = 20
     h_dy.Rebin(rebin)
     h_tt.Rebin(rebin)
     h_wjets.Rebin(rebin)
@@ -132,27 +135,7 @@ def main():
     h_ww.Rebin(rebin)
     h_st.Rebin(rebin)    
     h_data.Rebin(rebin)
-    '''
-
-    bins_list = [0, 1, 3, 6, 10, 15]
     
-    # Convert the Python list to a C-style array
-    bins = ROOT.array('d', bins_list)
-
-
-    #Rebin each histogram using variable binning
-    h_dy = h_dy.Rebin(5, "h_dy", bins);
-    h_tt = h_tt.Rebin(5, "h_tt", bins);
-    h_wjets = h_wjets.Rebin(5, "h_wjets", bins);
-    h_qcd = h_qcd.Rebin(5, "h_qcd_rebinned", bins);
-    h_wgamma = h_wgamma.Rebin(5, "h_wgamma", bins);
-    h_zgamma = h_zgamma.Rebin(5, "h_zgamma", bins);
-    h_zz = h_zz.Rebin(5, "h_zz", bins);
-    h_wz = h_wz.Rebin(5, "h_wz", bins);
-    h_ww = h_ww.Rebin(5, "h_ww", bins);
-    h_st = h_st.Rebin(5, "h_st", bins);
-    h_data = h_data.Rebin(5, "h_data", bins);
-
     # Create a list of tuples with histograms and their integrals
     
     histograms = [(h_dy,     h_dy.Integral(),     "DY"),
@@ -169,19 +152,43 @@ def main():
     # Sort the list in descending order based on integrals
     histograms.sort(key=lambda x: x[1], reverse=False)
 
+
     #Scaling
 
     print("number of bins", h_data.GetNbinsX())
     nbins = h_data.GetNbinsX()
-    bin_lo = 7
+    print("nbins", nbins)
+    bin_lo = 1
     bin_hi = nbins
     
     h_otherbkg = h_dy.Clone()
     for hist, integral, name in histograms:
-        if name!="QCD" and name!="DY":
+        if name!="QCD" and  name!="DY":
+            print(name)
             h_otherbkg.Add(hist)
-            
-            
+    
+    '''     
+    for bin_index in range(bin_lo, bin_hi + 1):  # +1 because range() is exclusive on the upper limit
+        data_integral = h_data.Integral(bin_index, bin_index)  # Calculate integral for the current bin
+        tt_integral = h_tt.Integral(bin_index, bin_index)
+        otherbkg_integral = h_otherbkg.Integral(bin_index, bin_index)
+        tt_sf = (data_integral - otherbkg_integral) / (tt_integral)
+        scaled_content = hist.GetBinContent(bin_index) * tt_sf
+        print(tt_integral)
+        h_tt.SetBinContent(bin_index,scaled_content)
+        print(h_tt.Integral(bin_index,bin_index))
+    '''
+        
+    '''
+    print(f"Bin {bin_index}:")
+    print("data", data_integral)
+    print("ttbar", tt_integral)
+    print("other bkg", otherbkg_integral)
+    print("tt_sf", tt_sf)
+    print()  # Print a newline for readability between bins
+    '''
+
+    
     data_integral = h_data.Integral(bin_lo,bin_hi)
     qcd_integral = h_qcd.Integral(bin_lo,bin_hi)
     otherbkg_integral = h_otherbkg.Integral(bin_lo,bin_hi)
@@ -189,13 +196,16 @@ def main():
     print("qcd", qcd_integral)
     print("other bkg", otherbkg_integral)
 
-    #qcd_sf = (data_integral-otherbkg_integral)/qcd_integral
+    qcd_sf = (data_integral-otherbkg_integral)/qcd_integral
+    print("qcd_sf", qcd_sf)
+    
+    print("qcd before scaling", h_qcd.Integral(1,bin_hi))
+    h_qcd.Scale(qcd_sf)      
+    print("qcd after scaling", h_qcd.Integral(1,bin_hi))
+    
 
-    #print("qcd before scaling", h_qcd.Integral(1,bin_hi))
-
-    #h_qcd.Scale(qcd_sf)
-   
-    #print("qcd after scaling", h_qcd.Integral(1,bin_hi))
+    #h_tt.Scale(1.1857848287288435)
+    #h_tt.Scale(1)
     
     # Create THStack 
     h_stack = THStack()
@@ -213,9 +223,9 @@ def main():
     h_stack.Add(h_st)
     '''
 
-    
     for hist, integral, name in histograms:
         h_stack.Add(hist)
+    
         
     h_bkg = histograms[0][0].Clone()
     for hist, integral, name in histograms[1:]:
@@ -230,7 +240,7 @@ def main():
     # Legend
     legend = TLegend(0.95, 0.50, 0.80, 0.86)
     ratioleg = TLegend(0.90, 0.90, 0.81, 0.87)
-    ratioleg.SetHeader(f"obs/exp={h_data.Integral()/h_bkg.Integral():.2f}   exp: {h_bkg.Integral():.0f}")
+    ratioleg.SetHeader(f"obs/exp={h_data.Integral()/h_bkg.Integral():.5f}   exp: {h_bkg.Integral():.0f}")
 
     legend.AddEntry(h_data, f"Data[{h_data.Integral():.0f}]", 'ep')
     for hist, integral, name in reversed(histograms):
@@ -258,24 +268,17 @@ def main():
     h_stack.SetMinimum(0.001)
     h_stack.SetMaximum(1e5)
     
-   
-   
-    #h_stack.GetYaxis().SetRangeUser(0,100)
-    
-    #h_data.GetYaxis().SetRangeUser(0.001,1e8)
-    
-    
 
     #h_data.Draw('ep')
     
     h_stack.Draw("HIST")
     h_data.Draw('ep same')
 
-    #h_stack.GetXaxis().SetRangeUser(0,1)
-    #h_data.GetXaxis().SetRangeUser(0,1)
+    #h_stack.GetXaxis().SetRangeUser(5,40)
+    #h_data.GetXaxis().SetRangeUser(5,40)
 
     #mainPad.Modified()
-    #mainPad.Update()
+    mainPad.Update()
     
     print("h_stack address:", h_stack)  # Check if it's not None
     
@@ -338,7 +341,7 @@ def main():
 
     canvas.Draw()
 
-    canvas.SaveAs(f'stackoneplot_{current_date}.pdf')
+    canvas.SaveAs(f'{plotname}.png')
     #canvas.SaveAs('qcdscaled_plots/qcdscaled_stackplot.pdf')
     
 

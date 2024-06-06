@@ -1,0 +1,13 @@
+universe = vanilla
+Requirements = (Arch == "X86_64")
+Executable = /home/work/risharma/work/git/DisplacedMultileptons/CondorSetup/runJobsCondor_simulation.sh
+should_transfer_files = YES
+Notification=never
+
+
+output = test.out
+error = test.err
+log = test.log
+arguments = /home/work/alaha1/public/RunII_ULSamples/2016/UL2016Data/SingleElectron/postVFP/SingleElectronFpostVFP/SingleElectron_2016FpostVFP_3.root test.root test.txt 1 2016 el
+queue
+
